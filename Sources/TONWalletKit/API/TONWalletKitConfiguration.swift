@@ -39,6 +39,7 @@ public struct TONWalletKitConfiguration: Encodable, Hashable {
     let bridge: Bridge?
     let eventsConfiguration: EventsConfiguration?
     let devConfiguration: DevConfiguration?
+    let analyticsConfiguration: AnalyticsConfiguration?
     
     public init(
         networkConfigurations: Set<NetworkConfiguration>,
@@ -48,7 +49,8 @@ public struct TONWalletKitConfiguration: Encodable, Hashable {
         bridge: Bridge?,
         eventsConfiguration: EventsConfiguration? = nil,
         features: [any TONFeature],
-        devConfiguration: DevConfiguration? = nil
+        devConfiguration: DevConfiguration? = nil,
+        analyticsConfiguration: AnalyticsConfiguration? = nil
     ) {
         self.networkConfigurations = Array(networkConfigurations)
         
@@ -68,6 +70,7 @@ public struct TONWalletKitConfiguration: Encodable, Hashable {
         self.bridge = bridge
         self.eventsConfiguration = eventsConfiguration
         self.devConfiguration = devConfiguration
+        self.analyticsConfiguration = analyticsConfiguration
     }
     
     public func encode(to encoder: Encoder) throws {
@@ -82,6 +85,7 @@ public struct TONWalletKitConfiguration: Encodable, Hashable {
         try container.encodeIfPresent(bridge, forKey: .bridge)
         try container.encodeIfPresent(eventsConfiguration, forKey: .eventsConfiguration)
         try container.encodeIfPresent(devConfiguration, forKey: .devConfiguration)
+        try container.encodeIfPresent(analyticsConfiguration, forKey: .analytics)
     }
     
     public func hash(into hasher: inout Hasher) {
@@ -91,12 +95,12 @@ public struct TONWalletKitConfiguration: Encodable, Hashable {
         hasher.combine(bridge)
         hasher.combine(eventsConfiguration)
         hasher.combine(devConfiguration)
+        hasher.combine(analyticsConfiguration)
     }
     
     public static func == (lhs: TONWalletKitConfiguration, rhs: TONWalletKitConfiguration) -> Bool {
         return lhs.hashValue == rhs.hashValue
     }
-    
     
     enum CodingKeys: String, CodingKey {
         case networkConfigurations
@@ -105,8 +109,8 @@ public struct TONWalletKitConfiguration: Encodable, Hashable {
         case bridge
         case eventsConfiguration
         case devConfiguration = "dev"
+        case analytics
     }
-    
 }
 
 extension TONWalletKitConfiguration {
@@ -121,6 +125,24 @@ extension TONWalletKitConfiguration {
         ) {
             self.disableNetworkSend = disableNetworkSend
             self.disableManifestDomainCheck = disableManifestDomainCheck
+        }
+    }
+    
+    public struct AnalyticsConfiguration: Encodable, Hashable {
+        let analyticsEnabled: Bool?
+        
+        public init(analyticsEnabled: Bool? = nil) {
+            self.analyticsEnabled = analyticsEnabled
+        }
+        
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            
+            try container.encodeIfPresent(analyticsEnabled, forKey: .analyticsEnabled)
+        }
+        
+        enum CodingKeys: String, CodingKey {
+            case analyticsEnabled = "enabled"
         }
     }
     
