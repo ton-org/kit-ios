@@ -30058,6 +30058,7 @@ var init_BridgeManager = __esmMin((() => {
 		jsBridgeTransport;
 		eventQueue = [];
 		isProcessing = false;
+		isActive = false;
 		eventStore;
 		eventRouter;
 		eventEmitter;
@@ -30081,14 +30082,27 @@ var init_BridgeManager = __esmMin((() => {
 			this.analytics = analyticsManager?.scoped({ bridge_url: this.config.bridgeUrl });
 			this.walletKitConfig = walletKitConfig;
 			this.jsBridgeTransport = config?.jsBridgeTransport;
+			if (this.config.bridgeUrl && !this.config.disableHttpConnection) this.bridgeProvider = new C$1(this.config.bridgeUrl, this.queueBridgeEvent.bind(this), (error) => {
+				log$27.error("Bridge listener error", { error: error.toString() });
+				this.analytics?.emitBridgeClientConnectError({
+					error_message: `${error?.toString() || "Unknown error"}${error?.errorCode ? ` (Code: ${error?.errorCode})` : ""}`,
+					trace_id: error?.traceId,
+					client_id: error?.clientId
+				});
+			});
 			if (!this.jsBridgeTransport && config?.enableJsBridge) throw new WalletKitError(ERROR_CODES.INVALID_CONFIG, "JS Bridge transport is not configured");
 		}
 		/**
 		* Initialize bridge connection
 		*/
 		async start() {
-			if (this.bridgeProvider) {
-				log$27.warn("Bridge already initialized");
+			if (this.isActive === true) {
+				log$27.warn("Bridge already started");
+				return;
+			}
+			this.isActive = true;
+			if (this.isConnected === true) {
+				log$27.warn("Bridge already connected");
 				return;
 			}
 			try {
@@ -30099,6 +30113,7 @@ var init_BridgeManager = __esmMin((() => {
 					this.reconnectAttempts = 0;
 				}
 			} catch (error) {
+				this.isActive = false;
 				log$27.error("Failed to start bridge", { error });
 				throw error;
 			}
@@ -30185,12 +30200,10 @@ var init_BridgeManager = __esmMin((() => {
 		* Close bridge connection
 		*/
 		async close() {
-			if (this.bridgeProvider) {
-				await this.bridgeProvider.close();
-				this.bridgeProvider = void 0;
-			}
+			if (this.bridgeProvider) await this.bridgeProvider.close();
 			this.eventQueue = [];
 			this.isProcessing = false;
+			this.isActive = false;
 			this.isConnected = false;
 			this.reconnectAttempts = 0;
 			if (this.requestProcessingTimeoutId) {
@@ -30220,7 +30233,7 @@ var init_BridgeManager = __esmMin((() => {
 		* Connect to TON Connect bridge
 		*/
 		async connectToSSEBridge() {
-			if (!this.config.bridgeUrl) return;
+			if (!this.bridgeProvider) throw new WalletKitError(ERROR_CODES.BRIDGE_NOT_INITIALIZED, "Bridge not initialized before connecting to SSE");
 			const connectTraceId = v7();
 			try {
 				const clients = await this.getClients();
@@ -30235,20 +30248,7 @@ var init_BridgeManager = __esmMin((() => {
 						client_id: client?.clientId
 					});
 				}
-				this.bridgeProvider = await C$1.open({
-					bridgeUrl: this.config.bridgeUrl,
-					clients,
-					listener: this.queueBridgeEvent.bind(this),
-					errorListener: (error) => {
-						log$27.error("Bridge listener error", { error: error.toString() });
-						this.analytics?.emitBridgeClientConnectError({
-							error_message: `${error?.toString() || "Unknown error"}${error?.errorCode ? ` (Code: ${error?.errorCode})` : ""}`,
-							trace_id: error?.traceId ?? connectTraceId,
-							client_id: error?.clientId
-						});
-					},
-					options: { lastEventId: this.lastEventId }
-				});
+				await this.bridgeProvider?.restoreConnection(clients, { lastEventId: this.lastEventId });
 				this.isConnected = true;
 				this.reconnectAttempts = 0;
 				log$27.info("Bridge connected successfully");
@@ -44339,7 +44339,7 @@ var init_DeDustSwapProvider = __esmMin((() => {
 	init_utils$4();
 	init_units();
 	log$1 = globalLogger.createChild("DeDustSwapProvider");
-	DEFAULT_API_URL = "https://api-mainnet.dedust.io";
+	DEFAULT_API_URL = "https://mainnet.api.dedust.io/v4/router";
 	DEFAULT_PROTOCOLS = [
 		"dedust",
 		"dedust_v3",
@@ -44360,7 +44360,7 @@ var init_DeDustSwapProvider = __esmMin((() => {
 		constructor(config) {
 			super();
 			this.providerId = config?.providerId ?? "dedust";
-			this.apiUrl = config?.apiUrl ?? DEFAULT_API_URL;
+			this.apiUrl = (config?.apiUrl ?? DEFAULT_API_URL).replace(/\/+$/, "");
 			this.defaultSlippageBps = config?.defaultSlippageBps ?? 100;
 			this.referralAddress = config?.referralAddress;
 			this.referralFeeBps = config?.referralFeeBps;
@@ -44400,7 +44400,7 @@ var init_DeDustSwapProvider = __esmMin((() => {
 					min_pool_usd_tvl: this.minPoolUsdTvl,
 					exclude_volatile_pools: params.providerOptions?.excludeVolatilePools
 				};
-				const response = await fetch(`${this.apiUrl}/v1/router/quote`, {
+				const response = await fetch(`${this.apiUrl}/quote`, {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
@@ -44468,7 +44468,7 @@ var init_DeDustSwapProvider = __esmMin((() => {
 					referral_address: referralAddress ? import_dist$1.Address.parse(referralAddress).toRawString() : void 0,
 					referral_fee: referralFeeBps
 				};
-				const response = await fetch(`${this.apiUrl}/v1/router/swap`, {
+				const response = await fetch(`${this.apiUrl}/swap`, {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
@@ -45183,7 +45183,8 @@ var init_main = __esmMin((() => {
 			bridge: configuration.bridge,
 			eventProcessor: configuration.eventsConfiguration,
 			storage: storage ? new SwiftStorageAdapter(storage) : new MemoryStorageAdapter({}),
-			dev: configuration.dev
+			dev: configuration.dev,
+			analytics: configuration.analytics
 		});
 		console.log("🚀 WalletKit iOS Bridge starting...");
 		let initialized = false;

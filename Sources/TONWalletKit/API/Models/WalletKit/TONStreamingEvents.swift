@@ -30,29 +30,29 @@ import BigInt
 
 public struct TONStreamingEvents: Codable {
 
-    public var streamingBalanceUpdate: TONBalanceUpdate
-    public var streamingTransactions: TONTransactionsUpdate
-    public var streamingJettonsUpdate: TONJettonUpdate
+    public var streamingbalanceUpdate: TONBalanceUpdate
+    public var streamingtransactions: TONTransactionsUpdate
+    public var streamingjettonsUpdate: TONJettonUpdate
 
-    public init(streamingBalanceUpdate: TONBalanceUpdate, streamingTransactions: TONTransactionsUpdate, streamingJettonsUpdate: TONJettonUpdate) {
-        self.streamingBalanceUpdate = streamingBalanceUpdate
-        self.streamingTransactions = streamingTransactions
-        self.streamingJettonsUpdate = streamingJettonsUpdate
+    public init(streamingbalanceUpdate: TONBalanceUpdate, streamingtransactions: TONTransactionsUpdate, streamingjettonsUpdate: TONJettonUpdate) {
+        self.streamingbalanceUpdate = streamingbalanceUpdate
+        self.streamingtransactions = streamingtransactions
+        self.streamingjettonsUpdate = streamingjettonsUpdate
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
-        case streamingBalanceUpdate = "streaming:balance-update"
-        case streamingTransactions = "streaming:transactions"
-        case streamingJettonsUpdate = "streaming:jettons-update"
+        case streamingbalanceUpdate = "streaming:balance-update"
+        case streamingtransactions = "streaming:transactions"
+        case streamingjettonsUpdate = "streaming:jettons-update"
     }
 
     // Encodable protocol methods
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(streamingBalanceUpdate, forKey: .streamingBalanceUpdate)
-        try container.encode(streamingTransactions, forKey: .streamingTransactions)
-        try container.encode(streamingJettonsUpdate, forKey: .streamingJettonsUpdate)
+        try container.encode(streamingbalanceUpdate, forKey: .streamingbalanceUpdate)
+        try container.encode(streamingtransactions, forKey: .streamingtransactions)
+        try container.encode(streamingjettonsUpdate, forKey: .streamingjettonsUpdate)
     }
 }
 
