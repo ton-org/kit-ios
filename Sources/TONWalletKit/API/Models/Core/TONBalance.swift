@@ -25,6 +25,6 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 public typealias TONBalance = TONTokenAmount

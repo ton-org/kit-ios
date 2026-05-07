@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 class TONWallet: TONWalletAdapter, TONWalletProtocol {
     let id: TONWalletID

@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 /** Action phase of transaction execution (message sending). */
 

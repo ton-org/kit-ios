@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 /** Metadata stored in SwapQuote for DeDust provider */
 

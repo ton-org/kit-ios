@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 /** Request to send a transaction on the TON blockchain. */
 

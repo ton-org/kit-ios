@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 /** This mode determines how the message is sent, including whether to pay for gas separately and how to handle errors. */
 

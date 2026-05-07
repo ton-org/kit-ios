@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 public struct TONSwapParams<TProviderOptions: Codable>: Codable {
     public var quote: TONSwapQuote

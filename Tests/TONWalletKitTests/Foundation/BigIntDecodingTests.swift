@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-import BigInt
+import _BigInt
 @testable import TONWalletKit
 
 private struct MockBigIntTest: Decodable, Equatable {

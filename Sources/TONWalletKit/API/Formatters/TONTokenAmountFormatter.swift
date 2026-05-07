@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 open class TONTokenAmountFormatter: Formatter {
     // Defaults to 9, as TON uses nano units (1 TON = 10^9 nanoTON)

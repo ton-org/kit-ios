@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 public struct TONStakingQuoteParams<TProviderOptions: Codable>: Codable {
     public var direction: TONStakingQuoteDirection

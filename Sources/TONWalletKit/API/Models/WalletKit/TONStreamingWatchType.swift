@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 /** Defines the types of blockchain events that can be subscribed to via a streaming provider. */
 public enum TONStreamingWatchType: String, Codable, CaseIterable {

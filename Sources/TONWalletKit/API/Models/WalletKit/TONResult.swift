@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 /** Generic result status for operations. */
 public enum TONResult: String, Codable, CaseIterable {

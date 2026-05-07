@@ -1,5 +1,5 @@
 @testable import TONWalletKit
-import BigInt
+import _BigInt
 
 struct MockSwapProvider: TONSwapProviderProtocol {
     typealias Identifier = TONOmnistonSwapProviderIdentifier

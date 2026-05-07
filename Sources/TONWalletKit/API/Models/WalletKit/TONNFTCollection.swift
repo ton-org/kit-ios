@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 /** NFT collection on the TON blockchain (TEP-62 standard). */
 

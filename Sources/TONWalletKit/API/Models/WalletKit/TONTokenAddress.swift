@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 public enum TONTokenAddress: Codable {
     case ton
     case userFriendlyAddress(TONUserFriendlyAddress)
