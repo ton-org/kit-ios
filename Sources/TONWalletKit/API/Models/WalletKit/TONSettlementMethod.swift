@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 public enum TONSettlementMethod: String, Codable, CaseIterable {
     case swap = "SETTLEMENT_METHOD_SWAP"

@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 /** Direction of the staking quote */
 public enum TONStakingQuoteDirection: String, Codable, CaseIterable {

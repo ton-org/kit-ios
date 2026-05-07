@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 public struct TONSwapQuoteParams<TProviderOptions: Codable>: Codable {
     /** Amount of tokens to swap (incoming or outgoing depending on isReverseSwap) */

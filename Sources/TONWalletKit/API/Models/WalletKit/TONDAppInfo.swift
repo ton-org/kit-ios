@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 /** Information about a decentralized application (dApp) connecting via TON Connect. */
 

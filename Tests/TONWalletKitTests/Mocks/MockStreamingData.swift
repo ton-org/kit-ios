@@ -1,5 +1,5 @@
 import Foundation
-import BigInt
+import _BigInt
 @testable import TONWalletKit
 
 enum MockStreamingData {

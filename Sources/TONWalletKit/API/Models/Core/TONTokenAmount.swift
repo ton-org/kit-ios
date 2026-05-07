@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 public struct TONTokenAmount: Codable {
     public let nanoUnits: BigInt

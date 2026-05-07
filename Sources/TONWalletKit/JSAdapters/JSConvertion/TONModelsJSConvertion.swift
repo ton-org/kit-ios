@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 extension TONConnectSessionsFilter: JSValueCodable {}
 extension TONBridgeEventMessage: JSValueCodable {}

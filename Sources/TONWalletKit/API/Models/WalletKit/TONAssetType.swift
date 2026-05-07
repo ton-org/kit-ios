@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 /** Types of assets supported on the TON blockchain. */
 public enum TONAssetType: String, Codable, CaseIterable {

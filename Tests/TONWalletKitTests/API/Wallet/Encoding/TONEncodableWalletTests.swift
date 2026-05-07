@@ -1,7 +1,7 @@
 import Testing
 import Foundation
 import JavaScriptCore
-import BigInt
+import _BigInt
 @testable import TONWalletKit
 
 private class NonEncodableWallet: TONWalletProtocol {

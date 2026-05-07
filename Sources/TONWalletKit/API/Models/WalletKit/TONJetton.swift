@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 /** Jetton fungible token on the TON blockchain (TEP-74 standard). */
 

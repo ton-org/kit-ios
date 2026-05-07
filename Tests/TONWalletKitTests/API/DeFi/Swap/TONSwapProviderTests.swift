@@ -1,7 +1,7 @@
 import Testing
 import JavaScriptCore
 @testable import TONWalletKit
-import BigInt
+import _BigInt
 
 @Suite("TONSwapProvider Tests")
 struct TONSwapProviderTests {

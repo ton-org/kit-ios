@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 /** Attribute/trait of an NFT, commonly used for rarity and properties. */
 

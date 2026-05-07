@@ -38,14 +38,14 @@ let package = Package(
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "BigInt",
+            name: "_BigInt",
             path: "Sources/BigInt",
             exclude: ["LICENSE.md"]
         ),
         .target(
             name: "TONWalletKit",
             dependencies: [
-                "BigInt"
+                "_BigInt"
             ],
             resources: [
                 .process("Resources/JS/walletkit-ios-bridge.mjs"),

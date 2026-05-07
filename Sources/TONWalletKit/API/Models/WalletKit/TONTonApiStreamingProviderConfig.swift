@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 /** Configuration options for the TonAPI streaming provider (v2 WebSocket protocol). */
 

@@ -25,7 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
-import BigInt
+import _BigInt
 
 /** Represents the status of a streaming notification. */
 public enum TONStreamingUpdateStatus: String, Codable, CaseIterable {
