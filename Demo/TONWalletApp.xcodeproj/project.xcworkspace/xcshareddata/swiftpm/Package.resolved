@@ -1,15 +1,6 @@
 {
-  "originHash" : "c8dbe2bec62042093ca04b7d6fd1a114cd1eb9c6f8e90c7d17573fb1c7a61129",
+  "originHash" : "ffd760091170440a5b240d7764594a3de9f347ae5af8c1eb003bd0563923136c",
   "pins" : [
-    {
-      "identity" : "bigint",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/attaswift/BigInt.git",
-      "state" : {
-        "revision" : "e07e00fa1fd435143a2dcf8b7eec9a7710b2fdfe",
-        "version" : "5.7.0"
-      }
-    },
     {
       "identity" : "lottie-ios",
       "kind" : "remoteSourceControl",
