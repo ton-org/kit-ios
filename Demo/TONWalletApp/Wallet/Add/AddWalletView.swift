@@ -32,61 +32,44 @@ import TONWalletKit
 @MainActor
 struct AddWalletView: View {
     @StateObject var viewModel = AddWalletViewModel()
-    
+
     let onAddWallet: (TONWalletProtocol) -> Void
-    
+
     var body: some View {
-        VStack(spacing: AppSpacing.spacing(2.0)) {
-            VStack(alignment: .leading, spacing: AppSpacing.spacing(2.0)) {
-                Text("Wallet version:")
-                    .textSM()
-                
-                Picker("", selection: $viewModel.walletVersion) {
-                    Text("V5R1").tag(TONWalletVersion.v5r1)
-                    Text("V4R2").tag(TONWalletVersion.v4r2)
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: 24) {
+                    VStack(spacing: 8) {
+                        Text("Import a wallet")
+                            .textStyle(.title2)
+                            .foregroundStyle(Color.tonTextPrimary)
+                        Text("Enter your secret recovery phrase")
+                            .textStyle(.body)
+                            .foregroundStyle(Color.tonTextSecondary)
+                            .multilineTextAlignment(.center)
+                    }
+
+                    MnemonicInputView(mnemonic: $viewModel.mnemonic)
+                        .allowsHitTesting(!viewModel.isAdding)
                 }
-                .pickerStyle(.segmented)
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 24)
             }
-            
-            MnemonicInputView(mnemonic: $viewModel.mnemonic)
-                .allowsHitTesting(!viewModel.isAdding)
-            
-            HStack(spacing: 16.0) {
-                Button("Clear all") {
-                    viewModel.clear()
-                }
-                .buttonStyle(TONLinkButtonStyle(type: .secondary))
-                
-                Button("Paste from Clipboard") {
-                    if let string = UIPasteboard.general.string {
-                        viewModel.insert(text: string)
-                        viewModel.mnemonic = TONMnemonic(string: string)
+
+            Button("Continue") {
+                Task {
+                    if let wallet = await viewModel.add() {
+                        onAddWallet(wallet)
                     }
                 }
-                .buttonStyle(TONLinkButtonStyle(type: .primary))
             }
-            
-            Spacer()
-            
-            VStack {
-                Button("Import Wallet") {
-                    Task {
-                        if let wallet = await viewModel.add() {
-                            onAddWallet(wallet)
-                        }
-                    }
-                }
-                .buttonStyle(TONLegacyButtonStyle(type: .secondary, isLoading: viewModel.isAdding))
-                .disabled(!viewModel.canAdd)
-                
-                Text("Restore wallet using recovery phrase")
-                    .foregroundStyle(.gray)
-                    .font(.caption)
-            }
+            .buttonStyle(.ton(.primary.isLoading(viewModel.isAdding)))
+            .disabled(!viewModel.canAdd)
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
         }
-        .padding(.horizontal, 16.0)
-        .background(Color.TON.gray100)
-        .navigationTitle("Import Wallet")
+        .background(Color.tonBgPrimary)
         .navigationBarTitleDisplayMode(.inline)
     }
 }

@@ -12,10 +12,10 @@
 //  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 //  copies of the Software, and to permit persons to whom the Software is
 //  furnished to do so, subject to the following conditions:
-//  
+//
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-//  
+//
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,35 +30,49 @@ import TONWalletKit
 
 struct MnemonicInputView: View {
     @Binding var mnemonic: TONMnemonic
-    
+    @FocusState private var focusedIndex: Int?
+
+    private let total = TONMnemonicLength.max.rawValue
+    private let columns: [GridItem] = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12),
+    ]
+
     var body: some View {
-        VStack(alignment: .center, spacing: 20) {
-            
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 12) {
-                ForEach(0..<TONMnemonicLength.max.rawValue, id: \.self) { index in
-                    HStack(spacing: 8) {
-                        
-                        TextField(
-                            "\(index + 1)",
-                            text: Binding(
-                                get: { mnemonic.value[index]
-                                },
-                                set: {
-                                    mnemonic.update(
-                                        word: $0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines),
-                                        at: index
-                                    )
-                                }
-                            )
-                        )
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
-                        .font(.system(.body, design: .monospaced))
-                        .multilineTextAlignment(.center)
-                    }
-                }
+        LazyVGrid(columns: columns, spacing: 12) {
+            ForEach(0..<total, id: \.self) { index in
+                TONSeedPhraseField(
+                    index: index,
+                    word: Binding(
+                        get: { mnemonic.value[index] },
+                        set: { mnemonic.update(word: $0, at: index) }
+                    ),
+                    isFocused: $focusedIndex,
+                    onPaste: { handlePaste($0, at: index) }
+                )
             }
         }
+    }
+
+    // Per spec: pasting into field N takes A = pasted.split(whitespace) and
+    // fills fields[N..] with A[N..]. If A is shorter than N, nothing is written.
+    private func handlePaste(_ pasted: String, at pasteIndex: Int) {
+        let words = pasted
+            .lowercased()
+            .split(whereSeparator: \.isWhitespace)
+            .map(String.init)
+
+        var lastFilled = pasteIndex - 1
+        var offset = 0
+        while pasteIndex + offset < total, pasteIndex + offset < words.count {
+            let target = pasteIndex + offset
+            let source = pasteIndex + offset
+            mnemonic.update(word: words[source], at: target)
+            lastFilled = target
+            offset += 1
+        }
+
+        let next = lastFilled + 1
+        focusedIndex = next < total ? next : nil
     }
 }

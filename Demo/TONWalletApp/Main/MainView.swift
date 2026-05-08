@@ -28,7 +28,8 @@ import SwiftUI
 
 struct MainView: View {
     @StateObject private var viewModel = MainViewModel()
-    
+    @State private var addWalletPath = NavigationPath()
+
     var body: some View {
         Group {
             switch viewModel.state {
@@ -38,9 +39,18 @@ struct MainView: View {
                         await viewModel.load()
                     }
             case .addWallet:
-                NavigationStack {
-                    AddWalletView {
-                        viewModel.show(wallets: [$0])
+                NavigationStack(path: $addWalletPath) {
+                    WalletWelcomeView(
+                        onCreateNew: {},
+                        onAddExisting: { addWalletPath.append(AddWalletPath.importExisting) }
+                    )
+                    .navigationDestination(for: AddWalletPath.self) { path in
+                        switch path {
+                        case .importExisting:
+                            AddWalletView {
+                                viewModel.show(wallets: [$0])
+                            }
+                        }
                     }
                 }
             case .wallets(let viewModel):
@@ -53,4 +63,8 @@ struct MainView: View {
             }
         }
     }
+}
+
+enum AddWalletPath: Hashable {
+    case importExisting
 }
