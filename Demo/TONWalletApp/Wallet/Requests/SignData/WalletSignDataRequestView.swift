@@ -94,12 +94,12 @@ struct WalletSignDataRequestView: View {
                 Button("Reject") {
                     viewModel.reject()
                 }
-                .buttonStyle(TONButtonStyle(type: .secondary))
+                .buttonStyle(TONLegacyButtonStyle(type: .secondary))
                 
                 Button("Sign Data") {
                     viewModel.approve()
                 }
-                .buttonStyle(TONButtonStyle(type: .primary))
+                .buttonStyle(TONLegacyButtonStyle(type: .primary))
             }
             .padding(AppSpacing.spacing(4.0))
         }

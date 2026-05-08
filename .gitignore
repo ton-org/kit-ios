@@ -1,4 +1,6 @@
 local
+settings.local.*
+mcp.json
 
 # Mac OS X
 .DS_Store

@@ -76,7 +76,7 @@ struct AddWalletView: View {
                         }
                     }
                 }
-                .buttonStyle(TONButtonStyle(type: .secondary, isLoading: viewModel.isAdding))
+                .buttonStyle(TONLegacyButtonStyle(type: .secondary, isLoading: viewModel.isAdding))
                 .disabled(!viewModel.canAdd)
                 
                 Text("Restore wallet using recovery phrase")

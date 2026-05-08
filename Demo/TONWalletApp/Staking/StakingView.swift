@@ -165,12 +165,12 @@ struct StakingView: View {
             Button("Cancel") {
                 viewModel.cancelQuote()
             }
-            .buttonStyle(TONButtonStyle(type: .secondary))
+            .buttonStyle(TONLegacyButtonStyle(type: .secondary))
 
             Button(viewModel.buttonTitle) {
                 viewModel.executeStake()
             }
-            .buttonStyle(TONButtonStyle(type: .primary, isLoading: viewModel.isExecuting))
+            .buttonStyle(TONLegacyButtonStyle(type: .primary, isLoading: viewModel.isExecuting))
             .disabled(viewModel.isExecuting)
         }
     }
@@ -256,7 +256,7 @@ struct StakingView: View {
             Button(viewModel.buttonTitle) {
                 viewModel.buttonAction()
             }
-            .buttonStyle(TONButtonStyle(
+            .buttonStyle(TONLegacyButtonStyle(
                 type: .primary,
                 isLoading: viewModel.isLoadingQuote
             ))

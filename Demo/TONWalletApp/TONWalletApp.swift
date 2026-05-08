@@ -32,17 +32,27 @@ import TONWalletKit
 @main
 struct TONWalletApp: App {
     @State var initialized = false
-    
+    #if DEBUG
+    @State private var showDebugMenu = false
+    #endif
+
     var body: some Scene {
         WindowGroup {
-            if initialized {
-                TONWalletAppView()
-            } else {
-                ProgressView()
-                    .task {
-                        initialized = true
-                    }
-            }
+            content
+            #if DEBUG
+                .onShake { showDebugMenu = true }
+                .sheet(isPresented: $showDebugMenu) { DebugMenuView() }
+            #endif
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if initialized {
+            TONWalletAppView()
+        } else {
+            ProgressView()
+                .task { initialized = true }
         }
     }
 }

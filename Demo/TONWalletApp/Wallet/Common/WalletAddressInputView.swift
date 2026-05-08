@@ -94,7 +94,7 @@ struct WalletAddressInputView: View {
                     onAddressSelected(addressInput.trimmingCharacters(in: .whitespacesAndNewlines))
                 }
             }
-            .buttonStyle(TONButtonStyle(type: .primary))
+            .buttonStyle(TONLegacyButtonStyle(type: .primary))
             .disabled(!isValidAddress)
         }
         .padding(AppSpacing.spacing(4))

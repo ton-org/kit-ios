@@ -37,11 +37,11 @@ struct TONWalletAppView: View {
                 Color.white
                     .onAppear { appStateManager.checkState() }
             case .locked:
-                UnlockWalletView()
+                UnlockPinView()
             case .unlocked:
                 MainView()
             case .createPassword:
-                CreatePasswordView()
+                CreatePinView()
             }
         }
         .environmentObject(appStateManager)

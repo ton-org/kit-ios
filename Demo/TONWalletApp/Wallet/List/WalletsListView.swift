@@ -54,7 +54,7 @@ struct WalletsListView: View {
                 Button("Add Wallet") {
                     navigationPath.append(Paths.addWallet)
                 }
-                .buttonStyle(TONButtonStyle(type: .primary))
+                .buttonStyle(TONLegacyButtonStyle(type: .primary))
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(AppSpacing.spacing(4.0))

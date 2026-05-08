@@ -155,7 +155,7 @@ struct SendTokensView: View {
                         address: recipientAddress
                     )
                 }
-                .buttonStyle(TONButtonStyle(
+                .buttonStyle(TONLegacyButtonStyle(
                     type: .primary,
                     isLoading: viewModel.isSending
                 ))

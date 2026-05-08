@@ -66,13 +66,13 @@ struct SwapSettingsView: View {
                 Button("Cancel") {
                     isPresented = false
                 }
-                .buttonStyle(TONButtonStyle(type: .secondary))
+                .buttonStyle(TONLegacyButtonStyle(type: .secondary))
 
                 Button("Save") {
                     slippageBps = editingSlippage
                     isPresented = false
                 }
-                .buttonStyle(TONButtonStyle(type: .primary))
+                .buttonStyle(TONLegacyButtonStyle(type: .primary))
             }
         }
         .padding(AppSpacing.spacing(4))

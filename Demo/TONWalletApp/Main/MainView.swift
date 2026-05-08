@@ -44,7 +44,12 @@ struct MainView: View {
                     }
                 }
             case .wallets(let viewModel):
-                WalletsListView(viewModel: viewModel)
+                if let active = viewModel.activeWallet {
+                    WalletHomeView(walletsList: viewModel, activeWallet: active)
+                        .id(active.id)
+                } else {
+                    WalletsListView(viewModel: viewModel)
+                }
             }
         }
     }

@@ -283,7 +283,7 @@ struct SwapView: View {
             Button(viewModel.buttonTitle) {
                 viewModel.buttonAction()
             }
-            .buttonStyle(TONButtonStyle(
+            .buttonStyle(TONLegacyButtonStyle(
                 type: .primary,
                 isLoading: viewModel.isLoadingQuote || viewModel.isSwapping
             ))

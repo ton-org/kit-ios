@@ -55,7 +55,7 @@ struct WalletNFTsListView: View {
                         self.viewModel.loadMoreNFTs()
                     }
                     .buttonStyle(
-                        TONButtonStyle(
+                        TONLegacyButtonStyle(
                             type: .secondary,
                             isLoading: viewModel.isLoadingMore
                         )

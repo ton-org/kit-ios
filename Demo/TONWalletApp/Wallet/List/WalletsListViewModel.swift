@@ -31,37 +31,57 @@ import TONWalletKit
 @MainActor
 class WalletsListViewModel: ObservableObject {
     @Published private(set) var wallets: [WalletViewModel] = []
-    
+    @Published private(set) var activeWallet: WalletViewModel?
+
     var onRemoveAll: (() -> Void)?
-    
+
     private var subscribers = Set<AnyCancellable>()
     private(set) var kit: TONWalletKit?
-    
+
     let event = PassthroughSubject<Event, Never>()
+
+    private static let activeWalletAddressKey = "activeWalletAddress"
 
     init(wallets: [WalletViewModel]) {
         self.wallets = wallets
+        self.activeWallet = Self.restoreActiveWallet(from: wallets)
     }
-    
+
     func add(wallets: [TONWalletProtocol]) {
         let viewModels = wallets.map { WalletViewModel(tonWallet: $0) }
         add(wallets: viewModels)
     }
-    
+
     func add(wallets: [WalletViewModel]) {
         self.wallets.append(contentsOf: wallets)
-        
+
         wallets.forEach { wallet in
             let id = wallet.id
-            
+
             wallet.onRemove = { [weak self] in
                 self?.remove(walletID: id)
-                
+
                 if self?.wallets.isEmpty == true {
                     self?.onRemoveAll?()
                 }
             }
         }
+
+        if activeWallet == nil {
+            activeWallet = Self.restoreActiveWallet(from: self.wallets)
+        }
+    }
+
+    func selectActive(wallet: WalletViewModel) {
+        guard wallets.contains(where: { $0.id == wallet.id }) else { return }
+        activeWallet = wallet
+        UserDefaults.standard.set(wallet.address, forKey: Self.activeWalletAddressKey)
+    }
+
+    private static func restoreActiveWallet(from wallets: [WalletViewModel]) -> WalletViewModel? {
+        guard !wallets.isEmpty else { return nil }
+        let savedAddress = UserDefaults.standard.string(forKey: activeWalletAddressKey)
+        return wallets.first(where: { $0.address == savedAddress }) ?? wallets.first
     }
     
     func waitForEvents() {
@@ -89,7 +109,17 @@ class WalletsListViewModel: ObservableObject {
     }
     
     private func remove(walletID: WalletViewModel.ID) {
+        let wasActive = activeWallet?.id == walletID
         self.wallets.removeAll { $0.id == walletID }
+
+        if wasActive {
+            activeWallet = wallets.first
+            if let address = activeWallet?.address {
+                UserDefaults.standard.set(address, forKey: Self.activeWalletAddressKey)
+            } else {
+                UserDefaults.standard.removeObject(forKey: Self.activeWalletAddressKey)
+            }
+        }
     }
 }
 

@@ -64,7 +64,7 @@ struct WalletInfoView: View {
             Button("Send") {
                 onSend()
             }
-            .buttonStyle(TONButtonStyle(type: .primary))
+            .buttonStyle(TONLegacyButtonStyle(type: .primary))
         }
         .task {
             await viewModel.load()

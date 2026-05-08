@@ -80,12 +80,12 @@ struct WalletTransactionRequestView: View {
                 Button("Reject") {
                     viewModel.reject()
                 }
-                .buttonStyle(TONButtonStyle(type: .secondary))
+                .buttonStyle(TONLegacyButtonStyle(type: .secondary))
                 
                 Button("Approve") {
                     viewModel.approve()
                 }
-                .buttonStyle(TONButtonStyle(type: .primary))
+                .buttonStyle(TONLegacyButtonStyle(type: .primary))
             }
             .padding(AppSpacing.spacing(4.0))
         }

@@ -154,13 +154,13 @@ struct WalletNFTDetailsView: View {
                 Button("Transfer") {
                     isWalletAddressInputPresented = true
                 }
-                .buttonStyle(TONButtonStyle(type: .primary, isLoading: viewModel.isTransferring))
+                .buttonStyle(TONLegacyButtonStyle(type: .primary, isLoading: viewModel.isTransferring))
                 .disabled(!nftDetails.canTransfer)
                 
                 Button("Close") {
                     dismiss()
                 }
-                .buttonStyle(TONButtonStyle(type: .secondary))
+                .buttonStyle(TONLegacyButtonStyle(type: .secondary))
             }
             .padding(AppSpacing.spacing(4.0))
         }

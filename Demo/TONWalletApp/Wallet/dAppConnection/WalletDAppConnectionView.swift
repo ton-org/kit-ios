@@ -45,7 +45,7 @@ struct WalletDAppConnectionView: View {
                 self.viewModel.connect()
             }
             .buttonStyle(
-                TONButtonStyle(
+                TONLegacyButtonStyle(
                     type: .primary
                 )
             )

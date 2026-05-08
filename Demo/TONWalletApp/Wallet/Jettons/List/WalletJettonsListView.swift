@@ -59,7 +59,7 @@ struct WalletJettonsListView: View {
                         Button("Load more") {
                             viewModel.loadMoreJettons()
                         }
-                        .buttonStyle(TONButtonStyle(
+                        .buttonStyle(TONLegacyButtonStyle(
                             type: .secondary,
                             isLoading: viewModel.isLoadingMore
                         ))
