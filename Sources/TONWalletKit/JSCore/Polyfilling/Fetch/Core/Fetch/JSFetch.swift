@@ -23,6 +23,10 @@
 
 // MARK: - JSFetch
 
+/// A `JSContextInstallable` that wires the WHATWG `fetch` global into a JS context.
+///
+/// Use the static factory methods on `JSContextInstallable` (`.fetch`,
+/// `.fetch(sessionConfiguration:)`, `.fetch(session:)`) rather than constructing this directly.
 public struct JSFetchInstaller: Sendable, JSContextInstallable {
     let session: URLSession
 
@@ -67,10 +71,14 @@ public struct JSFetchInstaller: Sendable, JSContextInstallable {
 }
 
 extension JSContextInstallable where Self == JSFetchInstaller {
-    /// An installable that installs a fetch implementation.
-    public static var fetch: Self { .fetch(sessionConfiguration: .default) }
+    /// An installable that installs a fetch implementation backed by `URLSession.shared`.
+    public static var fetch: Self { JSFetchInstaller(session: .shared) }
 
-    /// An installable that installs a fetch implementation.
+    /// An installable that installs a fetch implementation backed by a custom configuration.
+    ///
+    /// > Important: Each call constructs a fresh `URLSession` that is **not** invalidated automatically.
+    /// > Prefer `.fetch` (which uses `URLSession.shared`) or `.fetch(session:)` with a session you
+    /// > own and invalidate explicitly.
     ///
     /// - Parameters:
     ///   - sessionConfiguration: The configuration to use for the underlying `URLSession` that makes HTTP requests.
@@ -79,12 +87,11 @@ extension JSContextInstallable where Self == JSFetchInstaller {
         JSFetchInstaller(session: URLSession(configuration: sessionConfiguration))
     }
 
-    /// An installable that installs a fetch implementation.
+    /// An installable that installs a fetch implementation using a caller-provided session.
     ///
     /// - Parameters:
-    ///   - session: The underlying `URLSession` to use to make HTTP requests.
+    ///   - session: The underlying `URLSession` to use to make HTTP requests. Caller owns the lifecycle.
     /// - Returns: An installable.
-    @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
     public static func fetch(session: URLSession) -> Self {
         JSFetchInstaller(session: session)
     }
@@ -118,52 +125,33 @@ private actor JSFetchExecutor {
             reject?.call(withArguments: [reason as Any])
             return
         }
-        let request = self.request
-        let session = self.session
         self.swiftTask = Task {
-            await self.executeFetch(
-                context: context,
-                resolve: resolve,
-                reject: reject,
-                request: request,
-                session: session
-            )
+            await self.executeFetch(context: context, resolve: resolve, reject: reject)
         }
     }
 
-    private func executeFetch(
-        context: JSContext,
-        resolve: JSValue?,
-        reject: JSValue?,
-        request: URLRequest,
-        session: URLSession
-    ) async {
-        JSFetchLogger.logRequest(request)
+    private func executeFetch(context: JSContext, resolve: JSValue?, reject: JSValue?) async {
+        JSFetchLogger.logRequest(self.request)
         do {
             let data: Data
             let urlResponse: URLResponse
             let didRedirect: Bool
             if #available(iOS 15, macOS 12, tvOS 15, watchOS 8, *) {
                 let observer = JSRedirectObserver()
-                (data, urlResponse) = try await session.data(for: request, delegate: observer)
+                (data, urlResponse) = try await self.session.data(for: self.request, delegate: observer)
                 didRedirect = observer.didRedirect
             } else {
-                (data, urlResponse) = try await session.data(for: request)
-                didRedirect = urlResponse.url != request.url
+                (data, urlResponse) = try await self.session.data(for: self.request)
+                didRedirect = urlResponse.url != self.request.url
             }
             JSFetchLogger.logResponse(urlResponse, data: data)
             guard let httpResponse = urlResponse as? HTTPURLResponse else {
-                reject?.call(withArguments: [
-                    JSValue(
-                        newErrorFromMessage: "Server responded with a non-HTTP response.",
-                        in: context
-                    ) as Any
-                ])
+                rejectWithMessage("Server responded with a non-HTTP response.", in: context, reject: reject)
                 return
             }
             let (cookies, headers) = httpResponse.cookieFilteredHeaders
-            if request.httpShouldHandleCookies {
-                session.configuration.httpCookieStorage?
+            if self.request.httpShouldHandleCookies {
+                self.session.configuration.httpCookieStorage?
                     .setCookies(cookies, for: httpResponse.url, mainDocumentURL: httpResponse.url)
             }
             let storage = JSFetchResponseBlobStorage(data: data)
@@ -176,18 +164,19 @@ private actor JSFetchExecutor {
             )
             resolve?.call(withArguments: [responseJS as Any])
         } catch {
-            if let urlError = error as? URLError, urlError.code == .cancelled {
-                reject?.call(withArguments: [self.cancelReason as Any])
+            if (error as? URLError)?.code == .cancelled {
+                let reason = self.cancelReason
+                    ?? JSValue(newErrorFromMessage: "Fetch was aborted.", in: context)
+                reject?.call(withArguments: [reason as Any])
             } else {
-                reject?.call(withArguments: [
-                    JSValue(
-                        newErrorFromMessage: error.localizedDescription,
-                        in: context
-                    ) as Any
-                ])
+                rejectWithMessage(error.localizedDescription, in: context, reject: reject)
             }
         }
     }
+}
+
+private func rejectWithMessage(_ message: String, in context: JSContext, reject: JSValue?) {
+    reject?.call(withArguments: [JSValue(newErrorFromMessage: message, in: context) as Any])
 }
 
 private final class JSRedirectObserver: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
@@ -238,10 +227,12 @@ extension JSFetchTask: JSFetchTaskExport {
 
 private final class JSFetchResponseBlobStorage: JSBlobStorage {
     private let data: Data
+    private let decoded: String
     let utf8SizeInBytes: Int64
 
     init(data: Data) {
         self.data = data
+        self.decoded = String(decoding: data, as: UTF8.self)
         self.utf8SizeInBytes = Int64(data.count)
     }
 
@@ -250,8 +241,18 @@ private final class JSFetchResponseBlobStorage: JSBlobStorage {
         endIndex: Int64,
         context: JSContext
     ) async throws(JSValueError) -> String.UTF8View {
-        String(decoding: self.data, as: UTF8.self)
-            .utf8Bytes(startIndex: startIndex, endIndex: endIndex, context: context)
+        self.decoded.utf8Bytes(startIndex: startIndex, endIndex: endIndex, context: context)
+    }
+
+    func rawBytes(
+        startIndex: Int64,
+        endIndex: Int64,
+        context: JSContext
+    ) async throws(JSValueError) -> Data {
+        let lower = max(0, Int(startIndex))
+        let upper = min(self.data.count, Int(endIndex))
+        guard lower < upper else { return Data() }
+        return self.data.subdata(in: lower..<upper)
     }
 }
 
@@ -260,34 +261,58 @@ private final class JSFetchResponseBlobStorage: JSBlobStorage {
 extension URLRequest {
     fileprivate init(url: URL, request: JSValue, cookieStorage: HTTPCookieStorage?) {
         self.init(url: url)
-        var requestCopy = self
-        requestCopy.httpShouldHandleCookies = request.objectForKeyedSubscript("includeCookies")
-            .toBool()
-        requestCopy.httpMethod = request.objectForKeyedSubscript("method").toString()
-        requestCopy.httpBody = (request.objectForKeyedSubscript("body").toArray() as? [UInt8])
-            .map { Data($0) }
-        if let cookies = cookieStorage?.cookies(for: url), requestCopy.httpShouldHandleCookies {
-            requestCopy.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
-        }
-        // Properly map JS Headers object to Swift headers
-        if let headers = request.objectForKeyedSubscript("headers"), !headers.isUndefined {
-            if let entries = headers.invokeMethod("entries", withArguments: []), entries.isObject {
-                // entries() returns an iterator, so we need to iterate manually
-                while let next = entries.invokeMethod("next", withArguments: []),
-                      let done = next.objectForKeyedSubscript("done")?.toBool(),
-                      !done
-                {
-                    if let pair = next.objectForKeyedSubscript("value"),
-                       let key = pair.atIndex(0),
-                       let value = pair.atIndex(1)
-                    {
-                        requestCopy.addValue(value.toString(), forHTTPHeaderField: key.toString())
-                    }
-                }
-            }
-        }
-        self = requestCopy
+        self.httpShouldHandleCookies = request.objectForKeyedSubscript("includeCookies").toBool()
+        self.httpMethod = request.objectForKeyedSubscript("method").toString()
+        self.httpBody = jsRequestBody(from: request)
+        self.allHTTPHeaderFields = mergedHeaders(
+            from: request,
+            url: url,
+            cookieStorage: self.httpShouldHandleCookies ? cookieStorage : nil
+        )
     }
+}
+
+private func jsRequestBody(from request: JSValue) -> Data? {
+    (request.objectForKeyedSubscript("body").toArray() as? [UInt8]).map { Data($0) }
+}
+
+private func mergedHeaders(
+    from request: JSValue,
+    url: URL,
+    cookieStorage: HTTPCookieStorage?
+) -> [String: String] {
+    var merged: [String: String] = [:]
+    if let cookies = cookieStorage?.cookies(for: url) {
+        for (key, value) in HTTPCookie.requestHeaderFields(with: cookies) {
+            merged[key] = value
+        }
+    }
+    for (key, value) in jsHeaderEntries(from: request) {
+        merged[key] = value
+    }
+    return merged
+}
+
+private func jsHeaderEntries(from request: JSValue) -> [(String, String)] {
+    guard let headers = request.objectForKeyedSubscript("headers"), !headers.isUndefined else {
+        return []
+    }
+    guard let entries = headers.invokeMethod("entries", withArguments: []), entries.isObject else {
+        return []
+    }
+    var result: [(String, String)] = []
+    while let next = entries.invokeMethod("next", withArguments: []),
+          let done = next.objectForKeyedSubscript("done")?.toBool(),
+          !done
+    {
+        if let pair = next.objectForKeyedSubscript("value"),
+           let key = pair.atIndex(0),
+           let value = pair.atIndex(1)
+        {
+            result.append((key.toString(), value.toString()))
+        }
+    }
+    return result
 }
 
 // MARK: - Status Code
@@ -337,7 +362,7 @@ extension JSValue {
         didRedirect: Bool,
         in context: JSContext
     ) -> JSValue? {
-        let responseInit = JSValue(newObjectIn: context)!
+        guard let responseInit = JSValue(newObjectIn: context) else { return nil }
         responseInit.setValue(response.statusCode, forPath: "status")
         responseInit.setValue(response.localizedStatusText, forPath: "statusText")
         responseInit.setValue(headers, forPath: "headers")

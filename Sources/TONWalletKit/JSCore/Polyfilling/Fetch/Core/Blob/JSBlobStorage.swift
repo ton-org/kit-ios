@@ -19,6 +19,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+import Foundation
 import JavaScriptCore
 
 // MARK: - JSBlobStorage
@@ -28,7 +29,7 @@ import JavaScriptCore
 public protocol JSBlobStorage: Sendable {
     /// The size (in bytes) of the stored UTF8 content.
     var utf8SizeInBytes: Int64 { get }
-    
+
     /// Returns the stored UTF8 bytes.
     ///
     /// - Parameters:
@@ -42,6 +43,28 @@ public protocol JSBlobStorage: Sendable {
         endIndex: Int64,
         context: JSContext
     ) async throws(JSValueError) -> String.UTF8View
+
+    /// Returns the raw bytes for `Blob.bytes()` / `Blob.arrayBuffer()`.
+    ///
+    /// Binary-safe — does not round-trip through UTF-8. The default implementation
+    /// derives bytes from ``utf8Bytes(startIndex:endIndex:context:)`` for storages that
+    /// only have a textual source.
+    func rawBytes(
+        startIndex: Int64,
+        endIndex: Int64,
+        context: JSContext
+    ) async throws(JSValueError) -> Data
+}
+
+extension JSBlobStorage {
+    public func rawBytes(
+        startIndex: Int64,
+        endIndex: Int64,
+        context: JSContext
+    ) async throws(JSValueError) -> Data {
+        let utf8 = try await self.utf8Bytes(startIndex: startIndex, endIndex: endIndex, context: context)
+        return Data(utf8)
+    }
 }
 
 // MARK: - String Conformances

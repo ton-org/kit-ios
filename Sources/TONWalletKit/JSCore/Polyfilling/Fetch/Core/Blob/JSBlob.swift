@@ -19,6 +19,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+import Foundation
 @preconcurrency import JavaScriptCore
 
 // MARK: - JSBlob
@@ -116,14 +117,14 @@
 // MARK: - Subscript
 
 extension JSBlob {
-  public subscript(range: Range<Int64>, type mimeType: MIMEType? = nil) -> JSBlob {
+  fileprivate subscript(range: Range<Int64>, type mimeType: MIMEType? = nil) -> JSBlob {
     var state = self.indexedStorage
     state.startIndex = range.lowerBound
     state.endIndex = range.upperBound
     return JSBlob(state: state, type: mimeType ?? self.mimeType)
   }
 
-  public subscript(range: PartialRangeFrom<Int64>, type mimeType: MIMEType? = nil) -> JSBlob {
+  fileprivate subscript(range: PartialRangeFrom<Int64>, type mimeType: MIMEType? = nil) -> JSBlob {
     var state = self.indexedStorage
     state.startIndex = range.lowerBound
     state.endIndex = self.size
@@ -160,22 +161,26 @@ extension JSBlob: JSBlobExport {
 
   /// Returns the bytes of this blob as a `JSValue`.
   public func bytes() -> JSValue {
-    self.utf8Promise { bufferWithBytes(utf8: $0, in: $1).1 }
+    self.dataPromise { bufferWithRawBytes(data: $0, in: $1)?.bytes }
   }
 
   /// Returns a Javascript `ArrayBuffer` of this blob as a `JSValue`.
   public func arrayBuffer() -> JSValue {
-    self.utf8Promise { bufferWithBytes(utf8: $0, in: $1).0 }
+    self.dataPromise { bufferWithRawBytes(data: $0, in: $1)?.buffer }
   }
 
   /// The implementation of Javascript's `Blob.slice`.
+  ///
+  /// Follows the [MDN spec](https://developer.mozilla.org/en-US/docs/Web/API/Blob/slice):
+  /// negative indices are interpreted relative to `size`, both bounds are clamped to `[0, size]`,
+  /// and `end <= start` yields an empty slice.
   public func slice(_ start: JSValue, _ end: JSValue, _ type: JSValue) -> JSBlob {
-    let type = MIMEType(rawValue: type.isUndefined ? self.type : type.toString() ?? "")
-    guard !start.isUndefined else { return self }
-    let start = max(0, Int64(start.toInt32()))
-    guard !end.isUndefined else { return self[start..., type: type] }
-    let end = min(self.size, end.isUndefined ? self.size : Int64(end.toInt32()))
-    return self[start..<end, type: type]
+    let mimeType = MIMEType(rawValue: type.isUndefined ? self.type : type.toString() ?? "")
+    let size = self.size
+    let normalizedStart = normalizeSliceIndex(start, default: 0, size: size)
+    let normalizedEnd = normalizeSliceIndex(end, default: size, size: size)
+    let upper = max(normalizedStart, normalizedEnd)
+    return self[normalizedStart..<upper, type: mimeType]
   }
 
   private func utf8Promise(
@@ -187,13 +192,36 @@ extension JSBlob: JSBlobExport {
               in: JSContext()
           )
       }
-      
+
     let indexedStorage = self.indexedStorage
     return JSValue(newPromiseIn: context) { resolve, reject in
       Task {
         do {
           let utf8 = try await indexedStorage.utf8(context: context)
           resolve?.call(withArguments: [map(utf8, context) as Any])
+        } catch let error as JSValueError {
+          reject?.call(withArguments: [error.value as Any])
+        }
+      }
+    }
+  }
+
+  private func dataPromise(
+    _ map: @Sendable @escaping (Data, JSContext) -> Any?
+  ) -> JSValue {
+      guard let context = JSContext.current() else {
+          return JSValue(
+              newPromiseRejectedWithReason: "No context exists to perform \(#function)",
+              in: JSContext()
+          )
+      }
+
+    let indexedStorage = self.indexedStorage
+    return JSValue(newPromiseIn: context) { resolve, reject in
+      Task {
+        do {
+          let data = try await indexedStorage.rawBytes(context: context)
+          resolve?.call(withArguments: [map(data, context) as Any])
         } catch let error as JSValueError {
           reject?.call(withArguments: [error.value as Any])
         }
@@ -217,19 +245,39 @@ extension JSBlob {
         context: context
       )
     }
+
+    func rawBytes(context: JSContext) async throws(JSValueError) -> Data {
+      try await self.storage.rawBytes(
+        startIndex: self.startIndex,
+        endIndex: self.endIndex,
+        context: context
+      )
+    }
   }
 }
 
-private func bufferWithBytes(
-  utf8: String.UTF8View,
-  in context: JSContext
-) -> (JSValue, JSValue) {
-  let bytes = context.objectForKeyedSubscript("Uint8Array")
-    .construct(withArguments: [utf8.count])!
-  for (index, byte) in utf8.enumerated() {
-    bytes.setValue(byte, at: index)
+private func normalizeSliceIndex(_ value: JSValue, default defaultValue: Int64, size: Int64) -> Int64 {
+  guard !value.isUndefined else { return defaultValue }
+  let raw = Int64(value.toInt32())
+  if raw < 0 {
+    return max(size + raw, 0)
   }
-  return (bytes.objectForKeyedSubscript("buffer")!, bytes)
+  return min(raw, size)
+}
+
+private func bufferWithRawBytes(
+  data: Data,
+  in context: JSContext
+) -> (buffer: JSValue, bytes: JSValue)? {
+  // Bridge the bytes into JS in a single call by passing them through `JSValue(object:)`
+  // (which converts a `[UInt8]` to a JS Array), then constructing the typed array via
+  // `Uint8Array.from(...)`. This avoids the O(N) per-byte bridge crossings of the previous
+  // approach while keeping the implementation Swift-only (no JSC C API).
+  guard let arrayValue = JSValue(object: Array(data), in: context) else { return nil }
+  guard let bytes = context.objectForKeyedSubscript("Uint8Array")
+    .invokeMethod("from", withArguments: [arrayValue]) else { return nil }
+  guard let buffer = bytes.objectForKeyedSubscript("buffer") else { return nil }
+  return (buffer, bytes)
 }
 
 // MARK: - Blob Installer

@@ -26,8 +26,7 @@ public struct JSAbortControllerInstaller: JSContextInstallable, Sendable {
 
   public func install(in context: JSContext) throws {
     let timeout: @convention(block) (JSValue, TimeInterval) -> Void = { controller, time in
-      let transfer = UnsafeJSValueTransfer(value: controller)
-      Task { try await self.sleep(controller: transfer.value, time: time) }
+      Task { try await self.sleep(controller: controller, time: time) }
     }
     context.setObject(timeout, forPath: "_jsCoreExtrasAbortSignalTimeout")
     try context.install([.domException, .jsCoreExtrasBundled(path: "AbortController.js")])
