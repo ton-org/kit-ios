@@ -38,14 +38,21 @@ struct WalletWelcomeView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            Spacer()
+
             TabView(selection: $selectedPage) {
                 ForEach(Array(pages.enumerated()), id: \.offset) { index, content in
                     WalletWelcomePage(content: content)
                         .tag(index)
                 }
             }
-            .tabViewStyle(.page(indexDisplayMode: .always))
-            .indexViewStyle(.page(backgroundDisplayMode: .never))
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .frame(height: 280)
+
+            WalletWelcomePageControl(count: pages.count, current: selectedPage)
+                .padding(.top, 12)
+
+            Spacer()
 
             VStack(spacing: 8) {
                 Button("Create a new wallet") { onCreateNew() }
@@ -87,6 +94,21 @@ struct WalletWelcomeView: View {
     }
 }
 
+private struct WalletWelcomePageControl: View {
+    let count: Int
+    let current: Int
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(0..<count, id: \.self) { index in
+                Circle()
+                    .fill(index == current ? Color.tonTextBrand : Color.tonBgFillTertiary)
+                    .frame(width: 6, height: 6)
+            }
+        }
+    }
+}
+
 private struct WalletWelcomePage: View {
     struct Content {
         let title: String
@@ -97,8 +119,6 @@ private struct WalletWelcomePage: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            Spacer()
-
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .fill(Color.tonBgFillTertiary)
                 .frame(width: 160, height: 160)
@@ -112,8 +132,6 @@ private struct WalletWelcomePage: View {
                     .foregroundStyle(Color.tonTextSecondary)
             }
             .multilineTextAlignment(.center)
-
-            Spacer()
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 32)
