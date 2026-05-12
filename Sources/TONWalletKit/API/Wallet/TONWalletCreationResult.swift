@@ -28,10 +28,10 @@ import Foundation
 
 public struct TONWalletCreationResult {
     public let mnemonic: TONMnemonic
-    public let wallet: any TONWalletProtocol
+    public let walletAdapter: any TONWalletAdapterProtocol
 
-    public init(mnemonic: TONMnemonic, wallet: any TONWalletProtocol) {
+    public init(mnemonic: TONMnemonic, walletAdapter: any TONWalletAdapterProtocol) {
         self.mnemonic = mnemonic
-        self.wallet = wallet
+        self.walletAdapter = walletAdapter
     }
 }

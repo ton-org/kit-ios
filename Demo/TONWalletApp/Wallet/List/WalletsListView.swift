@@ -76,9 +76,14 @@ struct WalletsListView: View {
                     }
                 case .addWallet:
                     WalletWelcomeView(
-                        onCreateNew: {},
+                        onCreateNew: { navigationPath.append(Paths.createWallet) },
                         onAddExisting: { navigationPath.append(Paths.importWallet) }
                     )
+                case .createWallet:
+                    CreateWalletView { wallet in
+                        viewModel.add(wallets: [wallet])
+                        navigationPath.removeLast(2)
+                    }
                 case .importWallet:
                     AddWalletView { wallet in
                         viewModel.add(wallets: [wallet])
@@ -155,6 +160,7 @@ struct WalletsListView: View {
 private enum Paths: Hashable {
     case wallet(viewModel: WalletViewModel)
     case addWallet
+    case createWallet
     case importWallet
     case browser
     case send(viewModel: SendTokensViewModel)
@@ -167,6 +173,8 @@ private enum Paths: Hashable {
             hasher.combine(viewModel.id)
         case .addWallet:
             hasher.combine("addWallet")
+        case .createWallet:
+            hasher.combine("createWallet")
         case .importWallet:
             hasher.combine("importWallet")
         case .browser:
@@ -185,6 +193,8 @@ private enum Paths: Hashable {
         case (.wallet(let lhsViewModel), .wallet(let rhsViewModel)):
             return lhsViewModel.id == rhsViewModel.id
         case (.addWallet, .addWallet):
+            return true
+        case (.createWallet, .createWallet):
             return true
         case (.importWallet, .importWallet):
             return true

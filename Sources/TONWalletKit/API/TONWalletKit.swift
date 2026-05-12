@@ -143,9 +143,8 @@ public class TONWalletKit {
         let mnemonic = try await generateMnemonic()
         let signer = try await signer(mnemonic: mnemonic)
         let adapter = try await walletV5R1Adapter(signer: signer, parameters: parameters)
-        let wallet = try await add(walletAdapter: adapter)
 
-        return TONWalletCreationResult(mnemonic: mnemonic, wallet: wallet)
+        return TONWalletCreationResult(mnemonic: mnemonic, walletAdapter: adapter)
     }
 
     public func walletV4R2Adapter(
