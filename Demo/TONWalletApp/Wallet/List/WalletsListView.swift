@@ -54,11 +54,11 @@ struct WalletsListView: View {
                 Button("Add Wallet") {
                     navigationPath.append(Paths.addWallet)
                 }
-                .buttonStyle(TONLegacyButtonStyle(type: .primary))
+                .buttonStyle(.ton(.primary))
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding(AppSpacing.spacing(4.0))
-            .background(Color.TON.gray100)
+            .padding(16)
+            .background(Color.tonBgPrimary)
             .navigationTitle("TON Wallets")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
@@ -75,9 +75,14 @@ struct WalletsListView: View {
                         navigationPath.append(Paths.staking(viewModel: $0))
                     }
                 case .addWallet:
-                    AddWalletView() {
-                        viewModel.add(wallets: [$0])
-                        navigationPath.removeLast()
+                    WalletWelcomeView(
+                        onCreateNew: {},
+                        onAddExisting: { navigationPath.append(Paths.importWallet) }
+                    )
+                case .importWallet:
+                    AddWalletView { wallet in
+                        viewModel.add(wallets: [wallet])
+                        navigationPath.removeLast(2)
                     }
                 case .send(let viewModel):
                     SendTokensView(viewModel: viewModel)
@@ -150,6 +155,7 @@ struct WalletsListView: View {
 private enum Paths: Hashable {
     case wallet(viewModel: WalletViewModel)
     case addWallet
+    case importWallet
     case browser
     case send(viewModel: SendTokensViewModel)
     case swap(viewModel: SwapViewModel)
@@ -161,6 +167,8 @@ private enum Paths: Hashable {
             hasher.combine(viewModel.id)
         case .addWallet:
             hasher.combine("addWallet")
+        case .importWallet:
+            hasher.combine("importWallet")
         case .browser:
             hasher.combine("browser")
         case .send:
@@ -177,6 +185,8 @@ private enum Paths: Hashable {
         case (.wallet(let lhsViewModel), .wallet(let rhsViewModel)):
             return lhsViewModel.id == rhsViewModel.id
         case (.addWallet, .addWallet):
+            return true
+        case (.importWallet, .importWallet):
             return true
         default:
             return false

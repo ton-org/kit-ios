@@ -31,6 +31,7 @@ struct WalletHomeView: View {
     @StateObject private var viewModel: WalletHomeViewModel
 
     @State private var navigationPath = NavigationPath()
+    @State private var addWalletPath = NavigationPath()
     @State private var isWalletsSheetPresented = false
     @State private var isAddWalletPresented = false
     @State private var nftDetailsViewModel: WalletNFTDetailsViewModel?
@@ -123,15 +124,25 @@ struct WalletHomeView: View {
             .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $isAddWalletPresented) {
-            NavigationStack {
-                AddWalletView { newWallet in
-                    walletsList.add(wallets: [newWallet])
-                    if let added = walletsList.wallets.last {
-                        walletsList.selectActive(wallet: added)
+            NavigationStack(path: $addWalletPath) {
+                WalletWelcomeView(
+                    onCreateNew: {},
+                    onAddExisting: { addWalletPath.append(AddWalletPath.importExisting) }
+                )
+                .navigationDestination(for: AddWalletPath.self) { path in
+                    switch path {
+                    case .importExisting:
+                        AddWalletView { newWallet in
+                            walletsList.add(wallets: [newWallet])
+                            if let added = walletsList.wallets.last {
+                                walletsList.selectActive(wallet: added)
+                            }
+                            isAddWalletPresented = false
+                        }
                     }
-                    isAddWalletPresented = false
                 }
             }
+            .onDisappear { addWalletPath = NavigationPath() }
         }
         .sheet(item: $nftDetailsViewModel) { details in
             WalletNFTDetailsView(viewModel: details)
