@@ -126,10 +126,28 @@ public class TONWalletKit {
     public func signer(privateKey: Data) async throws -> any TONWalletSignerProtocol {
         let data = [UInt8](privateKey)
         let signer = try await jsWalletKit().createSignerFromPrivateKey(data)
-        
+
         return TONWalletSigner(jsWalletSigner: signer)
     }
-    
+
+    public func generateMnemonic() async throws -> TONMnemonic {
+        let value: JSValue = try await jsWalletKit().createMnemonic()
+        let words = value.toArray()?.compactMap { $0 as? String } ?? []
+
+        return TONMnemonic(value: words)
+    }
+
+    public func createWallet(
+        parameters: TONV5R1WalletParameters
+    ) async throws -> TONWalletCreationResult {
+        let mnemonic = try await generateMnemonic()
+        let signer = try await signer(mnemonic: mnemonic)
+        let adapter = try await walletV5R1Adapter(signer: signer, parameters: parameters)
+        let wallet = try await add(walletAdapter: adapter)
+
+        return TONWalletCreationResult(mnemonic: mnemonic, wallet: wallet)
+    }
+
     public func walletV4R2Adapter(
         signer: any TONWalletSignerProtocol,
         parameters: TONV4R2WalletParameters

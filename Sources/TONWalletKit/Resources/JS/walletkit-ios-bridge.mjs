@@ -26446,14 +26446,14 @@ function asMaybeAddressFriendly(data) {
 	}
 }
 function asAddressFriendly(data) {
-	if (data instanceof import_dist$42.Address) return data.toString();
+	if (data instanceof import_dist$41.Address) return data.toString();
 	try {
-		if (data) return import_dist$42.Address.parse(data).toString();
+		if (data) return import_dist$41.Address.parse(data).toString();
 	} catch {}
 	throw new Error(`Can not convert to AddressFriendly from "${data}"`);
 }
 function formatWalletAddress(address, isTestnet = false) {
-	if (typeof address === "string") return import_dist$42.Address.parse(address).toString({
+	if (typeof address === "string") return import_dist$41.Address.parse(address).toString({
 		bounceable: false,
 		testOnly: isTestnet
 	});
@@ -26465,7 +26465,7 @@ function formatWalletAddress(address, isTestnet = false) {
 function isValidAddress(address) {
 	if (typeof address !== "string") return false;
 	try {
-		import_dist$42.Address.parse(address);
+		import_dist$41.Address.parse(address);
 	} catch (_) {
 		return false;
 	}
@@ -26473,7 +26473,7 @@ function isValidAddress(address) {
 }
 function isFriendlyTonAddress(address) {
 	try {
-		import_dist$42.Address.parseFriendly(address);
+		import_dist$41.Address.parseFriendly(address);
 	} catch (_) {
 		return false;
 	}
@@ -26482,16 +26482,16 @@ function isFriendlyTonAddress(address) {
 function compareAddress(a, b) {
 	if (!a || !b) return false;
 	try {
-		const addressA = typeof a === "string" ? import_dist$42.Address.parse(a) : a;
-		const addressB = typeof b === "string" ? import_dist$42.Address.parse(b) : b;
+		const addressA = typeof a === "string" ? import_dist$41.Address.parse(a) : a;
+		const addressB = typeof b === "string" ? import_dist$41.Address.parse(b) : b;
 		return addressA.equals(addressB);
 	} catch {
 		return typeof a === "string" && typeof b === "string" ? a.toLowerCase() === b.toLowerCase() : false;
 	}
 }
-var import_dist$42;
+var import_dist$41;
 var init_address$1 = __esmMin((() => {
-	import_dist$42 = require_dist$1();
+	import_dist$41 = require_dist$1();
 }));
 //#endregion
 //#region ../walletkit/dist/esm/utils/hex.js
@@ -26773,8 +26773,8 @@ function parseOutgoingTonTransfers(tx, addressBook, status) {
 			},
 			simplePreview: {
 				name: "Ton Transfer",
-				description: `Transferring ${(0, import_dist$41.fromNano)(String(amount))} TON`,
-				value: `${(0, import_dist$41.fromNano)(String(amount))} TON`,
+				description: `Transferring ${(0, import_dist$40.fromNano)(String(amount))} TON`,
+				value: `${(0, import_dist$40.fromNano)(String(amount))} TON`,
 				accounts: [toAccount(sender, addressBook), recipientAccount]
 			},
 			baseTransactions: [Base64ToHex(tx.hash)]
@@ -26806,8 +26806,8 @@ function parseIncomingTonTransfers(tx, addressBook, status) {
 		},
 		simplePreview: {
 			name: "Ton Transfer",
-			description: `Transferring ${(0, import_dist$41.fromNano)(String(amount))} TON`,
-			value: `${(0, import_dist$41.fromNano)(String(amount))} TON`,
+			description: `Transferring ${(0, import_dist$40.fromNano)(String(amount))} TON`,
+			value: `${(0, import_dist$40.fromNano)(String(amount))} TON`,
 			accounts: [toAccount(sender, addressBook), recipientAccount]
 		},
 		baseTransactions: [Base64ToHex(tx.hash)]
@@ -26850,9 +26850,9 @@ function toContractAccount$3(address, addressBook) {
 		isWallet: false
 	};
 }
-var import_dist$41;
+var import_dist$40;
 var init_TonTransfer = __esmMin((() => {
-	import_dist$41 = require_dist$1();
+	import_dist$40 = require_dist$1();
 	init_AccountEvent();
 	init_base64();
 }));
@@ -26886,7 +26886,7 @@ function parseContractActions(ownerFriendly, transactions, addressBook) {
 				simplePreview: {
 					name: "Smart Contract Execution",
 					description: "Execution of smart contract",
-					value: `${(0, import_dist$40.fromNano)(String(tonAttached))} TON`,
+					value: `${(0, import_dist$39.fromNano)(String(tonAttached))} TON`,
 					accounts: [toAccount(ownerFriendly, addressBook), toContractAccount$2(contractAddress, addressBook)]
 				},
 				baseTransactions: [baseTx]
@@ -26933,9 +26933,9 @@ function toContractAccount$2(address, addressBook) {
 		isWallet: false
 	};
 }
-var import_dist$40;
+var import_dist$39;
 var init_Contract = __esmMin((() => {
-	import_dist$40 = require_dist$1();
+	import_dist$39 = require_dist$1();
 	init_AccountEvent();
 	init_address$1();
 	init_base64();
@@ -27019,10 +27019,10 @@ var init_opcodes = __esmMin((() => {
 	};
 }));
 //#endregion
-//#region ../walletkit/dist/esm/types/toncenter/parsers/messageDecoder.js
-/**
-* Extracts decoded body from message
-*/
+//#region ../walletkit/dist/esm/types/toncenter/parsers/body.js
+function isRecord$2(v) {
+	return v !== null && typeof v === "object";
+}
 function getDecodedBody(msg) {
 	if (!msg) return null;
 	const mc = msg.message_content;
@@ -27032,9 +27032,6 @@ function getDecodedBody(msg) {
 	}
 	return null;
 }
-/**
-* Extracts @type from decoded body
-*/
 function getDecodedType(msg) {
 	const decoded = getDecodedBody(msg);
 	if (decoded) {
@@ -27045,124 +27042,12 @@ function getDecodedType(msg) {
 	}
 	return null;
 }
-/**
-* Helper: check if value is a record
-*/
-function isRecord$2(v) {
-	return typeof v === "object" && v !== null;
-}
-var MessagePatternRegistry, messagePatternRegistry;
-var init_messageDecoder = __esmMin((() => {
-	init_opcodes();
-	MessagePatternRegistry = class {
-		patterns = /* @__PURE__ */ new Map();
-		/**
-		* Register a pattern for a message type
-		*/
-		register(pattern) {
-			const existing = this.patterns.get(pattern.messageType) || [];
-			existing.push(pattern);
-			this.patterns.set(pattern.messageType, existing);
-		}
-		/**
-		* Find matching pattern for a message
-		*/
-		match(msg) {
-			for (const patterns of this.patterns.values()) for (const pattern of patterns) if (pattern.match(msg)) return pattern;
-			return null;
-		}
-		/**
-		* Get all patterns for a message type
-		*/
-		getPatterns(messageType) {
-			return this.patterns.get(messageType) || [];
-		}
-	};
-	messagePatternRegistry = new MessagePatternRegistry();
-	messagePatternRegistry.register({
-		messageType: MessageType.JettonTransfer,
-		match: (msg) => {
-			const decoded = getDecodedBody(msg);
-			const type = getDecodedType(msg);
-			return msg.opcode === "0x0f8a7ea5" || type === "jetton_transfer" || decoded !== null && decoded["@type"] === "jetton_transfer";
-		},
-		decode: (msg) => getDecodedBody(msg)
-	});
-	messagePatternRegistry.register({
-		messageType: MessageType.JettonInternalTransfer,
-		match: (msg) => {
-			const decoded = getDecodedBody(msg);
-			const type = getDecodedType(msg);
-			return msg.opcode === "0x178d4519" || type === "jetton_internal_transfer" || decoded !== null && decoded["@type"] === "jetton_internal_transfer";
-		},
-		decode: (msg) => getDecodedBody(msg)
-	});
-	messagePatternRegistry.register({
-		messageType: MessageType.JettonNotify,
-		match: (msg) => {
-			const decoded = getDecodedBody(msg);
-			const type = getDecodedType(msg);
-			return msg.opcode === "0x7362d09c" || type === "jetton_notify" || decoded !== null && decoded["@type"] === "jetton_notify";
-		},
-		decode: (msg) => getDecodedBody(msg)
-	});
-	messagePatternRegistry.register({
-		messageType: MessageType.NftTransfer,
-		match: (msg) => {
-			const decoded = getDecodedBody(msg);
-			const type = getDecodedType(msg);
-			return msg.opcode === "0x5fcc3d14" || type === "nft_transfer" || decoded !== null && decoded["@type"] === "nft_transfer";
-		},
-		decode: (msg) => getDecodedBody(msg)
-	});
-	messagePatternRegistry.register({
-		messageType: MessageType.NftOwnershipAssigned,
-		match: (msg) => {
-			const decoded = getDecodedBody(msg);
-			const type = getDecodedType(msg);
-			return msg.opcode === "0x05138d91" || type === "nft_ownership_assigned" || decoded !== null && decoded["@type"] === "nft_ownership_assigned";
-		},
-		decode: (msg) => getDecodedBody(msg)
-	});
-	messagePatternRegistry.register({
-		messageType: MessageType.NftOwnerChanged,
-		match: (msg) => {
-			const decoded = getDecodedBody(msg);
-			const type = getDecodedType(msg);
-			return msg.opcode === "0x7bdd97de" || type === "nft_owner_changed" || decoded !== null && decoded["@type"] === "nft_owner_changed";
-		},
-		decode: (msg) => getDecodedBody(msg)
-	});
-	messagePatternRegistry.register({
-		messageType: MessageType.Excess,
-		match: (msg) => {
-			const decoded = getDecodedBody(msg);
-			const type = getDecodedType(msg);
-			return msg.opcode === "0xd53276db" || type === "excess" || decoded !== null && decoded["@type"] === "excess";
-		},
-		decode: (msg) => getDecodedBody(msg)
-	});
-}));
-//#endregion
-//#region ../walletkit/dist/esm/types/toncenter/parsers/body.js
-/**
-* Get decoded body from message
-* @deprecated Use getDecodedBody from messageDecoder instead
-*/
 function getDecoded(msg) {
 	return getDecodedBody(msg);
 }
-/**
-* Extract operation type from message body
-* @deprecated Use getDecodedType from messageDecoder instead
-*/
 function extractOpFromBody(msg) {
 	return getDecodedType(msg);
 }
-/**
-* Match operation code with type mapping
-* Now uses centralized opcode registry
-*/
 function matchOpWithMap(op, types, mapping) {
 	if (!op) return "";
 	const messageType = resolveOpCode(op);
@@ -27174,7 +27059,6 @@ function matchOpWithMap(op, types, mapping) {
 	return types.includes(normalized) ? normalized : "";
 }
 var init_body = __esmMin((() => {
-	init_messageDecoder();
 	init_opcodes();
 }));
 //#endregion
@@ -28299,15 +28183,15 @@ function isValidNanotonAmount(amount) {
 */
 function isValidBOC(bocString) {
 	try {
-		import_dist$38.Cell.fromBase64(bocString);
+		import_dist$37.Cell.fromBase64(bocString);
 		return true;
 	} catch {
 		return false;
 	}
 }
-var import_dist$38;
+var import_dist$37;
 var init_transaction$1 = __esmMin((() => {
-	import_dist$38 = require_dist$1();
+	import_dist$37 = require_dist$1();
 	init_address();
 	init_address$1();
 }));
@@ -30837,212 +30721,191 @@ var init_internal = __esmMin((() => {
 	init_address$1();
 }));
 //#endregion
-//#region ../walletkit/dist/esm/types/toncenter/v3/AddressBookRowV3.js
-function toAddressBookEntry(row) {
-	return {
-		domain: row.domain ?? void 0,
-		address: asAddressFriendly(row.user_friendly),
-		interfaces: row.interfaces ?? []
-	};
-}
-function toAddressBook(addressBookV3) {
-	const addressBook = {};
-	for (const [_, row] of Object.entries(addressBookV3)) {
-		const userFriendlyAddress = asAddressFriendly(row.user_friendly);
-		addressBook[userFriendlyAddress] = toAddressBookEntry(row);
-	}
-	return addressBook;
-}
-var init_AddressBookRowV3 = __esmMin((() => {
-	init_address$1();
-}));
-//#endregion
-//#region ../walletkit/dist/esm/types/toncenter/emulation.js
+//#region ../walletkit/dist/esm/clients/toncenter/mappers/map-emulation-trace.js
 function toTransactionEmulatedTrace(response) {
 	return {
-		mcBlockSeqno: response.mc_block_seqno,
-		trace: toTransactionTraceNode(response.trace),
-		transactions: Object.fromEntries(Object.entries(response.transactions ?? {}).map(([hash, tx]) => [Base64ToHex(hash), toTransaction(tx)])),
-		actions: response.actions.map(toTransactionTraceAction),
-		randSeed: Base64ToHex(response.rand_seed),
-		isIncomplete: response.is_incomplete,
-		codeCells: Object.fromEntries(Object.entries(response.code_cells ?? {}).map(([hash, cell]) => [Base64ToHex(hash), cell])),
-		dataCells: Object.fromEntries(Object.entries(response.data_cells ?? {}).map(([hash, cell]) => [Base64ToHex(hash), cell])),
+		mcBlockSeqno: response.mcBlockSeqno,
+		trace: domainTraceNodeToTransactionTraceNode(response.trace),
+		transactions: Object.fromEntries(Object.entries(response.transactions ?? {}).map(([hash, tx]) => [hash, emulationTxToTransaction(tx)])),
+		actions: response.actions.map(emulationActionToTransactionTraceAction),
+		randSeed: response.randSeed,
+		isIncomplete: response.isIncomplete,
+		codeCells: Object.fromEntries(Object.entries(response.codeCells ?? {}).map(([hash, cell]) => [hash, cell])),
+		dataCells: Object.fromEntries(Object.entries(response.dataCells ?? {}).map(([hash, cell]) => [hash, cell])),
 		metadata: {},
-		addressBook: toAddressBook(response.address_book)
+		addressBook: emulationAddressBookToAddressBook(response.addressBook)
 	};
 }
-function toTransactionTraceNode(node) {
+function domainTraceNodeToTransactionTraceNode(node) {
 	return {
-		txHash: node.tx_hash ? Base64ToHex(node.tx_hash) : void 0,
-		inMsgHash: node.in_msg_hash ? Base64ToHex(node.in_msg_hash) : void 0,
-		children: node.children?.map(toTransactionTraceNode) ?? []
+		txHash: node.txHash,
+		inMsgHash: node.inMsgHash,
+		children: node.children?.map(domainTraceNodeToTransactionTraceNode) ?? []
 	};
 }
-function toTransactionsResponse(response) {
+function emulationAccountStateToAccountState(state) {
 	return {
-		transactions: response.transactions?.map(toTransaction) ?? [],
-		addressBook: toAddressBook(response.address_book)
+		hash: state.hash ?? void 0,
+		balance: state.balance,
+		extraCurrencies: state.extraCurrencies ?? void 0,
+		accountStatus: toAccountStatus$3(state.accountStatus),
+		frozenHash: state.frozenHash ?? void 0,
+		dataHash: state.dataHash ?? void 0,
+		codeHash: state.codeHash ?? void 0
 	};
 }
-function toTransaction(tx) {
+function toAccountStatus$3(status) {
+	switch (status) {
+		case "active": return { type: "active" };
+		case "frozen": return { type: "frozen" };
+		case "uninit": return { type: "uninit" };
+		case "nonexist": return { type: "nonexist" };
+		default: return {
+			type: "unknown",
+			value: status
+		};
+	}
+}
+function emulationMsgToTransactionMessage(msg) {
 	return {
-		account: asAddressFriendly(tx.account),
-		accountStateBefore: toAccountState$1(tx.account_state_before),
-		accountStateAfter: toAccountState$1(tx.account_state_after),
-		description: toTransactionDescription$1(tx.description),
-		hash: Base64ToHex(tx.hash),
-		logicalTime: tx.lt,
-		now: tx.now,
-		mcBlockSeqno: tx.mc_block_seqno,
-		traceExternalHash: Base64ToHex(tx.trace_external_hash),
-		traceId: tx.trace_id ?? void 0,
-		previousTransactionHash: tx.prev_trans_hash ? Base64ToHex(tx.prev_trans_hash) : void 0,
-		previousTransactionLogicalTime: tx.prev_trans_lt ?? void 0,
-		origStatus: toAccountStatus$2(tx.orig_status),
-		endStatus: toAccountStatus$2(tx.end_status),
-		totalFees: tx.total_fees,
-		totalFeesExtraCurrencies: tx.total_fees_extra_currencies,
-		blockRef: toTransactionBlockRef$1(tx.block_ref),
-		inMessage: tx.in_msg ? toTransactionMessage$1(tx.in_msg) : void 0,
-		outMessages: tx.out_msgs?.map(toTransactionMessage$1) ?? [],
-		isEmulated: tx.emulated
-	};
-}
-function toAccountStatus$2(status) {
-	if (status === "active") return { type: "active" };
-	else if (status === "frozen") return { type: "frozen" };
-	else if (status === "uninit") return { type: "uninit" };
-	else return {
-		type: "unknown",
-		value: status
-	};
-}
-function toTransactionBlockRef$1(ref) {
-	return {
-		workchain: ref.workchain,
-		shard: ref.shard,
-		seqno: ref.seqno
-	};
-}
-function toTransactionDescription$1(desc) {
-	return {
-		type: desc.type,
-		isAborted: desc.aborted,
-		isDestroyed: desc.destroyed,
-		isCreditFirst: desc.credit_first,
-		isTock: desc.is_tock,
-		isInstalled: desc.installed,
-		storagePhase: {
-			storageFeesCollected: desc.storage_ph?.storage_fees_collected,
-			statusChange: desc.storage_ph?.status_change
-		},
-		creditPhase: desc.credit_ph ? { credit: desc.credit_ph?.credit } : void 0,
-		computePhase: {
-			isSkipped: desc.compute_ph?.skipped,
-			isSuccess: desc.compute_ph?.success,
-			isMessageStateUsed: desc.compute_ph?.msg_state_used,
-			isAccountActivated: desc.compute_ph?.account_activated,
-			gasFees: desc.compute_ph?.gas_fees,
-			gasUsed: desc.compute_ph?.gas_used,
-			gasLimit: desc.compute_ph?.gas_limit,
-			gasCredit: desc.compute_ph?.gas_credit,
-			mode: desc.compute_ph?.mode,
-			exitCode: desc.compute_ph?.exit_code,
-			vmStepsNumber: desc.compute_ph?.vm_steps,
-			vmInitStateHash: desc.compute_ph?.vm_init_state_hash ? Base64ToHex(desc.compute_ph.vm_init_state_hash) : void 0,
-			vmFinalStateHash: desc.compute_ph?.vm_final_state_hash ? Base64ToHex(desc.compute_ph.vm_final_state_hash) : void 0
-		},
-		action: {
-			isSuccess: desc.action?.success,
-			isValid: desc.action?.valid,
-			hasNoFunds: desc.action?.no_funds,
-			statusChange: desc.action?.status_change,
-			totalForwardingFees: desc.action?.total_fwd_fees,
-			totalActionFees: desc.action?.total_action_fees,
-			resultCode: desc.action?.result_code,
-			totalActionsNumber: desc.action?.tot_actions,
-			specActionsNumber: desc.action?.spec_actions,
-			skippedActionsNumber: desc.action?.skipped_actions,
-			messagesCreatedNumber: desc.action?.msgs_created,
-			actionListHash: desc.action?.action_list_hash ? Base64ToHex(desc.action.action_list_hash) : void 0,
-			totalMessagesSize: {
-				cells: desc.action?.tot_msg_size.cells,
-				bits: desc.action?.tot_msg_size.bits
-			}
-		}
-	};
-}
-function toTransactionMessage$1(msg) {
-	return {
-		hash: Base64ToHex(msg.hash),
-		normalizedHash: msg.hash_norm ? Base64ToHex(msg.hash_norm) : void 0,
-		source: asMaybeAddressFriendly(msg.source) ?? void 0,
-		destination: asMaybeAddressFriendly(msg.destination) ?? void 0,
+		hash: msg.hash,
+		normalizedHash: msg.normalizedHash,
+		source: msg.source ?? void 0,
+		destination: msg.destination ?? void 0,
 		value: msg.value ?? void 0,
-		valueExtraCurrencies: msg.value_extra_currencies,
-		fwdFee: msg.fwd_fee ?? void 0,
-		ihrFee: msg.ihr_fee ?? void 0,
-		creationLogicalTime: msg.created_lt ?? void 0,
-		createdAt: msg.created_at ? Number(msg.created_at) : void 0,
-		ihrDisabled: msg.ihr_disabled ?? void 0,
-		isBounce: msg.bounce ?? void 0,
-		isBounced: msg.bounced ?? void 0,
-		importFee: msg.import_fee ?? void 0,
+		valueExtraCurrencies: msg.valueExtraCurrencies ?? void 0,
+		fwdFee: msg.fwdFee ?? void 0,
+		ihrFee: msg.ihrFee ?? void 0,
+		creationLogicalTime: msg.createdLt ?? void 0,
+		createdAt: msg.createdAt ?? void 0,
+		ihrDisabled: msg.ihrDisabled ?? void 0,
+		isBounce: msg.isBounce ?? void 0,
+		isBounced: msg.isBounced ?? void 0,
+		importFee: msg.importFee ?? void 0,
 		opcode: msg.opcode ?? void 0,
 		messageContent: {
-			hash: msg.message_content?.hash ? Base64ToHex(msg.message_content.hash) : void 0,
-			body: msg.message_content?.body ? msg.message_content.body : void 0,
-			decoded: msg.message_content?.decoded ?? void 0
+			hash: msg.messageContent.hash ?? void 0,
+			body: msg.messageContent.body ?? void 0,
+			decoded: msg.messageContent.decoded ?? void 0
 		}
 	};
 }
-function toAccountState$1(state) {
+function emulationDescToTransactionDescription(desc) {
 	return {
-		hash: Base64ToHex(state.hash),
-		balance: state.balance,
-		extraCurrencies: state.extra_currencies ?? void 0,
-		accountStatus: state.account_status ? toAccountStatus$2(state.account_status) : void 0,
-		frozenHash: state.frozen_hash ? Base64ToHex(state.frozen_hash) : void 0,
-		dataHash: state.data_hash ? Base64ToHex(state.data_hash) : void 0,
-		codeHash: state.code_hash ? Base64ToHex(state.code_hash) : void 0
+		type: desc.type,
+		isAborted: desc.isAborted,
+		isDestroyed: desc.isDestroyed,
+		isCreditFirst: desc.isCreditFirst,
+		isTock: desc.isTock,
+		isInstalled: desc.isInstalled,
+		storagePhase: {
+			storageFeesCollected: desc.storagePhase.storageFeesCollected,
+			statusChange: desc.storagePhase.statusChange
+		},
+		creditPhase: desc.creditPhase ? { credit: desc.creditPhase.credit } : void 0,
+		computePhase: {
+			isSkipped: desc.computePhase.isSkipped,
+			isSuccess: desc.computePhase.isSuccess,
+			isMessageStateUsed: desc.computePhase.isMsgStateUsed,
+			isAccountActivated: desc.computePhase.isAccountActivated,
+			gasFees: desc.computePhase.gasFees,
+			gasUsed: desc.computePhase.gasUsed,
+			gasLimit: desc.computePhase.gasLimit,
+			gasCredit: desc.computePhase.gasCredit,
+			mode: desc.computePhase.mode,
+			exitCode: desc.computePhase.exitCode,
+			vmStepsNumber: desc.computePhase.vmSteps,
+			vmInitStateHash: desc.computePhase.vmInitStateHash,
+			vmFinalStateHash: desc.computePhase.vmFinalStateHash
+		},
+		action: desc.actionPhase ? {
+			isSuccess: desc.actionPhase.isSuccess,
+			isValid: desc.actionPhase.isValid,
+			hasNoFunds: desc.actionPhase.hasNoFunds,
+			statusChange: desc.actionPhase.statusChange,
+			totalForwardingFees: desc.actionPhase.totalFwdFees,
+			totalActionFees: desc.actionPhase.totalActionFees,
+			resultCode: desc.actionPhase.resultCode,
+			totalActionsNumber: desc.actionPhase.totalActions,
+			specActionsNumber: desc.actionPhase.specActions,
+			skippedActionsNumber: desc.actionPhase.skippedActions,
+			messagesCreatedNumber: desc.actionPhase.msgsCreated,
+			actionListHash: desc.actionPhase.actionListHash,
+			totalMessagesSize: {
+				cells: desc.actionPhase.totalMsgSize.cells,
+				bits: desc.actionPhase.totalMsgSize.bits
+			}
+		} : void 0
 	};
 }
-function toTransactionTraceAction(action) {
+function emulationTxToTransaction(tx) {
 	return {
-		traceId: action.trace_id ?? void 0,
-		actionId: action.action_id,
-		startLt: action.start_lt,
-		endLt: action.end_lt,
-		startUtime: action.start_utime,
-		endUtime: action.end_utime,
-		traceEndLt: action.trace_end_lt,
-		traceEndUtime: action.trace_end_utime,
-		traceMcSeqnoEnd: action.trace_mc_seqno_end,
-		transactions: action.transactions.map(Base64ToHex),
-		isSuccess: action.success,
-		traceExternalHash: Base64ToHex(action.trace_external_hash),
-		accounts: (action.accounts ?? []).map(asMaybeAddressFriendly).filter((addr) => addr !== null),
-		details: toTransactionTraceActionDetails(action)
+		account: tx.account,
+		hash: tx.hash,
+		logicalTime: tx.lt,
+		now: tx.now,
+		mcBlockSeqno: tx.mcBlockSeqno,
+		traceExternalHash: tx.traceExternalHash,
+		traceId: tx.traceId,
+		previousTransactionHash: tx.prevTransHash ?? void 0,
+		previousTransactionLogicalTime: tx.prevTransLt ?? void 0,
+		origStatus: toAccountStatus$3(tx.origStatus),
+		endStatus: toAccountStatus$3(tx.endStatus),
+		totalFees: tx.totalFees,
+		totalFeesExtraCurrencies: tx.totalFeesExtraCurrencies,
+		blockRef: tx.blockRef,
+		inMessage: tx.inMsg ? emulationMsgToTransactionMessage(tx.inMsg) : void 0,
+		outMessages: tx.outMsgs.map(emulationMsgToTransactionMessage),
+		accountStateBefore: emulationAccountStateToAccountState(tx.accountStateBefore),
+		accountStateAfter: emulationAccountStateToAccountState(tx.accountStateAfter),
+		isEmulated: tx.isEmulated,
+		description: emulationDescToTransactionDescription(tx.description)
 	};
 }
-function toTransactionTraceActionDetails(action) {
-	if (action.type === "jetton_swap") return {
+function emulationActionToTransactionTraceAction(action) {
+	return {
+		traceId: action.traceId ?? void 0,
+		actionId: action.actionId,
+		startLt: action.startLt,
+		endLt: action.endLt,
+		startUtime: action.startUtime,
+		endUtime: action.endUtime,
+		traceEndLt: action.traceEndLt,
+		traceEndUtime: action.traceEndUtime,
+		traceMcSeqnoEnd: action.traceMcSeqnoEnd,
+		transactions: action.transactions,
+		isSuccess: action.isSuccess,
+		traceExternalHash: action.traceExternalHash,
+		accounts: action.accounts,
+		details: domainActionDetailsToTransactionTraceActionDetails(action.type, action.details)
+	};
+}
+function domainActionDetailsToTransactionTraceActionDetails(type, details) {
+	if (type === "jetton_swap") return {
 		type: "jetton_swap",
-		value: toTransactionTraceActionJettonSwapDetails(action.details)
+		value: toTransactionTraceActionJettonSwapDetails(details)
 	};
-	else if (action.type === "call_contract") return {
+	else if (type === "call_contract") return {
 		type: "call_contract",
-		value: toTransactionTraceActionCallContractDetails(action.details)
+		value: toTransactionTraceActionCallContractDetails(details)
 	};
-	else if (action.type === "ton_transfer") return {
+	else if (type === "ton_transfer") return {
 		type: "ton_transfer",
-		value: toTransactionTraceActionTONTransferDetails(action.details)
+		value: toTransactionTraceActionTONTransferDetails(details)
 	};
 	else return {
 		type: "unknown",
-		value: action.details
+		value: details
 	};
+}
+function emulationAddressBookToAddressBook(book) {
+	const result = {};
+	for (const [, entry] of Object.entries(book)) result[entry.userFriendly] = {
+		address: entry.userFriendly,
+		domain: entry.domain,
+		interfaces: entry.interfaces
+	};
+	return result;
 }
 function toTransactionTraceActionJettonSwapDetails(details) {
 	return {
@@ -31086,10 +30949,8 @@ function toTransactionTraceActionTONTransferDetails(details) {
 		isEncrypted: details.encrypted
 	};
 }
-var init_emulation = __esmMin((() => {
-	init_base64();
+var init_map_emulation_trace = __esmMin((() => {
 	init_address$1();
-	init_AddressBookRowV3();
 }));
 //#endregion
 //#region ../walletkit/dist/esm/api/models/core/AssetType.js
@@ -31109,6 +30970,68 @@ var init_AssetType = __esmMin((() => {
 		*/
 		AssetType["nft"] = "nft";
 	})(AssetType || (AssetType = {}));
+}));
+//#endregion
+//#region ../walletkit/dist/esm/utils/computeMoneyFlow.js
+function computeMoneyFlow(response) {
+	const empty = {
+		outputs: "0",
+		inputs: "0",
+		allJettonTransfers: [],
+		ourTransfers: [],
+		ourAddress: void 0
+	};
+	const rootTxHash = response.trace?.txHash;
+	if (!rootTxHash) return empty;
+	const rootTx = response.transactions[rootTxHash];
+	if (!rootTx) return empty;
+	const ourAddress = rootTx.account;
+	const ourTxs = Object.values(response.transactions).filter((tx) => tx.account === ourAddress);
+	const outputs = ourTxs.reduce((acc, tx) => tx.outMsgs.reduce((a, m) => a + BigInt(m.value ?? 0), acc), 0n);
+	const inputs = ourTxs.reduce((acc, tx) => tx.inMsg?.value ? acc + BigInt(tx.inMsg.value) : acc, 0n);
+	const jettonTxHashes = new Set(Object.values(response.transactions).filter((tx) => tx.inMsg?.opcode === JETTON_TRANSFER_OPCODE).map((tx) => tx.hash));
+	const allJettonTransfers = response.actions.filter((a) => a.isSuccess && a.transactions.some((h) => jettonTxHashes.has(h))).map((a) => {
+		const asset = a.details?.asset;
+		const sender = a.details?.sender;
+		const receiver = a.details?.receiver;
+		return {
+			assetType: AssetType.jetton,
+			tokenAddress: typeof asset === "string" ? asMaybeAddressFriendly(asset) ?? void 0 : void 0,
+			fromAddress: typeof sender === "string" ? asMaybeAddressFriendly(sender) ?? void 0 : void 0,
+			toAddress: typeof receiver === "string" ? asMaybeAddressFriendly(receiver) ?? void 0 : void 0,
+			amount: String(a.details?.amount ?? 0)
+		};
+	});
+	const ourJettonByAddress = {};
+	for (const jt of allJettonTransfers) {
+		if (!jt.tokenAddress) continue;
+		if (TON_PROXY_ADDRESSES.has(jt.tokenAddress)) continue;
+		ourJettonByAddress[jt.tokenAddress] ??= 0n;
+		if (jt.toAddress === ourAddress) ourJettonByAddress[jt.tokenAddress] += BigInt(jt.amount);
+		if (jt.fromAddress === ourAddress) ourJettonByAddress[jt.tokenAddress] -= BigInt(jt.amount);
+	}
+	const ourJettonTransfers = Object.entries(ourJettonByAddress).map(([addr, amount]) => ({
+		assetType: AssetType.jetton,
+		tokenAddress: addr,
+		amount: amount.toString()
+	}));
+	return {
+		outputs: outputs.toString(),
+		inputs: inputs.toString(),
+		allJettonTransfers,
+		ourTransfers: [{
+			assetType: AssetType.ton,
+			amount: (inputs - outputs).toString()
+		}, ...ourJettonTransfers],
+		ourAddress
+	};
+}
+var JETTON_TRANSFER_OPCODE, TON_PROXY_ADDRESSES;
+var init_computeMoneyFlow = __esmMin((() => {
+	init_AssetType();
+	init_address$1();
+	JETTON_TRANSFER_OPCODE = "0x0f8a7ea5";
+	TON_PROXY_ADDRESSES = new Set(["EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez", "EQBnGWMCf3-FZZq1W4IWcWiGAc3PHuZ0_H-7sad2oY00o83S"]);
 }));
 //#endregion
 //#region ../walletkit/dist/esm/api/models/core/Network.js
@@ -31167,103 +31090,7 @@ var init_models = __esmMin((() => {
 	init_TransactionTrace();
 }));
 //#endregion
-//#region ../walletkit/dist/esm/utils/toncenterEmulation.js
-function parseJettonTransfer(slice) {
-	if (slice.remainingBits < 32 || slice.preloadUint(32) !== JETTON_TRANSFER_OPCODE) throw new Error("Expected JettonTransfer opcode 0x0f8a7ea5");
-	slice.loadUint(32);
-	return {
-		kind: "JettonTransfer",
-		query_id: slice.loadUintBig(64),
-		amount: slice.loadCoins(),
-		destination: slice.loadMaybeAddress(),
-		response_destination: slice.loadMaybeAddress(),
-		custom_payload: slice.loadUint(1) === 0 ? null : slice.loadRef(),
-		forward_ton_amount: slice.loadCoins()
-	};
-}
-/**
-* Processes toncenter emulation result to extract money flow
-*/
-function processToncenterMoneyFlow(emulation) {
-	if (!emulation || !emulation.transactions) return {
-		outputs: "0",
-		inputs: "0",
-		allJettonTransfers: [],
-		ourTransfers: [],
-		ourAddress: void 0
-	};
-	const firstTx = emulation.transactions[emulation.trace.tx_hash];
-	const ourTxes = Object.values(emulation.transactions).filter((t) => t.account === firstTx.account);
-	const messagesFrom = ourTxes.flatMap((t) => t.out_msgs);
-	const messagesTo = ourTxes.flatMap((t) => t.in_msg).filter((m) => m !== null);
-	const outputs = messagesFrom.reduce((acc, m) => {
-		if (m.value) return acc + BigInt(m.value);
-		return acc + 0n;
-	}, 0n).toString();
-	const inputs = messagesTo.reduce((acc, m) => {
-		if (m.value) return acc + BigInt(m.value);
-		return acc + 0n;
-	}, 0n).toString();
-	const jettonTransfers = [];
-	for (const t of Object.values(emulation.transactions)) {
-		if (!t.in_msg?.source) continue;
-		let parsed = null;
-		try {
-			parsed = parseJettonTransfer(import_dist$37.Cell.fromBase64(t.in_msg.message_content.body).beginParse());
-		} catch (_) {
-			continue;
-		}
-		if (!parsed) continue;
-		const from = asMaybeAddressFriendly(t.in_msg.source);
-		const to = parsed.destination instanceof import_dist$37.Address ? parsed.destination : null;
-		if (!to) continue;
-		const jettonAmount = parsed.amount;
-		const metadata = emulation.metadata[t.account];
-		if (!metadata || !metadata?.token_info) continue;
-		const tokenInfo = metadata.token_info.find((t) => t.valid && t.type === "jetton_wallets");
-		if (!tokenInfo) continue;
-		const jettonAddress = asMaybeAddressFriendly(tokenInfo.extra.jetton);
-		jettonTransfers.push({
-			fromAddress: from ?? void 0,
-			toAddress: asMaybeAddressFriendly(to.toString()) ?? void 0,
-			tokenAddress: jettonAddress ?? void 0,
-			amount: jettonAmount.toString(),
-			assetType: AssetType.jetton
-		});
-	}
-	const ourAddress = import_dist$37.Address.parse(firstTx.account);
-	const selfTransfers = [];
-	const ourJettonTransfersByAddress = jettonTransfers.reduce((acc, transfer) => {
-		if (transfer.assetType !== AssetType.jetton) return acc;
-		const jettonKey = transfer.tokenAddress?.toString() || "unknown";
-		if (TON_PROXY_ADDRESSES.includes(jettonKey)) return acc;
-		const rawKey = import_dist$37.Address.parse(jettonKey).toRawString().toUpperCase();
-		if (!acc[rawKey]) acc[rawKey] = 0n;
-		if (ourAddress && transfer.toAddress === ourAddress.toString()) acc[rawKey] += BigInt(transfer.amount);
-		if (ourAddress && transfer.fromAddress === ourAddress.toString()) acc[rawKey] -= BigInt(transfer.amount);
-		return acc;
-	}, {});
-	const ourJettonTransfers = Object.entries(ourJettonTransfersByAddress).map(([jettonKey, amount]) => ({
-		assetType: AssetType.jetton,
-		tokenAddress: asMaybeAddressFriendly(jettonKey) ?? void 0,
-		amount: amount.toString()
-	}));
-	selfTransfers.push({
-		assetType: AssetType.ton,
-		amount: (BigInt(inputs) - BigInt(outputs)).toString()
-	});
-	selfTransfers.push(...ourJettonTransfers);
-	return {
-		outputs,
-		inputs,
-		allJettonTransfers: jettonTransfers,
-		ourTransfers: selfTransfers,
-		ourAddress: asAddressFriendly(ourAddress)
-	};
-}
-/**
-* Creates a transaction preview by emulating the transaction
-*/
+//#region ../walletkit/dist/esm/utils/transactionPreview.js
 async function createTransactionPreview(client, request, wallet) {
 	const txData = await wallet?.getSignedSendTransaction(request, { fakeSignature: true });
 	if (!txData) return {
@@ -31293,24 +31120,18 @@ async function createTransactionPreview(client, request, wallet) {
 			}
 		};
 	}
-	const moneyFlow = processToncenterMoneyFlow(emulationResult);
 	return {
 		result: Result.success,
 		trace: toTransactionEmulatedTrace(emulationResult),
-		moneyFlow
+		moneyFlow: computeMoneyFlow(emulationResult)
 	};
 }
-var import_dist$37, TON_PROXY_ADDRESSES, JETTON_TRANSFER_OPCODE;
-var init_toncenterEmulation = __esmMin((() => {
-	import_dist$37 = require_dist$1();
-	init_emulation();
+var init_transactionPreview = __esmMin((() => {
+	init_map_emulation_trace();
+	init_computeMoneyFlow();
 	init_codes();
 	init_retry();
 	init_models();
-	init_sendMode();
-	init_address$1();
-	TON_PROXY_ADDRESSES = ["EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez", "EQBnGWMCf3-FZZq1W4IWcWiGAc3PHuZ0_H-7sad2oY00o83S"];
-	JETTON_TRANSFER_OPCODE = 260734629;
 }));
 //#endregion
 //#region ../walletkit/dist/esm/handlers/TransactionHandler.js
@@ -31322,7 +31143,7 @@ var init_TransactionHandler = __esmMin((() => {
 	init_transaction$1();
 	init_Logger();
 	init_address$1();
-	init_toncenterEmulation();
+	init_transactionPreview();
 	init_BasicHandler();
 	init_retry();
 	init_errors$3();
@@ -33246,65 +33067,1230 @@ var init_EventProcessor = __esmMin((() => {
 			return this.eventRouter.getEnabledEventTypes().filter((type) => type === "connect" || type === "restoreConnection");
 		}
 	};
-})), MessageHandlerRegistry;
-var init_messageHandler = __esmMin((() => {
-	MessageHandlerRegistry = class {
-		handlers = /* @__PURE__ */ new Map();
-		/**
-		* Register a message handler
-		*/
-		register(handler) {
-			const existing = this.handlers.get(handler.messageType) || [];
-			existing.push(handler);
-			existing.sort((a, b) => (a.priority || 100) - (b.priority || 100));
-			this.handlers.set(handler.messageType, existing);
+}));
+//#endregion
+//#region ../walletkit/dist/esm/types/toncenter/parsers/index.js
+var init_parsers = __esmMin((() => {
+	init_opcodes();
+	init_body();
+}));
+//#endregion
+//#region ../walletkit/dist/esm/utils/messageBuilders.js
+/**
+* Stores a jetton transfer message into a builder
+*/
+function storeJettonTransferMessage(src) {
+	return (builder) => {
+		builder.storeUint(Number(OpCode.JettonTransfer), 32);
+		builder.storeUint(src.queryId, 64);
+		builder.storeCoins(src.amount);
+		builder.storeAddress(src.destination);
+		builder.storeAddress(src.responseDestination);
+		builder.storeMaybeRef(src.customPayload);
+		builder.storeCoins(src.forwardAmount ?? 0);
+		builder.storeMaybeRef(src.forwardPayload);
+	};
+}
+/**
+* Creates a jetton transfer payload cell
+*/
+function createJettonTransferPayload(params) {
+	const forwardPayload = params.comment ? createCommentPayload(params.comment) : null;
+	return (0, import_dist$29.beginCell)().store(storeJettonTransferMessage({
+		queryId: params.queryId ?? 0n,
+		amount: params.amount,
+		destination: import_dist$29.Address.parse(params.destination),
+		responseDestination: import_dist$29.Address.parse(params.responseDestination),
+		customPayload: params.customPayload ?? null,
+		forwardAmount: params.forwardAmount ?? 1n,
+		forwardPayload
+	})).endCell();
+}
+/**
+* Stores an NFT transfer message into a builder
+*/
+function storeNftTransferMessage(message) {
+	return (builder) => {
+		builder.storeUint(Number(OpCode.NftTransfer), 32);
+		builder.storeUint(message.queryId, 64);
+		builder.storeAddress(message.newOwner);
+		builder.storeAddress(message.responseDestination);
+		builder.storeMaybeRef(message.customPayload);
+		builder.storeCoins(message.forwardAmount);
+		builder.storeMaybeRef(message.forwardPayload);
+	};
+}
+/**
+* Creates an NFT transfer payload cell
+*/
+function createNftTransferPayload(params) {
+	const forwardPayload = params.comment ? createCommentPayload(params.comment) : null;
+	return (0, import_dist$29.beginCell)().store(storeNftTransferMessage({
+		queryId: params.queryId ?? 0n,
+		newOwner: import_dist$29.Address.parse(params.newOwner),
+		responseDestination: import_dist$29.Address.parse(params.responseDestination),
+		customPayload: params.customPayload ?? null,
+		forwardAmount: params.forwardAmount ?? 1n,
+		forwardPayload
+	})).endCell();
+}
+/**
+* Creates an NFT transfer payload cell from raw parameters
+* Handles string/Address conversion automatically
+*/
+function createNftTransferRawPayload(params) {
+	const transferMessage = {
+		queryId: BigInt(params.queryId),
+		newOwner: typeof params.newOwner === "string" ? import_dist$29.Address.parse(params.newOwner) : params.newOwner,
+		responseDestination: params.responseDestination ? typeof params.responseDestination === "string" ? import_dist$29.Address.parse(params.responseDestination) : params.responseDestination : null,
+		customPayload: params.customPayload ? typeof params.customPayload === "string" ? import_dist$29.Cell.fromBase64(params.customPayload) : params.customPayload : null,
+		forwardAmount: BigInt(params.forwardAmount),
+		forwardPayload: params.forwardPayload ? typeof params.forwardPayload === "string" ? import_dist$29.Cell.fromBase64(params.forwardPayload) : params.forwardPayload : null
+	};
+	return (0, import_dist$29.beginCell)().store(storeNftTransferMessage(transferMessage)).endCell();
+}
+/**
+* Creates a comment payload cell (op code 0 + text)
+*/
+function createCommentPayload(comment) {
+	return (0, import_dist$29.beginCell)().storeUint(0, 32).storeStringTail(comment).endCell();
+}
+/**
+* Creates a comment payload as base64 string
+*/
+function createCommentPayloadBase64(comment) {
+	return createCommentPayload(comment).toBoc().toString("base64");
+}
+/**
+* Creates a standard transfer transaction request with default send mode flags
+*/
+function createTransferTransaction(params) {
+	const message = {
+		address: params.targetAddress,
+		amount: params.amount,
+		payload: params.payload.toBoc().toString("base64"),
+		stateInit: void 0,
+		extraCurrency: void 0,
+		mode: { flags: [SendModeFlag.IGNORE_ERRORS, SendModeFlag.PAY_GAS_SEPARATELY] }
+	};
+	if (!validateTransactionMessage(message, false).isValid) throw new Error(`Invalid transaction message: ${JSON.stringify(message)}`);
+	return {
+		messages: [message],
+		fromAddress: params.fromAddress
+	};
+}
+var import_dist$29, DEFAULT_JETTON_GAS_FEE;
+var init_messageBuilders = __esmMin((() => {
+	import_dist$29 = require_dist$1();
+	init_parsers();
+	init_models();
+	init_validation();
+	DEFAULT_JETTON_GAS_FEE = "50000000";
+}));
+//#endregion
+//#region ../walletkit/dist/esm/utils/getNormalizedExtMessageHash.js
+/**
+* Generates a normalized hash of an "external-in" message for comparison.
+*
+* This function ensures consistent hashing of external-in messages by following [TEP-467].
+* See documentation: https://docs.ton.org/ecosystem/ton-connect/message-lookup#transaction-lookup-using-external-message-from-ton-connect
+*
+* @param params - An object containing the built BOC as a base64 string.
+* @returns An object containing the hash (Hex string) and the boc (Base64 string) of the normalized message.
+* @throws if the message type is not `external-in`.
+*/
+function getNormalizedExtMessageHash(boc) {
+	const message = (0, import_dist$28.loadMessage)(import_dist$28.Cell.fromBase64(boc).beginParse());
+	if (message.info.type !== "external-in") throw new Error(`Message must be "external-in", got ${message.info.type}`);
+	const info = {
+		...message.info,
+		src: void 0,
+		importFee: 0n
+	};
+	const normalizedMessage = {
+		...message,
+		init: null,
+		info
+	};
+	const normalizedCell = (0, import_dist$28.beginCell)().store((0, import_dist$28.storeMessage)(normalizedMessage, { forceRef: true })).endCell();
+	return {
+		hash: `0x${normalizedCell.hash().toString("hex")}`,
+		boc: normalizedCell.toBoc().toString("base64")
+	};
+}
+var import_dist$28;
+var init_getNormalizedExtMessageHash = __esmMin((() => {
+	import_dist$28 = require_dist$1();
+}));
+//#endregion
+//#region ../walletkit/dist/esm/core/wallet/extensions/ton.js
+var log$19, WalletTonClass;
+var init_ton = __esmMin((() => {
+	init_address$1();
+	init_validation();
+	init_retry();
+	init_transactionPreview();
+	init_messageBuilders();
+	init_getNormalizedExtMessageHash();
+	init_errors$3();
+	init_Logger();
+	log$19 = globalLogger.createChild("WalletTonClass");
+	WalletTonClass = class {
+		async createTransferTonTransaction(param) {
+			if (!isValidAddress(param.recipientAddress)) throw new Error(`Invalid to address: ${param.recipientAddress}`);
+			if (!isValidNanotonAmount(param.transferAmount)) throw new Error(`Invalid amount: ${param.transferAmount}`);
+			let body;
+			if (param.payload) body = param.payload;
+			else if (param.comment) body = createCommentPayloadBase64(param.comment);
+			const message = {
+				address: param.recipientAddress,
+				amount: param.transferAmount,
+				payload: body,
+				stateInit: param.stateInit,
+				extraCurrency: param.extraCurrency,
+				mode: param.mode
+			};
+			if (!validateTransactionMessage(message, false).isValid) throw new Error(`Invalid transaction message: ${JSON.stringify(message)}`);
+			return {
+				messages: [message],
+				fromAddress: this.getAddress()
+			};
+		}
+		async createTransferMultiTonTransaction(params) {
+			const messages = [];
+			for (const param of params) {
+				if (!isValidAddress(param.recipientAddress)) throw new Error(`Invalid to address: ${param.recipientAddress}`);
+				if (!isValidNanotonAmount(param.transferAmount)) throw new Error(`Invalid amount: ${param.transferAmount}`);
+				let body;
+				if (param.payload) body = param.payload;
+				else if (param.comment) body = createCommentPayloadBase64(param.comment);
+				const message = {
+					address: param.recipientAddress,
+					amount: param.transferAmount,
+					payload: body,
+					stateInit: param.stateInit,
+					extraCurrency: param.extraCurrency,
+					mode: param.mode
+				};
+				if (!validateTransactionMessage(message, false).isValid) throw new Error(`Invalid transaction message: ${JSON.stringify(message)}`);
+				messages.push(message);
+			}
+			return {
+				messages,
+				fromAddress: this.getAddress()
+			};
+		}
+		async getTransactionPreview(param) {
+			const transaction = await param;
+			return await CallForSuccess(() => createTransactionPreview(this.client, transaction, this));
+		}
+		async sendTransaction(request) {
+			try {
+				const boc = await this.getSignedSendTransaction(request, { fakeSignature: false });
+				await CallForSuccess(() => this.getClient().sendBoc(boc));
+				const { hash: normalizedHash, boc: normalizedBoc } = getNormalizedExtMessageHash(boc);
+				return {
+					boc,
+					normalizedBoc,
+					normalizedHash
+				};
+			} catch (error) {
+				log$19.error("Failed to send transaction", { error });
+				if (error instanceof WalletKitError) throw error;
+				if (error?.message?.includes("Ledger device")) throw new WalletKitError(ERROR_CODES.LEDGER_DEVICE_ERROR, "Ledger device error", error);
+				throw error;
+			}
+		}
+		async getBalance() {
+			return await CallForSuccess(async () => this.getClient().getBalance(this.getAddress()));
+		}
+	};
+}));
+//#endregion
+//#region ../walletkit/dist/esm/utils/tvmStack.js
+function ParseStackItem(item) {
+	switch (item.type) {
+		case "num": if (item.value.startsWith("-")) return {
+			type: "int",
+			value: -BigInt(item.value.slice(1))
+		};
+		else return {
+			type: "int",
+			value: BigInt(item.value)
+		};
+		case "null": return { type: "null" };
+		case "cell": return {
+			type: "cell",
+			cell: import_dist$26.Cell.fromBoc(Buffer.from(item.value, "base64"))[0]
+		};
+		case "tuple":
+		case "list":
+			if (item.value.length === 0) return { type: "null" };
+			return {
+				type: "tuple",
+				items: item.value.map((value) => ParseStackItem(value))
+			};
+		default: throw Error(`Unsupported parse stack item type: ${JSON.stringify(item)}`);
+	}
+}
+function ParseStack(list) {
+	let stack = [];
+	for (let item of list) stack.push(ParseStackItem(item));
+	return stack;
+}
+function ReaderStack(list) {
+	return new import_dist$27.TupleReader(ParseStack(list));
+}
+function SerializeStackItem(item) {
+	switch (item.type) {
+		case "int": return {
+			type: "num",
+			value: `${item.value < 0 ? "-" : ""}0x${(item.value < 0 ? -item.value : item.value).toString(16)}`
+		};
+		case "slice": return {
+			type: "slice",
+			value: item.cell.toBoc().toString("base64")
+		};
+		case "cell": return {
+			type: "cell",
+			value: item.cell.toBoc().toString("base64")
+		};
+		default: throw Error(`Unsupported serialize stack item type: ${item.type}`);
+	}
+}
+function SerializeStack(list) {
+	let stack = [];
+	for (let item of list) stack.push(SerializeStackItem(item));
+	return stack;
+}
+var import_dist$26, import_dist$27;
+var init_tvmStack = __esmMin((() => {
+	import_dist$26 = require_dist$1();
+	import_dist$27 = require_dist$1();
+}));
+//#endregion
+//#region ../walletkit/dist/esm/utils/assetHelpers.js
+/**
+* Gets the jetton wallet address for an owner
+*/
+async function getJettonWalletAddressFromClient(client, jettonAddress, ownerAddress) {
+	if (!isValidAddress(jettonAddress)) throw new Error(`Invalid jetton address: ${jettonAddress}`);
+	try {
+		const parsedStack = ParseStack((await client.runGetMethod(jettonAddress, "get_wallet_address", SerializeStack([{
+			type: "slice",
+			cell: (0, import_dist$25.beginCell)().storeAddress(import_dist$25.Address.parse(ownerAddress)).endCell()
+		}]))).stack);
+		const jettonWalletAddress = parsedStack[0].type === "slice" || parsedStack[0].type === "cell" ? parsedStack[0].cell.asSlice().loadAddress() : null;
+		if (!jettonWalletAddress) throw new Error("Failed to get jetton wallet address");
+		return asAddressFriendly(jettonWalletAddress.toString());
+	} catch (error) {
+		throw new Error(`Failed to get jetton wallet address for ${jettonAddress}: ${error instanceof Error ? error.message : "Unknown error"}`);
+	}
+}
+/**
+* Gets the jetton balance for an owner's jetton wallet
+*/
+async function getJettonBalanceFromClient(client, jettonWalletAddress) {
+	try {
+		const result = await client.runGetMethod(jettonWalletAddress, "get_wallet_data");
+		if (result.exitCode !== 0) return "0";
+		const parsedStack = ParseStack(result.stack);
+		return (parsedStack[0].type === "int" ? parsedStack[0].value : 0n).toString();
+	} catch (_error) {
+		return "0";
+	}
+}
+/**
+* Gets jettons owned by an address
+*/
+async function getJettonsFromClient(client, ownerAddress, params) {
+	return client.jettonsByOwnerAddress({
+		ownerAddress,
+		offset: params?.pagination.offset,
+		limit: params?.pagination.limit
+	});
+}
+/**
+* Gets NFTs owned by an address
+*/
+async function getNftsFromClient(client, ownerAddress, params) {
+	return client.nftItemsByOwner({
+		ownerAddress,
+		pagination: params.pagination
+	});
+}
+/**
+* Gets a single NFT by address
+*/
+async function getNftFromClient(client, address) {
+	const result = await client.nftItemsByAddress({ address });
+	return result.nfts.length > 0 ? result.nfts[0] : void 0;
+}
+var import_dist$25;
+var init_assetHelpers = __esmMin((() => {
+	import_dist$25 = require_dist$1();
+	init_address$1();
+	init_tvmStack();
+}));
+//#endregion
+//#region ../walletkit/dist/esm/core/wallet/extensions/jetton.js
+var WalletJettonClass;
+var init_jetton$1 = __esmMin((() => {
+	init_address$1();
+	init_retry();
+	init_messageBuilders();
+	init_assetHelpers();
+	WalletJettonClass = class {
+		async createTransferJettonTransaction(params) {
+			if (!isValidAddress(params.recipientAddress)) throw new Error(`Invalid to address: ${params.recipientAddress}`);
+			if (!isValidAddress(params.jettonAddress)) throw new Error(`Invalid jetton address: ${params.jettonAddress}`);
+			if (!params.transferAmount || BigInt(params.transferAmount) <= 0n) throw new Error(`Invalid amount: ${params.transferAmount}`);
+			return createTransferTransaction({
+				targetAddress: await CallForSuccess(() => this.getJettonWalletAddress(params.jettonAddress)),
+				amount: DEFAULT_JETTON_GAS_FEE,
+				payload: createJettonTransferPayload({
+					amount: BigInt(params.transferAmount),
+					destination: params.recipientAddress,
+					responseDestination: this.getAddress(),
+					comment: params.comment
+				}),
+				fromAddress: this.getAddress()
+			});
+		}
+		async getJettonBalance(jettonAddress) {
+			const jettonWalletAddress = await this.getJettonWalletAddress(jettonAddress);
+			return getJettonBalanceFromClient(this.getClient(), jettonWalletAddress);
+		}
+		async getJettonWalletAddress(jettonAddress) {
+			return getJettonWalletAddressFromClient(this.getClient(), jettonAddress, this.getAddress());
+		}
+		async getJettons(params) {
+			return getJettonsFromClient(this.getClient(), this.getAddress(), params);
+		}
+	};
+}));
+//#endregion
+//#region ../walletkit/dist/esm/core/wallet/extensions/nft.js
+var WalletNftClass;
+var init_nft = __esmMin((() => {
+	init_messageBuilders();
+	init_assetHelpers();
+	WalletNftClass = class {
+		async getNfts(params) {
+			return getNftsFromClient(this.getClient(), this.getAddress(), params);
+		}
+		async getNft(address) {
+			return getNftFromClient(this.getClient(), address);
+		}
+		async createTransferNftTransaction(params) {
+			const nftPayload = createNftTransferPayload({
+				newOwner: params.recipientAddress,
+				responseDestination: this.getAddress(),
+				comment: params.comment
+			});
+			return createTransferTransaction({
+				targetAddress: params.nftAddress,
+				amount: params.transferAmount?.toString() ?? "100000000",
+				payload: nftPayload,
+				fromAddress: this.getAddress()
+			});
+		}
+		async createTransferNftRawTransaction(params) {
+			const nftPayload = createNftTransferRawPayload({
+				queryId: params.message.queryId,
+				newOwner: params.message.newOwner,
+				responseDestination: params.message.responseDestination,
+				customPayload: params.message.customPayload,
+				forwardAmount: params.message.forwardAmount,
+				forwardPayload: params.message.forwardPayload
+			});
+			return createTransferTransaction({
+				targetAddress: params.nftAddress,
+				amount: params.transferAmount.toString(),
+				payload: nftPayload,
+				fromAddress: this.getAddress()
+			});
+		}
+	};
+}));
+//#endregion
+//#region ../walletkit/dist/esm/core/Initializer.js
+/**
+* Wrap wallet adapter with extension interfaces (Ton, Jetton, NFT)
+* Uses proxy API to make wallet extension modular
+* The wallet adapter already contains its own ApiClient for its network
+*/
+async function wrapWalletInterface(wallet) {
+	const ourClassesToExtend = [
+		WalletTonClass,
+		WalletJettonClass,
+		WalletNftClass
+	];
+	const newProxy = new Proxy(wallet, { get: (target, prop) => {
+		if (typeof prop === "symbol") return target[prop];
+		const ourMethonImplementation = ourClassesToExtend.find((cls) => !!cls.prototype[prop]);
+		if (ourMethonImplementation) {
+			const value = ourMethonImplementation.prototype[prop];
+			return (...args) => value.apply(newProxy, [...args]);
+		}
+		return target[prop];
+	} });
+	return newProxy;
+}
+var log$18, Initializer;
+var init_Initializer = __esmMin((() => {
+	init_types$3();
+	init_storage();
+	init_WalletManager();
+	init_TONConnectStoredSessionManager();
+	init_BridgeManager();
+	init_EventRouter();
+	init_RequestProcessor();
+	init_Logger();
+	init_EventStore();
+	init_EventProcessor();
+	init_ton();
+	init_jetton$1();
+	init_nft();
+	log$18 = globalLogger.createChild("Initializer");
+	Initializer = class {
+		config;
+		networkManager;
+		eventEmitter;
+		analyticsManager;
+		constructor(config, eventEmitter, analyticsManager) {
+			this.config = config;
+			this.eventEmitter = eventEmitter;
+			this.analyticsManager = analyticsManager;
 		}
 		/**
-		* Unregister a handler
+		* Initialize all components
 		*/
-		unregister(handler) {
-			const existing = this.handlers.get(handler.messageType);
-			if (existing) {
-				const filtered = existing.filter((h) => h !== handler);
-				this.handlers.set(handler.messageType, filtered);
+		async initialize(options, networkManager) {
+			try {
+				log$18.info("Initializing TonWalletKit...");
+				this.networkManager = networkManager;
+				const storage = this.initializeStorage(options);
+				const { walletManager, sessionManager, bridgeManager, eventRouter, eventProcessor } = await this.initializeManagers(options, storage);
+				const { requestProcessor } = this.initializeProcessors(sessionManager, bridgeManager, walletManager);
+				log$18.info("TonWalletKit initialized successfully");
+				return {
+					walletManager,
+					sessionManager,
+					bridgeManager,
+					eventRouter,
+					requestProcessor,
+					storage,
+					eventProcessor
+				};
+			} catch (error) {
+				log$18.error("Failed to initialize TonWalletKit", { error });
+				throw error;
 			}
 		}
 		/**
-		* Get all handlers for a message type
+		* Initialize storage adapter and wrap it in Storage
 		*/
-		getHandlers(messageType) {
-			return this.handlers.get(messageType) || [];
+		initializeStorage(options) {
+			let adapter;
+			if (options.storage && "get" in options.storage && typeof options.storage.get === "function" && "set" in options.storage && typeof options.storage.set === "function" && "remove" in options.storage && typeof options.storage.remove === "function" && "clear" in options.storage && typeof options.storage.clear === "function") adapter = options.storage;
+			else adapter = createStorageAdapter({
+				prefix: options?.storage?.prefix ?? "tonwalletkit:",
+				maxRetries: options?.storage?.maxRetries,
+				retryDelay: options?.storage?.retryDelay,
+				allowMemory: options?.storage?.allowMemory
+			});
+			return new Storage(adapter);
 		}
 		/**
-		* Find the first handler that can handle the message
+		* Initialize core managers
 		*/
-		findHandler(message, context) {
-			const handlers = this.getHandlers(message.messageType);
-			for (const handler of handlers) if (handler.canHandle(message, context)) return handler;
-			return null;
+		async initializeManagers(options, storage) {
+			const walletManager = new WalletManager(storage);
+			await walletManager.initialize();
+			let sessionManager;
+			if (options.sessionManager) sessionManager = options.sessionManager;
+			else {
+				const storedSessionManager = new TONConnectStoredSessionManager(storage, walletManager);
+				await storedSessionManager.initialize();
+				sessionManager = storedSessionManager;
+			}
+			const eventStore = new StorageEventStore(storage);
+			const eventRouter = new EventRouter(options, this.eventEmitter, sessionManager, walletManager, this.analyticsManager);
+			const bridgeManager = new BridgeManager(options?.walletManifest, options?.bridge, sessionManager, storage, eventStore, eventRouter, options, this.eventEmitter, this.analyticsManager);
+			eventRouter.setBridgeManager(bridgeManager);
+			bridgeManager.start().then(() => {
+				log$18.info("Bridge manager started successfully");
+			}).catch((e) => {
+				log$18.error("Could not start bridge manager", { error: e?.toString?.() });
+			});
+			const eventProcessor = new StorageEventProcessor(options?.eventProcessor, eventStore, DEFAULT_DURABLE_EVENTS_CONFIG, walletManager, sessionManager, eventRouter, this.eventEmitter);
+			return {
+				walletManager,
+				sessionManager,
+				bridgeManager,
+				eventRouter,
+				eventProcessor
+			};
 		}
 		/**
-		* Process a message with the appropriate handler
+		* Initialize processors
 		*/
-		handle(message, context) {
-			const handler = this.findHandler(message, context);
-			if (handler) return handler.handle(message, context);
-			return [];
+		initializeProcessors(sessionManager, bridgeManager, walletManager) {
+			return { requestProcessor: new RequestProcessor(this.config, sessionManager, bridgeManager, walletManager, this.analyticsManager) };
 		}
 		/**
-		* Get all registered message types
+		* Cleanup resources during shutdown
 		*/
-		getRegisteredTypes() {
-			return Array.from(this.handlers.keys());
-		}
-		/**
-		* Clear all handlers
-		*/
-		clear() {
-			this.handlers.clear();
+		async cleanup(components) {
+			try {
+				log$18.info("Cleaning up TonWalletKit components...");
+				if (components.eventProcessor) {
+					components.eventProcessor.stopRecoveryLoop();
+					await components.eventProcessor.clearRegisteredWallets();
+					await components.eventProcessor.stopProcessing();
+				}
+				if (components.bridgeManager) await components.bridgeManager.close();
+				if (components.eventRouter) components.eventRouter.clearCallbacks();
+				log$18.info("TonWalletKit cleanup completed");
+			} catch (error) {
+				log$18.error("Error during cleanup", { error });
+			}
 		}
 	};
-	new MessageHandlerRegistry();
+}));
+//#endregion
+//#region ../../node_modules/lru-cache/dist/esm/browser/index.min.js
+var C, S, W, D, I, U, L, G, P, F, j, O, R, M;
+var init_index_min = __esmMin((() => {
+	C = { hasSubscribers: !1 }, S = C, W = C, D = () => S.hasSubscribers || W.hasSubscribers, I = typeof performance == "object" && performance && typeof performance.now == "function" ? performance : Date, U = /* @__PURE__ */ new Set(), L = typeof process == "object" && process ? process : {}, G = (u, e, t, i) => {
+		typeof L.emitWarning == "function" ? L.emitWarning(u, e, t, i) : console.error(`[${t}] ${e}: ${u}`);
+	}, P = (u) => !U.has(u), F = (u) => !!u && u === Math.floor(u) && u > 0 && isFinite(u), j = (u) => F(u) ? u <= Math.pow(2, 8) ? Uint8Array : u <= Math.pow(2, 16) ? Uint16Array : u <= Math.pow(2, 32) ? Uint32Array : u <= Number.MAX_SAFE_INTEGER ? O : null : null, O = class extends Array {
+		constructor(e) {
+			super(e), this.fill(0);
+		}
+	}, R = class u {
+		heap;
+		length;
+		static #o = !1;
+		static create(e) {
+			let t = j(e);
+			if (!t) return [];
+			u.#o = !0;
+			let i = new u(e, t);
+			return u.#o = !1, i;
+		}
+		constructor(e, t) {
+			if (!u.#o) throw new TypeError("instantiate Stack using Stack.create(n)");
+			this.heap = new t(e), this.length = 0;
+		}
+		push(e) {
+			this.heap[this.length++] = e;
+		}
+		pop() {
+			return this.heap[--this.length];
+		}
+	}, M = class u {
+		#o;
+		#u;
+		#w;
+		#D;
+		#S;
+		#M;
+		#U;
+		#m;
+		get perf() {
+			return this.#m;
+		}
+		ttl;
+		ttlResolution;
+		ttlAutopurge;
+		updateAgeOnGet;
+		updateAgeOnHas;
+		allowStale;
+		noDisposeOnSet;
+		noUpdateTTL;
+		maxEntrySize;
+		sizeCalculation;
+		noDeleteOnFetchRejection;
+		noDeleteOnStaleGet;
+		allowStaleOnFetchAbort;
+		allowStaleOnFetchRejection;
+		ignoreFetchAbort;
+		#n;
+		#b;
+		#s;
+		#i;
+		#t;
+		#a;
+		#c;
+		#l;
+		#h;
+		#y;
+		#r;
+		#_;
+		#F;
+		#d;
+		#g;
+		#T;
+		#W;
+		#f;
+		#j;
+		static unsafeExposeInternals(e) {
+			return {
+				starts: e.#F,
+				ttls: e.#d,
+				autopurgeTimers: e.#g,
+				sizes: e.#_,
+				keyMap: e.#s,
+				keyList: e.#i,
+				valList: e.#t,
+				next: e.#a,
+				prev: e.#c,
+				get head() {
+					return e.#l;
+				},
+				get tail() {
+					return e.#h;
+				},
+				free: e.#y,
+				isBackgroundFetch: (t) => e.#e(t),
+				backgroundFetch: (t, i, s, n) => e.#P(t, i, s, n),
+				moveToTail: (t) => e.#L(t),
+				indexes: (t) => e.#A(t),
+				rindexes: (t) => e.#z(t),
+				isStale: (t) => e.#p(t)
+			};
+		}
+		get max() {
+			return this.#o;
+		}
+		get maxSize() {
+			return this.#u;
+		}
+		get calculatedSize() {
+			return this.#b;
+		}
+		get size() {
+			return this.#n;
+		}
+		get fetchMethod() {
+			return this.#M;
+		}
+		get memoMethod() {
+			return this.#U;
+		}
+		get dispose() {
+			return this.#w;
+		}
+		get onInsert() {
+			return this.#D;
+		}
+		get disposeAfter() {
+			return this.#S;
+		}
+		constructor(e) {
+			let { max: t = 0, ttl: i, ttlResolution: s = 1, ttlAutopurge: n, updateAgeOnGet: o, updateAgeOnHas: r, allowStale: h, dispose: l, onInsert: c, disposeAfter: f, noDisposeOnSet: g, noUpdateTTL: p, maxSize: T = 0, maxEntrySize: w = 0, sizeCalculation: y, fetchMethod: a, memoMethod: m, noDeleteOnFetchRejection: _, noDeleteOnStaleGet: b, allowStaleOnFetchRejection: d, allowStaleOnFetchAbort: A, ignoreFetchAbort: z, perf: x } = e;
+			if (x !== void 0 && typeof x?.now != "function") throw new TypeError("perf option must have a now() method if specified");
+			if (this.#m = x ?? I, t !== 0 && !F(t)) throw new TypeError("max option must be a nonnegative integer");
+			let v = t ? j(t) : Array;
+			if (!v) throw new Error("invalid max value: " + t);
+			if (this.#o = t, this.#u = T, this.maxEntrySize = w || this.#u, this.sizeCalculation = y, this.sizeCalculation) {
+				if (!this.#u && !this.maxEntrySize) throw new TypeError("cannot set sizeCalculation without setting maxSize or maxEntrySize");
+				if (typeof this.sizeCalculation != "function") throw new TypeError("sizeCalculation set to non-function");
+			}
+			if (m !== void 0 && typeof m != "function") throw new TypeError("memoMethod must be a function if defined");
+			if (this.#U = m, a !== void 0 && typeof a != "function") throw new TypeError("fetchMethod must be a function if specified");
+			if (this.#M = a, this.#W = !!a, this.#s = /* @__PURE__ */ new Map(), this.#i = Array.from({ length: t }).fill(void 0), this.#t = Array.from({ length: t }).fill(void 0), this.#a = new v(t), this.#c = new v(t), this.#l = 0, this.#h = 0, this.#y = R.create(t), this.#n = 0, this.#b = 0, typeof l == "function" && (this.#w = l), typeof c == "function" && (this.#D = c), typeof f == "function" ? (this.#S = f, this.#r = []) : (this.#S = void 0, this.#r = void 0), this.#T = !!this.#w, this.#j = !!this.#D, this.#f = !!this.#S, this.noDisposeOnSet = !!g, this.noUpdateTTL = !!p, this.noDeleteOnFetchRejection = !!_, this.allowStaleOnFetchRejection = !!d, this.allowStaleOnFetchAbort = !!A, this.ignoreFetchAbort = !!z, this.maxEntrySize !== 0) {
+				if (this.#u !== 0 && !F(this.#u)) throw new TypeError("maxSize must be a positive integer if specified");
+				if (!F(this.maxEntrySize)) throw new TypeError("maxEntrySize must be a positive integer if specified");
+				this.#X();
+			}
+			if (this.allowStale = !!h, this.noDeleteOnStaleGet = !!b, this.updateAgeOnGet = !!o, this.updateAgeOnHas = !!r, this.ttlResolution = F(s) || s === 0 ? s : 1, this.ttlAutopurge = !!n, this.ttl = i || 0, this.ttl) {
+				if (!F(this.ttl)) throw new TypeError("ttl must be a positive integer if specified");
+				this.#H();
+			}
+			if (this.#o === 0 && this.ttl === 0 && this.#u === 0) throw new TypeError("At least one of max, maxSize, or ttl is required");
+			if (!this.ttlAutopurge && !this.#o && !this.#u) {
+				let E = "LRU_CACHE_UNBOUNDED";
+				P(E) && (U.add(E), G("TTL caching without ttlAutopurge, max, or maxSize can result in unbounded memory consumption.", "UnboundedCacheWarning", E, u));
+			}
+		}
+		getRemainingTTL(e) {
+			return this.#s.has(e) ? Infinity : 0;
+		}
+		#H() {
+			let e = new O(this.#o), t = new O(this.#o);
+			this.#d = e, this.#F = t;
+			let i = this.ttlAutopurge ? Array.from({ length: this.#o }) : void 0;
+			this.#g = i, this.#N = (r, h, l = this.#m.now()) => {
+				t[r] = h !== 0 ? l : 0, e[r] = h, s(r, h);
+			}, this.#x = (r) => {
+				t[r] = e[r] !== 0 ? this.#m.now() : 0, s(r, e[r]);
+			};
+			let s = this.ttlAutopurge ? (r, h) => {
+				if (i?.[r] && (clearTimeout(i[r]), i[r] = void 0), h && h !== 0 && i) {
+					let l = setTimeout(() => {
+						this.#p(r) && this.#v(this.#i[r], "expire");
+					}, h + 1);
+					l.unref && l.unref(), i[r] = l;
+				}
+			} : () => {};
+			this.#E = (r, h) => {
+				if (e[h]) {
+					let l = e[h], c = t[h];
+					if (!l || !c) return;
+					r.ttl = l, r.start = c, r.now = n || o();
+					r.remainingTTL = l - (r.now - c);
+				}
+			};
+			let n = 0, o = () => {
+				let r = this.#m.now();
+				if (this.ttlResolution > 0) {
+					n = r;
+					let h = setTimeout(() => n = 0, this.ttlResolution);
+					h.unref && h.unref();
+				}
+				return r;
+			};
+			this.getRemainingTTL = (r) => {
+				let h = this.#s.get(r);
+				if (h === void 0) return 0;
+				let l = e[h], c = t[h];
+				if (!l || !c) return Infinity;
+				return l - ((n || o()) - c);
+			}, this.#p = (r) => {
+				let h = t[r], l = e[r];
+				return !!l && !!h && (n || o()) - h > l;
+			};
+		}
+		#x = () => {};
+		#E = () => {};
+		#N = () => {};
+		#p = () => !1;
+		#X() {
+			let e = new O(this.#o);
+			this.#b = 0, this.#_ = e, this.#R = (t) => {
+				this.#b -= e[t], e[t] = 0;
+			}, this.#k = (t, i, s, n) => {
+				if (this.#e(i)) return 0;
+				if (!F(s)) if (n) {
+					if (typeof n != "function") throw new TypeError("sizeCalculation must be a function");
+					if (s = n(i, t), !F(s)) throw new TypeError("sizeCalculation return invalid (expect positive integer)");
+				} else throw new TypeError("invalid size value (must be positive integer). When maxSize or maxEntrySize is used, sizeCalculation or size must be set.");
+				return s;
+			}, this.#I = (t, i, s) => {
+				if (e[t] = i, this.#u) {
+					let n = this.#u - e[t];
+					for (; this.#b > n;) this.#G(!0);
+				}
+				this.#b += e[t], s && (s.entrySize = i, s.totalCalculatedSize = this.#b);
+			};
+		}
+		#R = (e) => {};
+		#I = (e, t, i) => {};
+		#k = (e, t, i, s) => {
+			if (i || s) throw new TypeError("cannot set size without setting maxSize or maxEntrySize on cache");
+			return 0;
+		};
+		*#A({ allowStale: e = this.allowStale } = {}) {
+			if (this.#n) for (let t = this.#h; this.#V(t) && ((e || !this.#p(t)) && (yield t), t !== this.#l);) t = this.#c[t];
+		}
+		*#z({ allowStale: e = this.allowStale } = {}) {
+			if (this.#n) for (let t = this.#l; this.#V(t) && ((e || !this.#p(t)) && (yield t), t !== this.#h);) t = this.#a[t];
+		}
+		#V(e) {
+			return e !== void 0 && this.#s.get(this.#i[e]) === e;
+		}
+		*entries() {
+			for (let e of this.#A()) this.#t[e] !== void 0 && this.#i[e] !== void 0 && !this.#e(this.#t[e]) && (yield [this.#i[e], this.#t[e]]);
+		}
+		*rentries() {
+			for (let e of this.#z()) this.#t[e] !== void 0 && this.#i[e] !== void 0 && !this.#e(this.#t[e]) && (yield [this.#i[e], this.#t[e]]);
+		}
+		*keys() {
+			for (let e of this.#A()) {
+				let t = this.#i[e];
+				t !== void 0 && !this.#e(this.#t[e]) && (yield t);
+			}
+		}
+		*rkeys() {
+			for (let e of this.#z()) {
+				let t = this.#i[e];
+				t !== void 0 && !this.#e(this.#t[e]) && (yield t);
+			}
+		}
+		*values() {
+			for (let e of this.#A()) this.#t[e] !== void 0 && !this.#e(this.#t[e]) && (yield this.#t[e]);
+		}
+		*rvalues() {
+			for (let e of this.#z()) this.#t[e] !== void 0 && !this.#e(this.#t[e]) && (yield this.#t[e]);
+		}
+		[Symbol.iterator]() {
+			return this.entries();
+		}
+		[Symbol.toStringTag] = "LRUCache";
+		find(e, t = {}) {
+			for (let i of this.#A()) {
+				let s = this.#t[i], n = this.#e(s) ? s.__staleWhileFetching : s;
+				if (n !== void 0 && e(n, this.#i[i], this)) return this.#C(this.#i[i], t);
+			}
+		}
+		forEach(e, t = this) {
+			for (let i of this.#A()) {
+				let s = this.#t[i], n = this.#e(s) ? s.__staleWhileFetching : s;
+				n !== void 0 && e.call(t, n, this.#i[i], this);
+			}
+		}
+		rforEach(e, t = this) {
+			for (let i of this.#z()) {
+				let s = this.#t[i], n = this.#e(s) ? s.__staleWhileFetching : s;
+				n !== void 0 && e.call(t, n, this.#i[i], this);
+			}
+		}
+		purgeStale() {
+			let e = !1;
+			for (let t of this.#z({ allowStale: !0 })) this.#p(t) && (this.#v(this.#i[t], "expire"), e = !0);
+			return e;
+		}
+		info(e) {
+			let t = this.#s.get(e);
+			if (t === void 0) return;
+			let i = this.#t[t], s = this.#e(i) ? i.__staleWhileFetching : i;
+			if (s === void 0) return;
+			let n = { value: s };
+			if (this.#d && this.#F) {
+				let o = this.#d[t], r = this.#F[t];
+				if (o && r) n.ttl = o - (this.#m.now() - r), n.start = Date.now();
+			}
+			return this.#_ && (n.size = this.#_[t]), n;
+		}
+		dump() {
+			let e = [];
+			for (let t of this.#A({ allowStale: !0 })) {
+				let i = this.#i[t], s = this.#t[t], n = this.#e(s) ? s.__staleWhileFetching : s;
+				if (n === void 0 || i === void 0) continue;
+				let o = { value: n };
+				if (this.#d && this.#F) {
+					o.ttl = this.#d[t];
+					let r = this.#m.now() - this.#F[t];
+					o.start = Math.floor(Date.now() - r);
+				}
+				this.#_ && (o.size = this.#_[t]), e.unshift([i, o]);
+			}
+			return e;
+		}
+		load(e) {
+			this.clear();
+			for (let [t, i] of e) {
+				if (i.start) {
+					let s = Date.now() - i.start;
+					i.start = this.#m.now() - s;
+				}
+				this.#O(t, i.value, i);
+			}
+		}
+		set(e, t, i = {}) {
+			let { status: s = S.hasSubscribers ? {} : void 0 } = i;
+			i.status = s, s && (s.op = "set", s.key = e, t !== void 0 && (s.value = t));
+			let n = this.#O(e, t, i);
+			return s && S.hasSubscribers && S.publish(s), n;
+		}
+		#O(e, t, i = {}) {
+			let { ttl: s = this.ttl, start: n, noDisposeOnSet: o = this.noDisposeOnSet, sizeCalculation: r = this.sizeCalculation, status: h } = i;
+			if (t === void 0) return h && (h.set = "deleted"), this.delete(e), this;
+			let { noUpdateTTL: l = this.noUpdateTTL } = i;
+			h && !this.#e(t) && (h.value = t);
+			let c = this.#k(e, t, i.size || 0, r, h);
+			if (this.maxEntrySize && c > this.maxEntrySize) return this.#v(e, "set"), h && (h.set = "miss", h.maxEntrySizeExceeded = !0), this;
+			let f = this.#n === 0 ? void 0 : this.#s.get(e);
+			if (f === void 0) f = this.#n === 0 ? this.#h : this.#y.length !== 0 ? this.#y.pop() : this.#n === this.#o ? this.#G(!1) : this.#n, this.#i[f] = e, this.#t[f] = t, this.#s.set(e, f), this.#a[this.#h] = f, this.#c[f] = this.#h, this.#h = f, this.#n++, this.#I(f, c, h), h && (h.set = "add"), l = !1, this.#j && this.#D?.(t, e, "add");
+			else {
+				this.#L(f);
+				let g = this.#t[f];
+				if (t !== g) {
+					if (this.#W && this.#e(g)) {
+						g.__abortController.abort(/* @__PURE__ */ new Error("replaced"));
+						let { __staleWhileFetching: p } = g;
+						p !== void 0 && !o && (this.#T && this.#w?.(p, e, "set"), this.#f && this.#r?.push([
+							p,
+							e,
+							"set"
+						]));
+					} else o || (this.#T && this.#w?.(g, e, "set"), this.#f && this.#r?.push([
+						g,
+						e,
+						"set"
+					]));
+					if (this.#R(f), this.#I(f, c, h), this.#t[f] = t, h) {
+						h.set = "replace";
+						let p = g && this.#e(g) ? g.__staleWhileFetching : g;
+						p !== void 0 && (h.oldValue = p);
+					}
+				} else h && (h.set = "update");
+				this.#j && this.onInsert?.(t, e, t === g ? "update" : "replace");
+			}
+			if (s !== 0 && !this.#d && this.#H(), this.#d && (l || this.#N(f, s, n), h && this.#E(h, f)), !o && this.#f && this.#r) {
+				let g = this.#r, p;
+				for (; p = g?.shift();) this.#S?.(...p);
+			}
+			return this;
+		}
+		pop() {
+			try {
+				for (; this.#n;) {
+					let e = this.#t[this.#l];
+					if (this.#G(!0), this.#e(e)) {
+						if (e.__staleWhileFetching) return e.__staleWhileFetching;
+					} else if (e !== void 0) return e;
+				}
+			} finally {
+				if (this.#f && this.#r) {
+					let e = this.#r, t;
+					for (; t = e?.shift();) this.#S?.(...t);
+				}
+			}
+		}
+		#G(e) {
+			let t = this.#l, i = this.#i[t], s = this.#t[t];
+			return this.#W && this.#e(s) ? s.__abortController.abort(/* @__PURE__ */ new Error("evicted")) : (this.#T || this.#f) && (this.#T && this.#w?.(s, i, "evict"), this.#f && this.#r?.push([
+				s,
+				i,
+				"evict"
+			])), this.#R(t), this.#g?.[t] && (clearTimeout(this.#g[t]), this.#g[t] = void 0), e && (this.#i[t] = void 0, this.#t[t] = void 0, this.#y.push(t)), this.#n === 1 ? (this.#l = this.#h = 0, this.#y.length = 0) : this.#l = this.#a[t], this.#s.delete(i), this.#n--, t;
+		}
+		has(e, t = {}) {
+			let { status: i = S.hasSubscribers ? {} : void 0 } = t;
+			t.status = i, i && (i.op = "has", i.key = e);
+			let s = this.#Y(e, t);
+			return S.hasSubscribers && S.publish(i), s;
+		}
+		#Y(e, t = {}) {
+			let { updateAgeOnHas: i = this.updateAgeOnHas, status: s } = t, n = this.#s.get(e);
+			if (n !== void 0) {
+				let o = this.#t[n];
+				if (this.#e(o) && o.__staleWhileFetching === void 0) return !1;
+				if (this.#p(n)) s && (s.has = "stale", this.#E(s, n));
+				else return i && this.#x(n), s && (s.has = "hit", this.#E(s, n)), !0;
+			} else s && (s.has = "miss");
+			return !1;
+		}
+		peek(e, t = {}) {
+			let { status: i = D() ? {} : void 0 } = t;
+			i && (i.op = "peek", i.key = e), t.status = i;
+			let s = this.#J(e, t);
+			return S.hasSubscribers && S.publish(i), s;
+		}
+		#J(e, t) {
+			let { status: i, allowStale: s = this.allowStale } = t, n = this.#s.get(e);
+			if (n === void 0 || !s && this.#p(n)) {
+				i && (i.peek = n === void 0 ? "miss" : "stale");
+				return;
+			}
+			let o = this.#t[n], r = this.#e(o) ? o.__staleWhileFetching : o;
+			return i && (r !== void 0 ? (i.peek = "hit", i.value = r) : i.peek = "miss"), r;
+		}
+		#P(e, t, i, s) {
+			let n = t === void 0 ? void 0 : this.#t[t];
+			if (this.#e(n)) return n;
+			let o = new AbortController(), { signal: r } = i;
+			r?.addEventListener("abort", () => o.abort(r.reason), { signal: o.signal });
+			let h = {
+				signal: o.signal,
+				options: i,
+				context: s
+			}, l = (w, y = !1) => {
+				let { aborted: a } = o.signal, m = i.ignoreFetchAbort && w !== void 0, _ = i.ignoreFetchAbort || !!(i.allowStaleOnFetchAbort && w !== void 0);
+				if (i.status && (a && !y ? (i.status.fetchAborted = !0, i.status.fetchError = o.signal.reason, m && (i.status.fetchAbortIgnored = !0)) : i.status.fetchResolved = !0), a && !m && !y) return f(o.signal.reason, _);
+				let b = p, d = this.#t[t];
+				return (d === p || d === void 0 && m && y) && (w === void 0 ? b.__staleWhileFetching !== void 0 ? this.#t[t] = b.__staleWhileFetching : this.#v(e, "fetch") : (i.status && (i.status.fetchUpdated = !0), this.#O(e, w, h.options))), w;
+			}, c = (w) => (i.status && (i.status.fetchRejected = !0, i.status.fetchError = w), f(w, !1)), f = (w, y) => {
+				let { aborted: a } = o.signal, m = a && i.allowStaleOnFetchAbort, _ = m || i.allowStaleOnFetchRejection, b = _ || i.noDeleteOnFetchRejection, d = p;
+				if (this.#t[t] === p && (!b || !y && d.__staleWhileFetching === void 0 ? this.#v(e, "fetch") : m || (this.#t[t] = d.__staleWhileFetching)), _) return i.status && d.__staleWhileFetching !== void 0 && (i.status.returnedStale = !0), d.__staleWhileFetching;
+				if (d.__returned === d) throw w;
+			}, g = (w, y) => {
+				let a = this.#M?.(e, n, h);
+				a && a instanceof Promise && a.then((m) => w(m === void 0 ? void 0 : m), y), o.signal.addEventListener("abort", () => {
+					(!i.ignoreFetchAbort || i.allowStaleOnFetchAbort) && (w(void 0), i.allowStaleOnFetchAbort && (w = (m) => l(m, !0)));
+				});
+			};
+			i.status && (i.status.fetchDispatched = !0);
+			let p = new Promise(g).then(l, c), T = Object.assign(p, {
+				__abortController: o,
+				__staleWhileFetching: n,
+				__returned: void 0
+			});
+			return t === void 0 ? (this.#O(e, T, {
+				...h.options,
+				status: void 0
+			}), t = this.#s.get(e)) : this.#t[t] = T, T;
+		}
+		#e(e) {
+			if (!this.#W) return !1;
+			let t = e;
+			return !!t && t instanceof Promise && t.hasOwnProperty("__staleWhileFetching") && t.__abortController instanceof AbortController;
+		}
+		fetch(e, t = {}) {
+			let i = W.hasSubscribers, { status: s = D() ? {} : void 0 } = t;
+			t.status = s, s && t.context && (s.context = t.context);
+			let n = this.#B(e, t);
+			return s && D() && i && (s.trace = !0, W.tracePromise(() => n, s).catch(() => {})), n;
+		}
+		async #B(e, t = {}) {
+			let { allowStale: i = this.allowStale, updateAgeOnGet: s = this.updateAgeOnGet, noDeleteOnStaleGet: n = this.noDeleteOnStaleGet, ttl: o = this.ttl, noDisposeOnSet: r = this.noDisposeOnSet, size: h = 0, sizeCalculation: l = this.sizeCalculation, noUpdateTTL: c = this.noUpdateTTL, noDeleteOnFetchRejection: f = this.noDeleteOnFetchRejection, allowStaleOnFetchRejection: g = this.allowStaleOnFetchRejection, ignoreFetchAbort: p = this.ignoreFetchAbort, allowStaleOnFetchAbort: T = this.allowStaleOnFetchAbort, context: w, forceRefresh: y = !1, status: a, signal: m } = t;
+			if (a && (a.op = "fetch", a.key = e, y && (a.forceRefresh = !0)), !this.#W) return a && (a.fetch = "get"), this.#C(e, {
+				allowStale: i,
+				updateAgeOnGet: s,
+				noDeleteOnStaleGet: n,
+				status: a
+			});
+			let _ = {
+				allowStale: i,
+				updateAgeOnGet: s,
+				noDeleteOnStaleGet: n,
+				ttl: o,
+				noDisposeOnSet: r,
+				size: h,
+				sizeCalculation: l,
+				noUpdateTTL: c,
+				noDeleteOnFetchRejection: f,
+				allowStaleOnFetchRejection: g,
+				allowStaleOnFetchAbort: T,
+				ignoreFetchAbort: p,
+				status: a,
+				signal: m
+			}, b = this.#s.get(e);
+			if (b === void 0) {
+				a && (a.fetch = "miss");
+				let d = this.#P(e, b, _, w);
+				return d.__returned = d;
+			} else {
+				let d = this.#t[b];
+				if (this.#e(d)) {
+					let E = i && d.__staleWhileFetching !== void 0;
+					return a && (a.fetch = "inflight", E && (a.returnedStale = !0)), E ? d.__staleWhileFetching : d.__returned = d;
+				}
+				let A = this.#p(b);
+				if (!y && !A) return a && (a.fetch = "hit"), this.#L(b), s && this.#x(b), a && this.#E(a, b), d;
+				let z = this.#P(e, b, _, w), v = z.__staleWhileFetching !== void 0 && i;
+				return a && (a.fetch = A ? "stale" : "refresh", v && A && (a.returnedStale = !0)), v ? z.__staleWhileFetching : z.__returned = z;
+			}
+		}
+		forceFetch(e, t = {}) {
+			let i = W.hasSubscribers, { status: s = D() ? {} : void 0 } = t;
+			t.status = s, s && t.context && (s.context = t.context);
+			let n = this.#K(e, t);
+			return s && D() && i && (s.trace = !0, W.tracePromise(() => n, s).catch(() => {})), n;
+		}
+		async #K(e, t = {}) {
+			let i = await this.#B(e, t);
+			if (i === void 0) throw new Error("fetch() returned undefined");
+			return i;
+		}
+		memo(e, t = {}) {
+			let { status: i = S.hasSubscribers ? {} : void 0 } = t;
+			t.status = i, i && (i.op = "memo", i.key = e, t.context && (i.context = t.context));
+			let s = this.#Q(e, t);
+			return i && (i.value = s), S.hasSubscribers && S.publish(i), s;
+		}
+		#Q(e, t = {}) {
+			let i = this.#U;
+			if (!i) throw new Error("no memoMethod provided to constructor");
+			let { context: s, status: n, forceRefresh: o, ...r } = t;
+			n && o && (n.forceRefresh = !0);
+			let h = this.#C(e, r), l = o || h === void 0;
+			if (n && (n.memo = l ? "miss" : "hit", l || (n.value = h)), !l) return h;
+			let c = i(e, h, {
+				options: r,
+				context: s
+			});
+			return n && (n.value = c), this.#O(e, c, r), c;
+		}
+		get(e, t = {}) {
+			let { status: i = S.hasSubscribers ? {} : void 0 } = t;
+			t.status = i, i && (i.op = "get", i.key = e);
+			let s = this.#C(e, t);
+			return i && (s !== void 0 && (i.value = s), S.hasSubscribers && S.publish(i)), s;
+		}
+		#C(e, t = {}) {
+			let { allowStale: i = this.allowStale, updateAgeOnGet: s = this.updateAgeOnGet, noDeleteOnStaleGet: n = this.noDeleteOnStaleGet, status: o } = t, r = this.#s.get(e);
+			if (r === void 0) {
+				o && (o.get = "miss");
+				return;
+			}
+			let h = this.#t[r], l = this.#e(h);
+			return o && this.#E(o, r), this.#p(r) ? l ? (o && (o.get = "stale-fetching"), i && h.__staleWhileFetching !== void 0 ? (o && (o.returnedStale = !0), h.__staleWhileFetching) : void 0) : (n || this.#v(e, "expire"), o && (o.get = "stale"), i ? (o && (o.returnedStale = !0), h) : void 0) : (o && (o.get = l ? "fetching" : "hit"), this.#L(r), s && this.#x(r), l ? h.__staleWhileFetching : h);
+		}
+		#$(e, t) {
+			this.#c[t] = e, this.#a[e] = t;
+		}
+		#L(e) {
+			e !== this.#h && (e === this.#l ? this.#l = this.#a[e] : this.#$(this.#c[e], this.#a[e]), this.#$(this.#h, e), this.#h = e);
+		}
+		delete(e) {
+			return this.#v(e, "delete");
+		}
+		#v(e, t) {
+			S.hasSubscribers && S.publish({
+				op: "delete",
+				delete: t,
+				key: e
+			});
+			let i = !1;
+			if (this.#n !== 0) {
+				let s = this.#s.get(e);
+				if (s !== void 0) if (this.#g?.[s] && (clearTimeout(this.#g?.[s]), this.#g[s] = void 0), i = !0, this.#n === 1) this.#q(t);
+				else {
+					this.#R(s);
+					let n = this.#t[s];
+					if (this.#e(n) ? n.__abortController.abort(/* @__PURE__ */ new Error("deleted")) : (this.#T || this.#f) && (this.#T && this.#w?.(n, e, t), this.#f && this.#r?.push([
+						n,
+						e,
+						t
+					])), this.#s.delete(e), this.#i[s] = void 0, this.#t[s] = void 0, s === this.#h) this.#h = this.#c[s];
+					else if (s === this.#l) this.#l = this.#a[s];
+					else {
+						let o = this.#c[s];
+						this.#a[o] = this.#a[s];
+						let r = this.#a[s];
+						this.#c[r] = this.#c[s];
+					}
+					this.#n--, this.#y.push(s);
+				}
+			}
+			if (this.#f && this.#r?.length) {
+				let s = this.#r, n;
+				for (; n = s?.shift();) this.#S?.(...n);
+			}
+			return i;
+		}
+		clear() {
+			return this.#q("delete");
+		}
+		#q(e) {
+			for (let t of this.#z({ allowStale: !0 })) {
+				let i = this.#t[t];
+				if (this.#e(i)) i.__abortController.abort(/* @__PURE__ */ new Error("deleted"));
+				else {
+					let s = this.#i[t];
+					this.#T && this.#w?.(i, s, e), this.#f && this.#r?.push([
+						i,
+						s,
+						e
+					]);
+				}
+			}
+			if (this.#s.clear(), this.#t.fill(void 0), this.#i.fill(void 0), this.#d && this.#F) {
+				this.#d.fill(0), this.#F.fill(0);
+				for (let t of this.#g ?? []) t !== void 0 && clearTimeout(t);
+				this.#g?.fill(void 0);
+			}
+			if (this.#_ && this.#_.fill(0), this.#l = 0, this.#h = 0, this.#y.length = 0, this.#b = 0, this.#n = 0, this.#f && this.#r) {
+				let t = this.#r, i;
+				for (; i = t?.shift();) this.#S?.(...i);
+			}
+		}
+	};
 }));
 //#endregion
 //#region ../../node_modules/@scure/bip39/node_modules/@noble/hashes/utils.js
@@ -33985,7 +34971,7 @@ var init_bip39 = __esmMin((() => {
 //#region ../walletkit/dist/esm/utils/mnemonic.mjs
 async function bip39ToPrivateKey(mnemonic) {
 	const seed = await mnemonicToSeed(mnemonic.join(" "));
-	return (0, import_dist$29.keyPairFromSeed)((await (0, import_dist$29.deriveEd25519Path)(Buffer.from(seed), [
+	return (0, import_dist$24.keyPairFromSeed)((await (0, import_dist$24.deriveEd25519Path)(Buffer.from(seed), [
 		44,
 		607,
 		0
@@ -34001,7 +34987,7 @@ async function MnemonicToKeyPair(mnemonic, mnemonicType = "ton") {
 	const mnemonicArray = Array.isArray(mnemonic) ? mnemonic : mnemonic.split(" ");
 	if (mnemonicArray.length !== 12 && mnemonicArray.length !== 24) throw new WalletKitError(ERROR_CODES.VALIDATION_ERROR, `Invalid mnemonic length: expected 12 or 24 words, got ${mnemonicArray.length}`);
 	if (mnemonicType === "ton") {
-		const key = await (0, import_dist$29.mnemonicToWalletKey)(mnemonicArray);
+		const key = await (0, import_dist$24.mnemonicToWalletKey)(mnemonicArray);
 		return {
 			publicKey: new Uint8Array(key.publicKey),
 			secretKey: new Uint8Array(key.secretKey)
@@ -34019,9 +35005,12 @@ async function MnemonicToKeyPair(mnemonic, mnemonicType = "ton") {
 		supportedTypes: ["ton", "bip39"]
 	});
 }
-var import_dist$29;
+async function CreateTonMnemonic() {
+	return (0, import_dist$24.mnemonicNew)(24);
+}
+var import_dist$24;
 var init_mnemonic = __esmMin((() => {
-	import_dist$29 = require_dist$2();
+	import_dist$24 = require_dist$2();
 	init_bip39();
 	init_errors$3();
 }));
@@ -34029,8 +35018,8 @@ var init_mnemonic = __esmMin((() => {
 //#region ../walletkit/dist/esm/utils/sign.js
 function DefaultSignature(data, privateKey) {
 	let fullKey = privateKey;
-	if (fullKey.length === 32) fullKey = (0, import_dist$28.keyPairFromSeed)(Buffer.from(fullKey)).secretKey;
-	return Uint8ArrayToHex((0, import_dist$28.sign)(Buffer.from(Uint8Array.from(data)), Buffer.from(fullKey)));
+	if (fullKey.length === 32) fullKey = (0, import_dist$23.keyPairFromSeed)(Buffer.from(fullKey)).secretKey;
+	return Uint8ArrayToHex((0, import_dist$23.sign)(Buffer.from(Uint8Array.from(data)), Buffer.from(fullKey)));
 }
 function createWalletSigner(privateKey) {
 	return async (data) => {
@@ -34038,19 +35027,19 @@ function createWalletSigner(privateKey) {
 	};
 }
 function FakeSignature(data) {
-	return Uint8ArrayToHex([...(0, import_dist$28.sign)(Buffer.from(Uint8Array.from(data)), Buffer.from(fakeKeyPair.secretKey))]);
+	return Uint8ArrayToHex([...(0, import_dist$23.sign)(Buffer.from(Uint8Array.from(data)), Buffer.from(fakeKeyPair.secretKey))]);
 }
-var import_dist$28, fakeKeyPair;
+var import_dist$23, fakeKeyPair;
 var init_sign = __esmMin((() => {
-	import_dist$28 = require_dist$2();
+	import_dist$23 = require_dist$2();
 	init_base64();
-	fakeKeyPair = (0, import_dist$28.keyPairFromSeed)(Buffer.alloc(32, 0));
+	fakeKeyPair = (0, import_dist$23.keyPairFromSeed)(Buffer.alloc(32, 0));
 }));
 //#endregion
 //#region ../walletkit/dist/esm/utils/Signer.js
-var import_dist$27, Signer;
+var import_dist$22, Signer;
 var init_Signer = __esmMin((() => {
-	import_dist$27 = require_dist$2();
+	import_dist$22 = require_dist$2();
 	init_mnemonic();
 	init_sign();
 	init_base64();
@@ -34075,7 +35064,7 @@ var init_Signer = __esmMin((() => {
 		*/
 		static async fromPrivateKey(privateKey) {
 			const privateKeyBytes = typeof privateKey === "string" ? Uint8Array.from(Buffer.from(privateKey.replace("0x", ""), "hex")) : privateKey;
-			const keyPair = (0, import_dist$27.keyPairFromSeed)(Buffer.from(privateKeyBytes));
+			const keyPair = (0, import_dist$22.keyPairFromSeed)(Buffer.from(privateKeyBytes));
 			return {
 				sign: createWalletSigner(keyPair.secretKey),
 				publicKey: Uint8ArrayToHex(keyPair.publicKey)
@@ -34100,68 +35089,6 @@ function getUnixtime() {
 }
 var init_time = __esmMin((() => {}));
 //#endregion
-//#region ../walletkit/dist/esm/utils/tvmStack.js
-function ParseStackItem(item) {
-	switch (item.type) {
-		case "num": if (item.value.startsWith("-")) return {
-			type: "int",
-			value: -BigInt(item.value.slice(1))
-		};
-		else return {
-			type: "int",
-			value: BigInt(item.value)
-		};
-		case "null": return { type: "null" };
-		case "cell": return {
-			type: "cell",
-			cell: import_dist$24.Cell.fromBoc(Buffer.from(item.value, "base64"))[0]
-		};
-		case "tuple":
-		case "list":
-			if (item.value.length === 0) return { type: "null" };
-			return {
-				type: "tuple",
-				items: item.value.map((value) => ParseStackItem(value))
-			};
-		default: throw Error(`Unsupported parse stack item type: ${JSON.stringify(item)}`);
-	}
-}
-function ParseStack(list) {
-	let stack = [];
-	for (let item of list) stack.push(ParseStackItem(item));
-	return stack;
-}
-function ReaderStack(list) {
-	return new import_dist$25.TupleReader(ParseStack(list));
-}
-function SerializeStackItem(item) {
-	switch (item.type) {
-		case "int": return {
-			type: "num",
-			value: `${item.value < 0 ? "-" : ""}0x${(item.value < 0 ? -item.value : item.value).toString(16)}`
-		};
-		case "slice": return {
-			type: "slice",
-			value: item.cell.toBoc().toString("base64")
-		};
-		case "cell": return {
-			type: "cell",
-			value: item.cell.toBoc().toString("base64")
-		};
-		default: throw Error(`Unsupported serialize stack item type: ${item.type}`);
-	}
-}
-function SerializeStack(list) {
-	let stack = [];
-	for (let item of list) stack.push(SerializeStackItem(item));
-	return stack;
-}
-var import_dist$24, import_dist$25;
-var init_tvmStack = __esmMin((() => {
-	import_dist$24 = require_dist$1();
-	import_dist$25 = require_dist$1();
-}));
-//#endregion
 //#region ../walletkit/dist/esm/utils/version.js
 function getVersion() {
 	return VERSION;
@@ -34179,75 +35106,11 @@ var init_version = __esmMin((() => {
 * Creates a wallet ID from network and address
 */
 function createWalletId(network, address) {
-	return (0, import_dist$23.sha256_sync)(`${network.chainId}:${address}`).toString("base64");
+	return (0, import_dist$20.sha256_sync)(`${network.chainId}:${address}`).toString("base64");
 }
-var import_dist$23;
+var import_dist$20;
 var init_walletId = __esmMin((() => {
-	import_dist$23 = require_dist$2();
-}));
-//#endregion
-//#region ../walletkit/dist/esm/utils/assetHelpers.js
-/**
-* Gets the jetton wallet address for an owner
-*/
-async function getJettonWalletAddressFromClient(client, jettonAddress, ownerAddress) {
-	if (!isValidAddress(jettonAddress)) throw new Error(`Invalid jetton address: ${jettonAddress}`);
-	try {
-		const parsedStack = ParseStack((await client.runGetMethod(jettonAddress, "get_wallet_address", SerializeStack([{
-			type: "slice",
-			cell: (0, import_dist$22.beginCell)().storeAddress(import_dist$22.Address.parse(ownerAddress)).endCell()
-		}]))).stack);
-		const jettonWalletAddress = parsedStack[0].type === "slice" || parsedStack[0].type === "cell" ? parsedStack[0].cell.asSlice().loadAddress() : null;
-		if (!jettonWalletAddress) throw new Error("Failed to get jetton wallet address");
-		return asAddressFriendly(jettonWalletAddress.toString());
-	} catch (error) {
-		throw new Error(`Failed to get jetton wallet address for ${jettonAddress}: ${error instanceof Error ? error.message : "Unknown error"}`);
-	}
-}
-/**
-* Gets the jetton balance for an owner's jetton wallet
-*/
-async function getJettonBalanceFromClient(client, jettonWalletAddress) {
-	try {
-		const result = await client.runGetMethod(jettonWalletAddress, "get_wallet_data");
-		if (result.exitCode !== 0) return "0";
-		const parsedStack = ParseStack(result.stack);
-		return (parsedStack[0].type === "int" ? parsedStack[0].value : 0n).toString();
-	} catch (_error) {
-		return "0";
-	}
-}
-/**
-* Gets jettons owned by an address
-*/
-async function getJettonsFromClient(client, ownerAddress, params) {
-	return client.jettonsByOwnerAddress({
-		ownerAddress,
-		offset: params?.pagination.offset,
-		limit: params?.pagination.limit
-	});
-}
-/**
-* Gets NFTs owned by an address
-*/
-async function getNftsFromClient(client, ownerAddress, params) {
-	return client.nftItemsByOwner({
-		ownerAddress,
-		pagination: params.pagination
-	});
-}
-/**
-* Gets a single NFT by address
-*/
-async function getNftFromClient(client, address) {
-	const result = await client.nftItemsByAddress({ address });
-	return result.nfts.length > 0 ? result.nfts[0] : null;
-}
-var import_dist$22;
-var init_assetHelpers = __esmMin((() => {
-	import_dist$22 = require_dist$1();
-	init_address$1();
-	init_tvmStack();
+	import_dist$20 = require_dist$2();
 }));
 //#endregion
 //#region ../walletkit/dist/esm/utils/toncenter/getTxOpcode.js
@@ -34264,41 +35127,6 @@ var init_isFailedTrace = __esmMin((() => {}));
 //#endregion
 //#region ../walletkit/dist/esm/utils/toncenter/parseTraceResponse.js
 var init_parseTraceResponse = __esmMin((() => {}));
-//#endregion
-//#region ../walletkit/dist/esm/utils/getNormalizedExtMessageHash.js
-/**
-* Generates a normalized hash of an "external-in" message for comparison.
-*
-* This function ensures consistent hashing of external-in messages by following [TEP-467].
-* See documentation: https://docs.ton.org/ecosystem/ton-connect/message-lookup#transaction-lookup-using-external-message-from-ton-connect
-*
-* @param params - An object containing the built BOC as a base64 string.
-* @returns An object containing the hash (Hex string) and the boc (Base64 string) of the normalized message.
-* @throws if the message type is not `external-in`.
-*/
-function getNormalizedExtMessageHash(boc) {
-	const message = (0, import_dist$21.loadMessage)(import_dist$21.Cell.fromBase64(boc).beginParse());
-	if (message.info.type !== "external-in") throw new Error(`Message must be "external-in", got ${message.info.type}`);
-	const info = {
-		...message.info,
-		src: void 0,
-		importFee: 0n
-	};
-	const normalizedMessage = {
-		...message,
-		init: null,
-		info
-	};
-	const normalizedCell = (0, import_dist$21.beginCell)().store((0, import_dist$21.storeMessage)(normalizedMessage, { forceRef: true })).endCell();
-	return {
-		hash: `0x${normalizedCell.hash().toString("hex")}`,
-		boc: normalizedCell.toBoc().toString("base64")
-	};
-}
-var import_dist$21;
-var init_getNormalizedExtMessageHash = __esmMin((() => {
-	import_dist$21 = require_dist$1();
-}));
 //#endregion
 //#region ../walletkit/dist/esm/utils/toncenter/getTransactionStatus.js
 var init_getTransactionStatus = __esmMin((() => {
@@ -34332,7 +35160,7 @@ var init_utils$4 = __esmMin((() => {
 	init_sign$1();
 	init_time();
 	init_tonProof();
-	init_toncenterEmulation();
+	init_transactionPreview();
 	init_tvmStack();
 	init_url();
 	init_uuid();
@@ -34342,1081 +35170,6 @@ var init_utils$4 = __esmMin((() => {
 	init_assetHelpers();
 	init_toncenter$2();
 	init_getNormalizedExtMessageHash();
-}));
-//#endregion
-//#region ../walletkit/dist/esm/types/toncenter/parsers/handlers/JettonHandler.js
-var init_JettonHandler = __esmMin((() => {
-	init_messageHandler();
-	init_opcodes();
-	init_AccountEvent();
-	init_base64();
-	init_utils$4();
-}));
-//#endregion
-//#region ../walletkit/dist/esm/types/toncenter/parsers/index.js
-var init_parsers = __esmMin((() => {
-	init_opcodes();
-	init_messageDecoder();
-	init_messageHandler();
-	init_JettonHandler();
-	init_body();
-}));
-//#endregion
-//#region ../walletkit/dist/esm/utils/messageBuilders.js
-/**
-* Stores a jetton transfer message into a builder
-*/
-function storeJettonTransferMessage(src) {
-	return (builder) => {
-		builder.storeUint(Number(OpCode.JettonTransfer), 32);
-		builder.storeUint(src.queryId, 64);
-		builder.storeCoins(src.amount);
-		builder.storeAddress(src.destination);
-		builder.storeAddress(src.responseDestination);
-		builder.storeMaybeRef(src.customPayload);
-		builder.storeCoins(src.forwardAmount ?? 0);
-		builder.storeMaybeRef(src.forwardPayload);
-	};
-}
-/**
-* Creates a jetton transfer payload cell
-*/
-function createJettonTransferPayload(params) {
-	const forwardPayload = params.comment ? createCommentPayload(params.comment) : null;
-	return (0, import_dist$20.beginCell)().store(storeJettonTransferMessage({
-		queryId: params.queryId ?? 0n,
-		amount: params.amount,
-		destination: import_dist$20.Address.parse(params.destination),
-		responseDestination: import_dist$20.Address.parse(params.responseDestination),
-		customPayload: params.customPayload ?? null,
-		forwardAmount: params.forwardAmount ?? 1n,
-		forwardPayload
-	})).endCell();
-}
-/**
-* Stores an NFT transfer message into a builder
-*/
-function storeNftTransferMessage(message) {
-	return (builder) => {
-		builder.storeUint(Number(OpCode.NftTransfer), 32);
-		builder.storeUint(message.queryId, 64);
-		builder.storeAddress(message.newOwner);
-		builder.storeAddress(message.responseDestination);
-		builder.storeMaybeRef(message.customPayload);
-		builder.storeCoins(message.forwardAmount);
-		builder.storeMaybeRef(message.forwardPayload);
-	};
-}
-/**
-* Creates an NFT transfer payload cell
-*/
-function createNftTransferPayload(params) {
-	const forwardPayload = params.comment ? createCommentPayload(params.comment) : null;
-	return (0, import_dist$20.beginCell)().store(storeNftTransferMessage({
-		queryId: params.queryId ?? 0n,
-		newOwner: import_dist$20.Address.parse(params.newOwner),
-		responseDestination: import_dist$20.Address.parse(params.responseDestination),
-		customPayload: params.customPayload ?? null,
-		forwardAmount: params.forwardAmount ?? 1n,
-		forwardPayload
-	})).endCell();
-}
-/**
-* Creates an NFT transfer payload cell from raw parameters
-* Handles string/Address conversion automatically
-*/
-function createNftTransferRawPayload(params) {
-	const transferMessage = {
-		queryId: BigInt(params.queryId),
-		newOwner: typeof params.newOwner === "string" ? import_dist$20.Address.parse(params.newOwner) : params.newOwner,
-		responseDestination: params.responseDestination ? typeof params.responseDestination === "string" ? import_dist$20.Address.parse(params.responseDestination) : params.responseDestination : null,
-		customPayload: params.customPayload ? typeof params.customPayload === "string" ? import_dist$20.Cell.fromBase64(params.customPayload) : params.customPayload : null,
-		forwardAmount: BigInt(params.forwardAmount),
-		forwardPayload: params.forwardPayload ? typeof params.forwardPayload === "string" ? import_dist$20.Cell.fromBase64(params.forwardPayload) : params.forwardPayload : null
-	};
-	return (0, import_dist$20.beginCell)().store(storeNftTransferMessage(transferMessage)).endCell();
-}
-/**
-* Creates a comment payload cell (op code 0 + text)
-*/
-function createCommentPayload(comment) {
-	return (0, import_dist$20.beginCell)().storeUint(0, 32).storeStringTail(comment).endCell();
-}
-/**
-* Creates a comment payload as base64 string
-*/
-function createCommentPayloadBase64(comment) {
-	return createCommentPayload(comment).toBoc().toString("base64");
-}
-/**
-* Creates a standard transfer transaction request with default send mode flags
-*/
-function createTransferTransaction(params) {
-	const message = {
-		address: params.targetAddress,
-		amount: params.amount,
-		payload: params.payload.toBoc().toString("base64"),
-		stateInit: void 0,
-		extraCurrency: void 0,
-		mode: { flags: [SendModeFlag.IGNORE_ERRORS, SendModeFlag.PAY_GAS_SEPARATELY] }
-	};
-	if (!validateTransactionMessage(message, false).isValid) throw new Error(`Invalid transaction message: ${JSON.stringify(message)}`);
-	return {
-		messages: [message],
-		fromAddress: params.fromAddress
-	};
-}
-var import_dist$20, DEFAULT_JETTON_GAS_FEE;
-var init_messageBuilders = __esmMin((() => {
-	import_dist$20 = require_dist$1();
-	init_parsers();
-	init_models();
-	init_validation();
-	DEFAULT_JETTON_GAS_FEE = "50000000";
-}));
-//#endregion
-//#region ../walletkit/dist/esm/core/wallet/extensions/ton.js
-var log$19, WalletTonClass;
-var init_ton = __esmMin((() => {
-	init_address$1();
-	init_validation();
-	init_retry();
-	init_toncenterEmulation();
-	init_messageBuilders();
-	init_getNormalizedExtMessageHash();
-	init_errors$3();
-	init_Logger();
-	log$19 = globalLogger.createChild("WalletTonClass");
-	WalletTonClass = class {
-		async createTransferTonTransaction(param) {
-			if (!isValidAddress(param.recipientAddress)) throw new Error(`Invalid to address: ${param.recipientAddress}`);
-			if (!isValidNanotonAmount(param.transferAmount)) throw new Error(`Invalid amount: ${param.transferAmount}`);
-			let body;
-			if (param.payload) body = param.payload;
-			else if (param.comment) body = createCommentPayloadBase64(param.comment);
-			const message = {
-				address: param.recipientAddress,
-				amount: param.transferAmount,
-				payload: body,
-				stateInit: param.stateInit,
-				extraCurrency: param.extraCurrency,
-				mode: param.mode
-			};
-			if (!validateTransactionMessage(message, false).isValid) throw new Error(`Invalid transaction message: ${JSON.stringify(message)}`);
-			return {
-				messages: [message],
-				fromAddress: this.getAddress()
-			};
-		}
-		async createTransferMultiTonTransaction(params) {
-			const messages = [];
-			for (const param of params) {
-				if (!isValidAddress(param.recipientAddress)) throw new Error(`Invalid to address: ${param.recipientAddress}`);
-				if (!isValidNanotonAmount(param.transferAmount)) throw new Error(`Invalid amount: ${param.transferAmount}`);
-				let body;
-				if (param.payload) body = param.payload;
-				else if (param.comment) body = createCommentPayloadBase64(param.comment);
-				const message = {
-					address: param.recipientAddress,
-					amount: param.transferAmount,
-					payload: body,
-					stateInit: param.stateInit,
-					extraCurrency: param.extraCurrency,
-					mode: param.mode
-				};
-				if (!validateTransactionMessage(message, false).isValid) throw new Error(`Invalid transaction message: ${JSON.stringify(message)}`);
-				messages.push(message);
-			}
-			return {
-				messages,
-				fromAddress: this.getAddress()
-			};
-		}
-		async getTransactionPreview(param) {
-			const transaction = await param;
-			return await CallForSuccess(() => createTransactionPreview(this.client, transaction, this));
-		}
-		async sendTransaction(request) {
-			try {
-				const boc = await this.getSignedSendTransaction(request, { fakeSignature: false });
-				await CallForSuccess(() => this.getClient().sendBoc(boc));
-				const { hash: normalizedHash, boc: normalizedBoc } = getNormalizedExtMessageHash(boc);
-				return {
-					boc,
-					normalizedBoc,
-					normalizedHash
-				};
-			} catch (error) {
-				log$19.error("Failed to send transaction", { error });
-				if (error instanceof WalletKitError) throw error;
-				if (error?.message?.includes("Ledger device")) throw new WalletKitError(ERROR_CODES.LEDGER_DEVICE_ERROR, "Ledger device error", error);
-				throw error;
-			}
-		}
-		async getBalance() {
-			return await CallForSuccess(async () => this.getClient().getBalance(this.getAddress()));
-		}
-	};
-}));
-//#endregion
-//#region ../walletkit/dist/esm/core/wallet/extensions/jetton.js
-var WalletJettonClass;
-var init_jetton$1 = __esmMin((() => {
-	init_address$1();
-	init_retry();
-	init_messageBuilders();
-	init_assetHelpers();
-	WalletJettonClass = class {
-		async createTransferJettonTransaction(params) {
-			if (!isValidAddress(params.recipientAddress)) throw new Error(`Invalid to address: ${params.recipientAddress}`);
-			if (!isValidAddress(params.jettonAddress)) throw new Error(`Invalid jetton address: ${params.jettonAddress}`);
-			if (!params.transferAmount || BigInt(params.transferAmount) <= 0n) throw new Error(`Invalid amount: ${params.transferAmount}`);
-			return createTransferTransaction({
-				targetAddress: await CallForSuccess(() => this.getJettonWalletAddress(params.jettonAddress)),
-				amount: DEFAULT_JETTON_GAS_FEE,
-				payload: createJettonTransferPayload({
-					amount: BigInt(params.transferAmount),
-					destination: params.recipientAddress,
-					responseDestination: this.getAddress(),
-					comment: params.comment
-				}),
-				fromAddress: this.getAddress()
-			});
-		}
-		async getJettonBalance(jettonAddress) {
-			const jettonWalletAddress = await this.getJettonWalletAddress(jettonAddress);
-			return getJettonBalanceFromClient(this.getClient(), jettonWalletAddress);
-		}
-		async getJettonWalletAddress(jettonAddress) {
-			return getJettonWalletAddressFromClient(this.getClient(), jettonAddress, this.getAddress());
-		}
-		async getJettons(params) {
-			return getJettonsFromClient(this.getClient(), this.getAddress(), params);
-		}
-	};
-}));
-//#endregion
-//#region ../walletkit/dist/esm/core/wallet/extensions/nft.js
-var WalletNftClass;
-var init_nft = __esmMin((() => {
-	init_messageBuilders();
-	init_assetHelpers();
-	WalletNftClass = class {
-		async getNfts(params) {
-			return getNftsFromClient(this.getClient(), this.getAddress(), params);
-		}
-		async getNft(address) {
-			return getNftFromClient(this.getClient(), address);
-		}
-		async createTransferNftTransaction(params) {
-			const nftPayload = createNftTransferPayload({
-				newOwner: params.recipientAddress,
-				responseDestination: this.getAddress(),
-				comment: params.comment
-			});
-			return createTransferTransaction({
-				targetAddress: params.nftAddress,
-				amount: params.transferAmount?.toString() ?? "100000000",
-				payload: nftPayload,
-				fromAddress: this.getAddress()
-			});
-		}
-		async createTransferNftRawTransaction(params) {
-			const nftPayload = createNftTransferRawPayload({
-				queryId: params.message.queryId,
-				newOwner: params.message.newOwner,
-				responseDestination: params.message.responseDestination,
-				customPayload: params.message.customPayload,
-				forwardAmount: params.message.forwardAmount,
-				forwardPayload: params.message.forwardPayload
-			});
-			return createTransferTransaction({
-				targetAddress: params.nftAddress,
-				amount: params.transferAmount.toString(),
-				payload: nftPayload,
-				fromAddress: this.getAddress()
-			});
-		}
-	};
-}));
-//#endregion
-//#region ../walletkit/dist/esm/core/Initializer.js
-/**
-* Wrap wallet adapter with extension interfaces (Ton, Jetton, NFT)
-* Uses proxy API to make wallet extension modular
-* The wallet adapter already contains its own ApiClient for its network
-*/
-async function wrapWalletInterface(wallet) {
-	const ourClassesToExtend = [
-		WalletTonClass,
-		WalletJettonClass,
-		WalletNftClass
-	];
-	const newProxy = new Proxy(wallet, { get: (target, prop) => {
-		if (typeof prop === "symbol") return target[prop];
-		const ourMethonImplementation = ourClassesToExtend.find((cls) => !!cls.prototype[prop]);
-		if (ourMethonImplementation) {
-			const value = ourMethonImplementation.prototype[prop];
-			return (...args) => value.apply(newProxy, [...args]);
-		}
-		return target[prop];
-	} });
-	return newProxy;
-}
-var log$18, Initializer;
-var init_Initializer = __esmMin((() => {
-	init_types$3();
-	init_storage();
-	init_WalletManager();
-	init_TONConnectStoredSessionManager();
-	init_BridgeManager();
-	init_EventRouter();
-	init_RequestProcessor();
-	init_Logger();
-	init_EventStore();
-	init_EventProcessor();
-	init_ton();
-	init_jetton$1();
-	init_nft();
-	log$18 = globalLogger.createChild("Initializer");
-	Initializer = class {
-		config;
-		networkManager;
-		eventEmitter;
-		analyticsManager;
-		constructor(config, eventEmitter, analyticsManager) {
-			this.config = config;
-			this.eventEmitter = eventEmitter;
-			this.analyticsManager = analyticsManager;
-		}
-		/**
-		* Initialize all components
-		*/
-		async initialize(options, networkManager) {
-			try {
-				log$18.info("Initializing TonWalletKit...");
-				this.networkManager = networkManager;
-				const storage = this.initializeStorage(options);
-				const { walletManager, sessionManager, bridgeManager, eventRouter, eventProcessor } = await this.initializeManagers(options, storage);
-				const { requestProcessor } = this.initializeProcessors(sessionManager, bridgeManager, walletManager);
-				log$18.info("TonWalletKit initialized successfully");
-				return {
-					walletManager,
-					sessionManager,
-					bridgeManager,
-					eventRouter,
-					requestProcessor,
-					storage,
-					eventProcessor
-				};
-			} catch (error) {
-				log$18.error("Failed to initialize TonWalletKit", { error });
-				throw error;
-			}
-		}
-		/**
-		* Initialize storage adapter and wrap it in Storage
-		*/
-		initializeStorage(options) {
-			let adapter;
-			if (options.storage && "get" in options.storage && typeof options.storage.get === "function" && "set" in options.storage && typeof options.storage.set === "function" && "remove" in options.storage && typeof options.storage.remove === "function" && "clear" in options.storage && typeof options.storage.clear === "function") adapter = options.storage;
-			else adapter = createStorageAdapter({
-				prefix: options?.storage?.prefix ?? "tonwalletkit:",
-				maxRetries: options?.storage?.maxRetries,
-				retryDelay: options?.storage?.retryDelay,
-				allowMemory: options?.storage?.allowMemory
-			});
-			return new Storage(adapter);
-		}
-		/**
-		* Initialize core managers
-		*/
-		async initializeManagers(options, storage) {
-			const walletManager = new WalletManager(storage);
-			await walletManager.initialize();
-			let sessionManager;
-			if (options.sessionManager) sessionManager = options.sessionManager;
-			else {
-				const storedSessionManager = new TONConnectStoredSessionManager(storage, walletManager);
-				await storedSessionManager.initialize();
-				sessionManager = storedSessionManager;
-			}
-			const eventStore = new StorageEventStore(storage);
-			const eventRouter = new EventRouter(options, this.eventEmitter, sessionManager, walletManager, this.analyticsManager);
-			const bridgeManager = new BridgeManager(options?.walletManifest, options?.bridge, sessionManager, storage, eventStore, eventRouter, options, this.eventEmitter, this.analyticsManager);
-			eventRouter.setBridgeManager(bridgeManager);
-			bridgeManager.start().then(() => {
-				log$18.info("Bridge manager started successfully");
-			}).catch((e) => {
-				log$18.error("Could not start bridge manager", { error: e?.toString?.() });
-			});
-			const eventProcessor = new StorageEventProcessor(options?.eventProcessor, eventStore, DEFAULT_DURABLE_EVENTS_CONFIG, walletManager, sessionManager, eventRouter, this.eventEmitter);
-			return {
-				walletManager,
-				sessionManager,
-				bridgeManager,
-				eventRouter,
-				eventProcessor
-			};
-		}
-		/**
-		* Initialize processors
-		*/
-		initializeProcessors(sessionManager, bridgeManager, walletManager) {
-			return { requestProcessor: new RequestProcessor(this.config, sessionManager, bridgeManager, walletManager, this.analyticsManager) };
-		}
-		/**
-		* Cleanup resources during shutdown
-		*/
-		async cleanup(components) {
-			try {
-				log$18.info("Cleaning up TonWalletKit components...");
-				if (components.eventProcessor) {
-					components.eventProcessor.stopRecoveryLoop();
-					await components.eventProcessor.clearRegisteredWallets();
-					await components.eventProcessor.stopProcessing();
-				}
-				if (components.bridgeManager) await components.bridgeManager.close();
-				if (components.eventRouter) components.eventRouter.clearCallbacks();
-				log$18.info("TonWalletKit cleanup completed");
-			} catch (error) {
-				log$18.error("Error during cleanup", { error });
-			}
-		}
-	};
-}));
-//#endregion
-//#region ../walletkit/node_modules/lru-cache/dist/esm/browser/index.min.js
-var C, S, W, D, I, U, L, G, P, F, j, O, R, M;
-var init_index_min = __esmMin((() => {
-	C = { hasSubscribers: !1 }, S = C, W = C, D = () => S.hasSubscribers || W.hasSubscribers, I = typeof performance == "object" && performance && typeof performance.now == "function" ? performance : Date, U = /* @__PURE__ */ new Set(), L = typeof process == "object" && process ? process : {}, G = (u, e, t, i) => {
-		typeof L.emitWarning == "function" ? L.emitWarning(u, e, t, i) : console.error(`[${t}] ${e}: ${u}`);
-	}, P = (u) => !U.has(u), F = (u) => !!u && u === Math.floor(u) && u > 0 && isFinite(u), j = (u) => F(u) ? u <= Math.pow(2, 8) ? Uint8Array : u <= Math.pow(2, 16) ? Uint16Array : u <= Math.pow(2, 32) ? Uint32Array : u <= Number.MAX_SAFE_INTEGER ? O : null : null, O = class extends Array {
-		constructor(e) {
-			super(e), this.fill(0);
-		}
-	}, R = class u {
-		heap;
-		length;
-		static #o = !1;
-		static create(e) {
-			let t = j(e);
-			if (!t) return [];
-			u.#o = !0;
-			let i = new u(e, t);
-			return u.#o = !1, i;
-		}
-		constructor(e, t) {
-			if (!u.#o) throw new TypeError("instantiate Stack using Stack.create(n)");
-			this.heap = new t(e), this.length = 0;
-		}
-		push(e) {
-			this.heap[this.length++] = e;
-		}
-		pop() {
-			return this.heap[--this.length];
-		}
-	}, M = class u {
-		#o;
-		#u;
-		#w;
-		#D;
-		#S;
-		#M;
-		#U;
-		#m;
-		get perf() {
-			return this.#m;
-		}
-		ttl;
-		ttlResolution;
-		ttlAutopurge;
-		updateAgeOnGet;
-		updateAgeOnHas;
-		allowStale;
-		noDisposeOnSet;
-		noUpdateTTL;
-		maxEntrySize;
-		sizeCalculation;
-		noDeleteOnFetchRejection;
-		noDeleteOnStaleGet;
-		allowStaleOnFetchAbort;
-		allowStaleOnFetchRejection;
-		ignoreFetchAbort;
-		#n;
-		#b;
-		#s;
-		#i;
-		#t;
-		#a;
-		#c;
-		#l;
-		#h;
-		#y;
-		#r;
-		#_;
-		#F;
-		#d;
-		#g;
-		#T;
-		#W;
-		#f;
-		#j;
-		static unsafeExposeInternals(e) {
-			return {
-				starts: e.#F,
-				ttls: e.#d,
-				autopurgeTimers: e.#g,
-				sizes: e.#_,
-				keyMap: e.#s,
-				keyList: e.#i,
-				valList: e.#t,
-				next: e.#a,
-				prev: e.#c,
-				get head() {
-					return e.#l;
-				},
-				get tail() {
-					return e.#h;
-				},
-				free: e.#y,
-				isBackgroundFetch: (t) => e.#e(t),
-				backgroundFetch: (t, i, s, n) => e.#P(t, i, s, n),
-				moveToTail: (t) => e.#L(t),
-				indexes: (t) => e.#A(t),
-				rindexes: (t) => e.#z(t),
-				isStale: (t) => e.#p(t)
-			};
-		}
-		get max() {
-			return this.#o;
-		}
-		get maxSize() {
-			return this.#u;
-		}
-		get calculatedSize() {
-			return this.#b;
-		}
-		get size() {
-			return this.#n;
-		}
-		get fetchMethod() {
-			return this.#M;
-		}
-		get memoMethod() {
-			return this.#U;
-		}
-		get dispose() {
-			return this.#w;
-		}
-		get onInsert() {
-			return this.#D;
-		}
-		get disposeAfter() {
-			return this.#S;
-		}
-		constructor(e) {
-			let { max: t = 0, ttl: i, ttlResolution: s = 1, ttlAutopurge: n, updateAgeOnGet: o, updateAgeOnHas: r, allowStale: h, dispose: l, onInsert: c, disposeAfter: f, noDisposeOnSet: g, noUpdateTTL: p, maxSize: T = 0, maxEntrySize: w = 0, sizeCalculation: y, fetchMethod: a, memoMethod: m, noDeleteOnFetchRejection: _, noDeleteOnStaleGet: b, allowStaleOnFetchRejection: d, allowStaleOnFetchAbort: A, ignoreFetchAbort: z, perf: x } = e;
-			if (x !== void 0 && typeof x?.now != "function") throw new TypeError("perf option must have a now() method if specified");
-			if (this.#m = x ?? I, t !== 0 && !F(t)) throw new TypeError("max option must be a nonnegative integer");
-			let v = t ? j(t) : Array;
-			if (!v) throw new Error("invalid max value: " + t);
-			if (this.#o = t, this.#u = T, this.maxEntrySize = w || this.#u, this.sizeCalculation = y, this.sizeCalculation) {
-				if (!this.#u && !this.maxEntrySize) throw new TypeError("cannot set sizeCalculation without setting maxSize or maxEntrySize");
-				if (typeof this.sizeCalculation != "function") throw new TypeError("sizeCalculation set to non-function");
-			}
-			if (m !== void 0 && typeof m != "function") throw new TypeError("memoMethod must be a function if defined");
-			if (this.#U = m, a !== void 0 && typeof a != "function") throw new TypeError("fetchMethod must be a function if specified");
-			if (this.#M = a, this.#W = !!a, this.#s = /* @__PURE__ */ new Map(), this.#i = Array.from({ length: t }).fill(void 0), this.#t = Array.from({ length: t }).fill(void 0), this.#a = new v(t), this.#c = new v(t), this.#l = 0, this.#h = 0, this.#y = R.create(t), this.#n = 0, this.#b = 0, typeof l == "function" && (this.#w = l), typeof c == "function" && (this.#D = c), typeof f == "function" ? (this.#S = f, this.#r = []) : (this.#S = void 0, this.#r = void 0), this.#T = !!this.#w, this.#j = !!this.#D, this.#f = !!this.#S, this.noDisposeOnSet = !!g, this.noUpdateTTL = !!p, this.noDeleteOnFetchRejection = !!_, this.allowStaleOnFetchRejection = !!d, this.allowStaleOnFetchAbort = !!A, this.ignoreFetchAbort = !!z, this.maxEntrySize !== 0) {
-				if (this.#u !== 0 && !F(this.#u)) throw new TypeError("maxSize must be a positive integer if specified");
-				if (!F(this.maxEntrySize)) throw new TypeError("maxEntrySize must be a positive integer if specified");
-				this.#X();
-			}
-			if (this.allowStale = !!h, this.noDeleteOnStaleGet = !!b, this.updateAgeOnGet = !!o, this.updateAgeOnHas = !!r, this.ttlResolution = F(s) || s === 0 ? s : 1, this.ttlAutopurge = !!n, this.ttl = i || 0, this.ttl) {
-				if (!F(this.ttl)) throw new TypeError("ttl must be a positive integer if specified");
-				this.#H();
-			}
-			if (this.#o === 0 && this.ttl === 0 && this.#u === 0) throw new TypeError("At least one of max, maxSize, or ttl is required");
-			if (!this.ttlAutopurge && !this.#o && !this.#u) {
-				let E = "LRU_CACHE_UNBOUNDED";
-				P(E) && (U.add(E), G("TTL caching without ttlAutopurge, max, or maxSize can result in unbounded memory consumption.", "UnboundedCacheWarning", E, u));
-			}
-		}
-		getRemainingTTL(e) {
-			return this.#s.has(e) ? Infinity : 0;
-		}
-		#H() {
-			let e = new O(this.#o), t = new O(this.#o);
-			this.#d = e, this.#F = t;
-			let i = this.ttlAutopurge ? Array.from({ length: this.#o }) : void 0;
-			this.#g = i, this.#N = (r, h, l = this.#m.now()) => {
-				t[r] = h !== 0 ? l : 0, e[r] = h, s(r, h);
-			}, this.#x = (r) => {
-				t[r] = e[r] !== 0 ? this.#m.now() : 0, s(r, e[r]);
-			};
-			let s = this.ttlAutopurge ? (r, h) => {
-				if (i?.[r] && (clearTimeout(i[r]), i[r] = void 0), h && h !== 0 && i) {
-					let l = setTimeout(() => {
-						this.#p(r) && this.#v(this.#i[r], "expire");
-					}, h + 1);
-					l.unref && l.unref(), i[r] = l;
-				}
-			} : () => {};
-			this.#E = (r, h) => {
-				if (e[h]) {
-					let l = e[h], c = t[h];
-					if (!l || !c) return;
-					r.ttl = l, r.start = c, r.now = n || o();
-					r.remainingTTL = l - (r.now - c);
-				}
-			};
-			let n = 0, o = () => {
-				let r = this.#m.now();
-				if (this.ttlResolution > 0) {
-					n = r;
-					let h = setTimeout(() => n = 0, this.ttlResolution);
-					h.unref && h.unref();
-				}
-				return r;
-			};
-			this.getRemainingTTL = (r) => {
-				let h = this.#s.get(r);
-				if (h === void 0) return 0;
-				let l = e[h], c = t[h];
-				if (!l || !c) return Infinity;
-				return l - ((n || o()) - c);
-			}, this.#p = (r) => {
-				let h = t[r], l = e[r];
-				return !!l && !!h && (n || o()) - h > l;
-			};
-		}
-		#x = () => {};
-		#E = () => {};
-		#N = () => {};
-		#p = () => !1;
-		#X() {
-			let e = new O(this.#o);
-			this.#b = 0, this.#_ = e, this.#R = (t) => {
-				this.#b -= e[t], e[t] = 0;
-			}, this.#k = (t, i, s, n) => {
-				if (this.#e(i)) return 0;
-				if (!F(s)) if (n) {
-					if (typeof n != "function") throw new TypeError("sizeCalculation must be a function");
-					if (s = n(i, t), !F(s)) throw new TypeError("sizeCalculation return invalid (expect positive integer)");
-				} else throw new TypeError("invalid size value (must be positive integer). When maxSize or maxEntrySize is used, sizeCalculation or size must be set.");
-				return s;
-			}, this.#I = (t, i, s) => {
-				if (e[t] = i, this.#u) {
-					let n = this.#u - e[t];
-					for (; this.#b > n;) this.#G(!0);
-				}
-				this.#b += e[t], s && (s.entrySize = i, s.totalCalculatedSize = this.#b);
-			};
-		}
-		#R = (e) => {};
-		#I = (e, t, i) => {};
-		#k = (e, t, i, s) => {
-			if (i || s) throw new TypeError("cannot set size without setting maxSize or maxEntrySize on cache");
-			return 0;
-		};
-		*#A({ allowStale: e = this.allowStale } = {}) {
-			if (this.#n) for (let t = this.#h; this.#V(t) && ((e || !this.#p(t)) && (yield t), t !== this.#l);) t = this.#c[t];
-		}
-		*#z({ allowStale: e = this.allowStale } = {}) {
-			if (this.#n) for (let t = this.#l; this.#V(t) && ((e || !this.#p(t)) && (yield t), t !== this.#h);) t = this.#a[t];
-		}
-		#V(e) {
-			return e !== void 0 && this.#s.get(this.#i[e]) === e;
-		}
-		*entries() {
-			for (let e of this.#A()) this.#t[e] !== void 0 && this.#i[e] !== void 0 && !this.#e(this.#t[e]) && (yield [this.#i[e], this.#t[e]]);
-		}
-		*rentries() {
-			for (let e of this.#z()) this.#t[e] !== void 0 && this.#i[e] !== void 0 && !this.#e(this.#t[e]) && (yield [this.#i[e], this.#t[e]]);
-		}
-		*keys() {
-			for (let e of this.#A()) {
-				let t = this.#i[e];
-				t !== void 0 && !this.#e(this.#t[e]) && (yield t);
-			}
-		}
-		*rkeys() {
-			for (let e of this.#z()) {
-				let t = this.#i[e];
-				t !== void 0 && !this.#e(this.#t[e]) && (yield t);
-			}
-		}
-		*values() {
-			for (let e of this.#A()) this.#t[e] !== void 0 && !this.#e(this.#t[e]) && (yield this.#t[e]);
-		}
-		*rvalues() {
-			for (let e of this.#z()) this.#t[e] !== void 0 && !this.#e(this.#t[e]) && (yield this.#t[e]);
-		}
-		[Symbol.iterator]() {
-			return this.entries();
-		}
-		[Symbol.toStringTag] = "LRUCache";
-		find(e, t = {}) {
-			for (let i of this.#A()) {
-				let s = this.#t[i], n = this.#e(s) ? s.__staleWhileFetching : s;
-				if (n !== void 0 && e(n, this.#i[i], this)) return this.#C(this.#i[i], t);
-			}
-		}
-		forEach(e, t = this) {
-			for (let i of this.#A()) {
-				let s = this.#t[i], n = this.#e(s) ? s.__staleWhileFetching : s;
-				n !== void 0 && e.call(t, n, this.#i[i], this);
-			}
-		}
-		rforEach(e, t = this) {
-			for (let i of this.#z()) {
-				let s = this.#t[i], n = this.#e(s) ? s.__staleWhileFetching : s;
-				n !== void 0 && e.call(t, n, this.#i[i], this);
-			}
-		}
-		purgeStale() {
-			let e = !1;
-			for (let t of this.#z({ allowStale: !0 })) this.#p(t) && (this.#v(this.#i[t], "expire"), e = !0);
-			return e;
-		}
-		info(e) {
-			let t = this.#s.get(e);
-			if (t === void 0) return;
-			let i = this.#t[t], s = this.#e(i) ? i.__staleWhileFetching : i;
-			if (s === void 0) return;
-			let n = { value: s };
-			if (this.#d && this.#F) {
-				let o = this.#d[t], r = this.#F[t];
-				if (o && r) n.ttl = o - (this.#m.now() - r), n.start = Date.now();
-			}
-			return this.#_ && (n.size = this.#_[t]), n;
-		}
-		dump() {
-			let e = [];
-			for (let t of this.#A({ allowStale: !0 })) {
-				let i = this.#i[t], s = this.#t[t], n = this.#e(s) ? s.__staleWhileFetching : s;
-				if (n === void 0 || i === void 0) continue;
-				let o = { value: n };
-				if (this.#d && this.#F) {
-					o.ttl = this.#d[t];
-					let r = this.#m.now() - this.#F[t];
-					o.start = Math.floor(Date.now() - r);
-				}
-				this.#_ && (o.size = this.#_[t]), e.unshift([i, o]);
-			}
-			return e;
-		}
-		load(e) {
-			this.clear();
-			for (let [t, i] of e) {
-				if (i.start) {
-					let s = Date.now() - i.start;
-					i.start = this.#m.now() - s;
-				}
-				this.#O(t, i.value, i);
-			}
-		}
-		set(e, t, i = {}) {
-			let { status: s = S.hasSubscribers ? {} : void 0 } = i;
-			i.status = s, s && (s.op = "set", s.key = e, t !== void 0 && (s.value = t));
-			let n = this.#O(e, t, i);
-			return s && S.hasSubscribers && S.publish(s), n;
-		}
-		#O(e, t, i = {}) {
-			let { ttl: s = this.ttl, start: n, noDisposeOnSet: o = this.noDisposeOnSet, sizeCalculation: r = this.sizeCalculation, status: h } = i;
-			if (t === void 0) return h && (h.set = "deleted"), this.delete(e), this;
-			let { noUpdateTTL: l = this.noUpdateTTL } = i;
-			h && !this.#e(t) && (h.value = t);
-			let c = this.#k(e, t, i.size || 0, r, h);
-			if (this.maxEntrySize && c > this.maxEntrySize) return this.#v(e, "set"), h && (h.set = "miss", h.maxEntrySizeExceeded = !0), this;
-			let f = this.#n === 0 ? void 0 : this.#s.get(e);
-			if (f === void 0) f = this.#n === 0 ? this.#h : this.#y.length !== 0 ? this.#y.pop() : this.#n === this.#o ? this.#G(!1) : this.#n, this.#i[f] = e, this.#t[f] = t, this.#s.set(e, f), this.#a[this.#h] = f, this.#c[f] = this.#h, this.#h = f, this.#n++, this.#I(f, c, h), h && (h.set = "add"), l = !1, this.#j && this.#D?.(t, e, "add");
-			else {
-				this.#L(f);
-				let g = this.#t[f];
-				if (t !== g) {
-					if (this.#W && this.#e(g)) {
-						g.__abortController.abort(/* @__PURE__ */ new Error("replaced"));
-						let { __staleWhileFetching: p } = g;
-						p !== void 0 && !o && (this.#T && this.#w?.(p, e, "set"), this.#f && this.#r?.push([
-							p,
-							e,
-							"set"
-						]));
-					} else o || (this.#T && this.#w?.(g, e, "set"), this.#f && this.#r?.push([
-						g,
-						e,
-						"set"
-					]));
-					if (this.#R(f), this.#I(f, c, h), this.#t[f] = t, h) {
-						h.set = "replace";
-						let p = g && this.#e(g) ? g.__staleWhileFetching : g;
-						p !== void 0 && (h.oldValue = p);
-					}
-				} else h && (h.set = "update");
-				this.#j && this.onInsert?.(t, e, t === g ? "update" : "replace");
-			}
-			if (s !== 0 && !this.#d && this.#H(), this.#d && (l || this.#N(f, s, n), h && this.#E(h, f)), !o && this.#f && this.#r) {
-				let g = this.#r, p;
-				for (; p = g?.shift();) this.#S?.(...p);
-			}
-			return this;
-		}
-		pop() {
-			try {
-				for (; this.#n;) {
-					let e = this.#t[this.#l];
-					if (this.#G(!0), this.#e(e)) {
-						if (e.__staleWhileFetching) return e.__staleWhileFetching;
-					} else if (e !== void 0) return e;
-				}
-			} finally {
-				if (this.#f && this.#r) {
-					let e = this.#r, t;
-					for (; t = e?.shift();) this.#S?.(...t);
-				}
-			}
-		}
-		#G(e) {
-			let t = this.#l, i = this.#i[t], s = this.#t[t];
-			return this.#W && this.#e(s) ? s.__abortController.abort(/* @__PURE__ */ new Error("evicted")) : (this.#T || this.#f) && (this.#T && this.#w?.(s, i, "evict"), this.#f && this.#r?.push([
-				s,
-				i,
-				"evict"
-			])), this.#R(t), this.#g?.[t] && (clearTimeout(this.#g[t]), this.#g[t] = void 0), e && (this.#i[t] = void 0, this.#t[t] = void 0, this.#y.push(t)), this.#n === 1 ? (this.#l = this.#h = 0, this.#y.length = 0) : this.#l = this.#a[t], this.#s.delete(i), this.#n--, t;
-		}
-		has(e, t = {}) {
-			let { status: i = S.hasSubscribers ? {} : void 0 } = t;
-			t.status = i, i && (i.op = "has", i.key = e);
-			let s = this.#Y(e, t);
-			return S.hasSubscribers && S.publish(i), s;
-		}
-		#Y(e, t = {}) {
-			let { updateAgeOnHas: i = this.updateAgeOnHas, status: s } = t, n = this.#s.get(e);
-			if (n !== void 0) {
-				let o = this.#t[n];
-				if (this.#e(o) && o.__staleWhileFetching === void 0) return !1;
-				if (this.#p(n)) s && (s.has = "stale", this.#E(s, n));
-				else return i && this.#x(n), s && (s.has = "hit", this.#E(s, n)), !0;
-			} else s && (s.has = "miss");
-			return !1;
-		}
-		peek(e, t = {}) {
-			let { status: i = D() ? {} : void 0 } = t;
-			i && (i.op = "peek", i.key = e), t.status = i;
-			let s = this.#J(e, t);
-			return S.hasSubscribers && S.publish(i), s;
-		}
-		#J(e, t) {
-			let { status: i, allowStale: s = this.allowStale } = t, n = this.#s.get(e);
-			if (n === void 0 || !s && this.#p(n)) {
-				i && (i.peek = n === void 0 ? "miss" : "stale");
-				return;
-			}
-			let o = this.#t[n], r = this.#e(o) ? o.__staleWhileFetching : o;
-			return i && (r !== void 0 ? (i.peek = "hit", i.value = r) : i.peek = "miss"), r;
-		}
-		#P(e, t, i, s) {
-			let n = t === void 0 ? void 0 : this.#t[t];
-			if (this.#e(n)) return n;
-			let o = new AbortController(), { signal: r } = i;
-			r?.addEventListener("abort", () => o.abort(r.reason), { signal: o.signal });
-			let h = {
-				signal: o.signal,
-				options: i,
-				context: s
-			}, l = (w, y = !1) => {
-				let { aborted: a } = o.signal, m = i.ignoreFetchAbort && w !== void 0, _ = i.ignoreFetchAbort || !!(i.allowStaleOnFetchAbort && w !== void 0);
-				if (i.status && (a && !y ? (i.status.fetchAborted = !0, i.status.fetchError = o.signal.reason, m && (i.status.fetchAbortIgnored = !0)) : i.status.fetchResolved = !0), a && !m && !y) return f(o.signal.reason, _);
-				let b = p, d = this.#t[t];
-				return (d === p || d === void 0 && m && y) && (w === void 0 ? b.__staleWhileFetching !== void 0 ? this.#t[t] = b.__staleWhileFetching : this.#v(e, "fetch") : (i.status && (i.status.fetchUpdated = !0), this.#O(e, w, h.options))), w;
-			}, c = (w) => (i.status && (i.status.fetchRejected = !0, i.status.fetchError = w), f(w, !1)), f = (w, y) => {
-				let { aborted: a } = o.signal, m = a && i.allowStaleOnFetchAbort, _ = m || i.allowStaleOnFetchRejection, b = _ || i.noDeleteOnFetchRejection, d = p;
-				if (this.#t[t] === p && (!b || !y && d.__staleWhileFetching === void 0 ? this.#v(e, "fetch") : m || (this.#t[t] = d.__staleWhileFetching)), _) return i.status && d.__staleWhileFetching !== void 0 && (i.status.returnedStale = !0), d.__staleWhileFetching;
-				if (d.__returned === d) throw w;
-			}, g = (w, y) => {
-				let a = this.#M?.(e, n, h);
-				a && a instanceof Promise && a.then((m) => w(m === void 0 ? void 0 : m), y), o.signal.addEventListener("abort", () => {
-					(!i.ignoreFetchAbort || i.allowStaleOnFetchAbort) && (w(void 0), i.allowStaleOnFetchAbort && (w = (m) => l(m, !0)));
-				});
-			};
-			i.status && (i.status.fetchDispatched = !0);
-			let p = new Promise(g).then(l, c), T = Object.assign(p, {
-				__abortController: o,
-				__staleWhileFetching: n,
-				__returned: void 0
-			});
-			return t === void 0 ? (this.#O(e, T, {
-				...h.options,
-				status: void 0
-			}), t = this.#s.get(e)) : this.#t[t] = T, T;
-		}
-		#e(e) {
-			if (!this.#W) return !1;
-			let t = e;
-			return !!t && t instanceof Promise && t.hasOwnProperty("__staleWhileFetching") && t.__abortController instanceof AbortController;
-		}
-		fetch(e, t = {}) {
-			let i = W.hasSubscribers, { status: s = D() ? {} : void 0 } = t;
-			t.status = s, s && t.context && (s.context = t.context);
-			let n = this.#B(e, t);
-			return s && D() && i && (s.trace = !0, W.tracePromise(() => n, s).catch(() => {})), n;
-		}
-		async #B(e, t = {}) {
-			let { allowStale: i = this.allowStale, updateAgeOnGet: s = this.updateAgeOnGet, noDeleteOnStaleGet: n = this.noDeleteOnStaleGet, ttl: o = this.ttl, noDisposeOnSet: r = this.noDisposeOnSet, size: h = 0, sizeCalculation: l = this.sizeCalculation, noUpdateTTL: c = this.noUpdateTTL, noDeleteOnFetchRejection: f = this.noDeleteOnFetchRejection, allowStaleOnFetchRejection: g = this.allowStaleOnFetchRejection, ignoreFetchAbort: p = this.ignoreFetchAbort, allowStaleOnFetchAbort: T = this.allowStaleOnFetchAbort, context: w, forceRefresh: y = !1, status: a, signal: m } = t;
-			if (a && (a.op = "fetch", a.key = e, y && (a.forceRefresh = !0)), !this.#W) return a && (a.fetch = "get"), this.#C(e, {
-				allowStale: i,
-				updateAgeOnGet: s,
-				noDeleteOnStaleGet: n,
-				status: a
-			});
-			let _ = {
-				allowStale: i,
-				updateAgeOnGet: s,
-				noDeleteOnStaleGet: n,
-				ttl: o,
-				noDisposeOnSet: r,
-				size: h,
-				sizeCalculation: l,
-				noUpdateTTL: c,
-				noDeleteOnFetchRejection: f,
-				allowStaleOnFetchRejection: g,
-				allowStaleOnFetchAbort: T,
-				ignoreFetchAbort: p,
-				status: a,
-				signal: m
-			}, b = this.#s.get(e);
-			if (b === void 0) {
-				a && (a.fetch = "miss");
-				let d = this.#P(e, b, _, w);
-				return d.__returned = d;
-			} else {
-				let d = this.#t[b];
-				if (this.#e(d)) {
-					let E = i && d.__staleWhileFetching !== void 0;
-					return a && (a.fetch = "inflight", E && (a.returnedStale = !0)), E ? d.__staleWhileFetching : d.__returned = d;
-				}
-				let A = this.#p(b);
-				if (!y && !A) return a && (a.fetch = "hit"), this.#L(b), s && this.#x(b), a && this.#E(a, b), d;
-				let z = this.#P(e, b, _, w), v = z.__staleWhileFetching !== void 0 && i;
-				return a && (a.fetch = A ? "stale" : "refresh", v && A && (a.returnedStale = !0)), v ? z.__staleWhileFetching : z.__returned = z;
-			}
-		}
-		forceFetch(e, t = {}) {
-			let i = W.hasSubscribers, { status: s = D() ? {} : void 0 } = t;
-			t.status = s, s && t.context && (s.context = t.context);
-			let n = this.#K(e, t);
-			return s && D() && i && (s.trace = !0, W.tracePromise(() => n, s).catch(() => {})), n;
-		}
-		async #K(e, t = {}) {
-			let i = await this.#B(e, t);
-			if (i === void 0) throw new Error("fetch() returned undefined");
-			return i;
-		}
-		memo(e, t = {}) {
-			let { status: i = S.hasSubscribers ? {} : void 0 } = t;
-			t.status = i, i && (i.op = "memo", i.key = e, t.context && (i.context = t.context));
-			let s = this.#Q(e, t);
-			return i && (i.value = s), S.hasSubscribers && S.publish(i), s;
-		}
-		#Q(e, t = {}) {
-			let i = this.#U;
-			if (!i) throw new Error("no memoMethod provided to constructor");
-			let { context: s, status: n, forceRefresh: o, ...r } = t;
-			n && o && (n.forceRefresh = !0);
-			let h = this.#C(e, r), l = o || h === void 0;
-			if (n && (n.memo = l ? "miss" : "hit", l || (n.value = h)), !l) return h;
-			let c = i(e, h, {
-				options: r,
-				context: s
-			});
-			return n && (n.value = c), this.#O(e, c, r), c;
-		}
-		get(e, t = {}) {
-			let { status: i = S.hasSubscribers ? {} : void 0 } = t;
-			t.status = i, i && (i.op = "get", i.key = e);
-			let s = this.#C(e, t);
-			return i && (s !== void 0 && (i.value = s), S.hasSubscribers && S.publish(i)), s;
-		}
-		#C(e, t = {}) {
-			let { allowStale: i = this.allowStale, updateAgeOnGet: s = this.updateAgeOnGet, noDeleteOnStaleGet: n = this.noDeleteOnStaleGet, status: o } = t, r = this.#s.get(e);
-			if (r === void 0) {
-				o && (o.get = "miss");
-				return;
-			}
-			let h = this.#t[r], l = this.#e(h);
-			return o && this.#E(o, r), this.#p(r) ? l ? (o && (o.get = "stale-fetching"), i && h.__staleWhileFetching !== void 0 ? (o && (o.returnedStale = !0), h.__staleWhileFetching) : void 0) : (n || this.#v(e, "expire"), o && (o.get = "stale"), i ? (o && (o.returnedStale = !0), h) : void 0) : (o && (o.get = l ? "fetching" : "hit"), this.#L(r), s && this.#x(r), l ? h.__staleWhileFetching : h);
-		}
-		#$(e, t) {
-			this.#c[t] = e, this.#a[e] = t;
-		}
-		#L(e) {
-			e !== this.#h && (e === this.#l ? this.#l = this.#a[e] : this.#$(this.#c[e], this.#a[e]), this.#$(this.#h, e), this.#h = e);
-		}
-		delete(e) {
-			return this.#v(e, "delete");
-		}
-		#v(e, t) {
-			S.hasSubscribers && S.publish({
-				op: "delete",
-				delete: t,
-				key: e
-			});
-			let i = !1;
-			if (this.#n !== 0) {
-				let s = this.#s.get(e);
-				if (s !== void 0) if (this.#g?.[s] && (clearTimeout(this.#g?.[s]), this.#g[s] = void 0), i = !0, this.#n === 1) this.#q(t);
-				else {
-					this.#R(s);
-					let n = this.#t[s];
-					if (this.#e(n) ? n.__abortController.abort(/* @__PURE__ */ new Error("deleted")) : (this.#T || this.#f) && (this.#T && this.#w?.(n, e, t), this.#f && this.#r?.push([
-						n,
-						e,
-						t
-					])), this.#s.delete(e), this.#i[s] = void 0, this.#t[s] = void 0, s === this.#h) this.#h = this.#c[s];
-					else if (s === this.#l) this.#l = this.#a[s];
-					else {
-						let o = this.#c[s];
-						this.#a[o] = this.#a[s];
-						let r = this.#a[s];
-						this.#c[r] = this.#c[s];
-					}
-					this.#n--, this.#y.push(s);
-				}
-			}
-			if (this.#f && this.#r?.length) {
-				let s = this.#r, n;
-				for (; n = s?.shift();) this.#S?.(...n);
-			}
-			return i;
-		}
-		clear() {
-			return this.#q("delete");
-		}
-		#q(e) {
-			for (let t of this.#z({ allowStale: !0 })) {
-				let i = this.#t[t];
-				if (this.#e(i)) i.__abortController.abort(/* @__PURE__ */ new Error("deleted"));
-				else {
-					let s = this.#i[t];
-					this.#T && this.#w?.(i, s, e), this.#f && this.#r?.push([
-						i,
-						s,
-						e
-					]);
-				}
-			}
-			if (this.#s.clear(), this.#t.fill(void 0), this.#i.fill(void 0), this.#d && this.#F) {
-				this.#d.fill(0), this.#F.fill(0);
-				for (let t of this.#g ?? []) t !== void 0 && clearTimeout(t);
-				this.#g?.fill(void 0);
-			}
-			if (this.#_ && this.#_.fill(0), this.#l = 0, this.#h = 0, this.#y.length = 0, this.#b = 0, this.#n = 0, this.#f && this.#r) {
-				let t = this.#r, i;
-				for (; i = t?.shift();) this.#S?.(...i);
-			}
-		}
-	};
 }));
 //#endregion
 //#region ../walletkit/dist/esm/core/JettonsManager.js
@@ -36545,7 +36298,7 @@ var init_analytics = __esmMin((() => {
 	init_types$2();
 }));
 //#endregion
-//#region ../walletkit/dist/esm/types/toncenter/v3/NFTCollectionV3.js
+//#region ../walletkit/dist/esm/clients/toncenter/types/v3/NFTCollectionV3.js
 function toNftCollection(address, data) {
 	if (!data) if (address) return { address: asAddressFriendly(address) };
 	else return null;
@@ -36579,7 +36332,7 @@ var init_NFTCollectionV3 = __esmMin((() => {
 	init_utils$4();
 }));
 //#endregion
-//#region ../walletkit/dist/esm/types/toncenter/v3/NftItemV3.js
+//#region ../walletkit/dist/esm/clients/toncenter/types/v3/NftItemV3.js
 function toNftItem(data) {
 	const out = {
 		address: asAddressFriendly(data.address),
@@ -36603,7 +36356,7 @@ var init_NftItemV3 = __esmMin((() => {
 	init_NFTCollectionV3();
 }));
 //#endregion
-//#region ../walletkit/dist/esm/types/toncenter/v3/NftTokenInfoV3.js
+//#region ../walletkit/dist/esm/clients/toncenter/types/v3/NftTokenInfoV3.js
 /**
 * Copyright (c) TonTech.
 *
@@ -36632,7 +36385,7 @@ function toTokenInfo(data) {
 }
 var init_NftTokenInfoV3 = __esmMin((() => {}));
 //#endregion
-//#region ../walletkit/dist/esm/types/toncenter/TokenInfo.js
+//#region ../walletkit/dist/esm/clients/toncenter/types/nfts.js
 /**
 * Copyright (c) TonTech.
 *
@@ -36641,8 +36394,8 @@ var init_NftTokenInfoV3 = __esmMin((() => {}));
 *
 */
 function toApiTokenInfo(data) {
-	var lottie;
-	var animationUrl;
+	let lottie;
+	let animationUrl;
 	if (data?.extra?.animation_url) animationUrl = data.extra.animation_url;
 	else if (data?.extra?.content_url && data.extra.content_url.includes("mp4")) animationUrl = data.extra.content_url;
 	if (data.lottie) lottie = data.lottie;
@@ -36666,9 +36419,9 @@ function toApiTokenInfo(data) {
 		symbol: data.symbol
 	};
 }
-var init_TokenInfo = __esmMin((() => {}));
+var init_nfts = __esmMin((() => {}));
 //#endregion
-//#region ../walletkit/dist/esm/types/toncenter/v3/NftItemsResponseV3.js
+//#region ../walletkit/dist/esm/clients/toncenter/types/v3/NftItemsResponseV3.js
 function toNftItemsResponse(data) {
 	const metadata = {};
 	const collections = {};
@@ -36716,10 +36469,194 @@ var init_NftItemsResponseV3 = __esmMin((() => {
 	init_utils$4();
 	init_NftTokenInfoV3();
 	init_NFTCollectionV3();
-	init_TokenInfo();
+	init_nfts();
 }));
 //#endregion
-//#region ../walletkit/dist/esm/types/toncenter/v3/DNSRecordV3.js
+//#region ../walletkit/dist/esm/clients/toncenter/utils.js
+var import_dist$18, padBase64, parseMsgSizeCount, prepareAddress, parseInternalTransactionId;
+var init_utils$2 = __esmMin((() => {
+	import_dist$18 = require_dist$1();
+	init_utils$4();
+	padBase64 = (data) => {
+		return data.padEnd(data.length + (4 - data.length % 4), "=");
+	};
+	parseMsgSizeCount = (value) => {
+		if (value === void 0) return void 0;
+		const num = Number(value);
+		if (!Number.isFinite(num)) return void 0;
+		return Math.trunc(num);
+	};
+	prepareAddress = (address) => {
+		if (address instanceof import_dist$18.Address) address = address.toString();
+		return address;
+	};
+	parseInternalTransactionId = (data) => {
+		if (data.hash !== "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=") return {
+			lt: data.lt,
+			hash: Base64ToHex(data.hash)
+		};
+		return null;
+	};
+}));
+//#endregion
+//#region ../walletkit/dist/esm/types/toncenter/v3/AddressBookRowV3.js
+function toAddressBookEntry(row) {
+	return {
+		domain: row.domain ?? void 0,
+		address: asAddressFriendly(row.user_friendly),
+		interfaces: row.interfaces ?? []
+	};
+}
+function toAddressBook(addressBookV3) {
+	const addressBook = {};
+	for (const [_, row] of Object.entries(addressBookV3)) {
+		const userFriendlyAddress = asAddressFriendly(row.user_friendly);
+		addressBook[userFriendlyAddress] = toAddressBookEntry(row);
+	}
+	return addressBook;
+}
+var init_AddressBookRowV3 = __esmMin((() => {
+	init_address$1();
+}));
+//#endregion
+//#region ../walletkit/dist/esm/clients/toncenter/mappers/map-transactions.js
+function toTransactionsResponse(response) {
+	return {
+		transactions: response.transactions?.map(toTransaction) ?? [],
+		addressBook: toAddressBook(response.address_book)
+	};
+}
+function toTransaction(tx) {
+	return {
+		account: asAddressFriendly(tx.account),
+		accountStateBefore: toAccountState$1(tx.account_state_before),
+		accountStateAfter: toAccountState$1(tx.account_state_after),
+		description: toTransactionDescription$1(tx.description),
+		hash: Base64ToHex(tx.hash),
+		logicalTime: tx.lt,
+		now: tx.now,
+		mcBlockSeqno: tx.mc_block_seqno,
+		traceExternalHash: Base64ToHex(tx.trace_external_hash),
+		traceId: tx.trace_id ?? void 0,
+		previousTransactionHash: tx.prev_trans_hash ? Base64ToHex(tx.prev_trans_hash) : void 0,
+		previousTransactionLogicalTime: tx.prev_trans_lt ?? void 0,
+		origStatus: toAccountStatus$2(tx.orig_status),
+		endStatus: toAccountStatus$2(tx.end_status),
+		totalFees: tx.total_fees,
+		totalFeesExtraCurrencies: tx.total_fees_extra_currencies,
+		blockRef: toTransactionBlockRef$1(tx.block_ref),
+		inMessage: tx.in_msg ? toTransactionMessage$1(tx.in_msg) : void 0,
+		outMessages: tx.out_msgs?.map(toTransactionMessage$1) ?? [],
+		isEmulated: tx.emulated
+	};
+}
+function toAccountStatus$2(status) {
+	if (status === "active") return { type: "active" };
+	else if (status === "frozen") return { type: "frozen" };
+	else if (status === "uninit") return { type: "uninit" };
+	else return {
+		type: "unknown",
+		value: status
+	};
+}
+function toTransactionBlockRef$1(ref) {
+	return {
+		workchain: ref.workchain,
+		shard: ref.shard,
+		seqno: ref.seqno
+	};
+}
+function toTransactionDescription$1(desc) {
+	return {
+		type: desc.type,
+		isAborted: desc.aborted,
+		isDestroyed: desc.destroyed,
+		isCreditFirst: desc.credit_first,
+		isTock: desc.is_tock,
+		isInstalled: desc.installed,
+		storagePhase: {
+			storageFeesCollected: desc.storage_ph?.storage_fees_collected,
+			statusChange: desc.storage_ph?.status_change
+		},
+		creditPhase: desc.credit_ph ? { credit: desc.credit_ph?.credit } : void 0,
+		computePhase: {
+			isSkipped: desc.compute_ph?.skipped,
+			isSuccess: desc.compute_ph?.success,
+			isMessageStateUsed: desc.compute_ph?.msg_state_used,
+			isAccountActivated: desc.compute_ph?.account_activated,
+			gasFees: desc.compute_ph?.gas_fees,
+			gasUsed: desc.compute_ph?.gas_used,
+			gasLimit: desc.compute_ph?.gas_limit,
+			gasCredit: desc.compute_ph?.gas_credit,
+			mode: desc.compute_ph?.mode,
+			exitCode: desc.compute_ph?.exit_code,
+			vmStepsNumber: desc.compute_ph?.vm_steps,
+			vmInitStateHash: desc.compute_ph?.vm_init_state_hash ? Base64ToHex(desc.compute_ph.vm_init_state_hash) : void 0,
+			vmFinalStateHash: desc.compute_ph?.vm_final_state_hash ? Base64ToHex(desc.compute_ph.vm_final_state_hash) : void 0
+		},
+		action: {
+			isSuccess: desc.action?.success,
+			isValid: desc.action?.valid,
+			hasNoFunds: desc.action?.no_funds,
+			statusChange: desc.action?.status_change,
+			totalForwardingFees: desc.action?.total_fwd_fees,
+			totalActionFees: desc.action?.total_action_fees,
+			resultCode: desc.action?.result_code,
+			totalActionsNumber: desc.action?.tot_actions,
+			specActionsNumber: desc.action?.spec_actions,
+			skippedActionsNumber: desc.action?.skipped_actions,
+			messagesCreatedNumber: desc.action?.msgs_created,
+			actionListHash: desc.action?.action_list_hash ? Base64ToHex(desc.action.action_list_hash) : void 0,
+			totalMessagesSize: {
+				cells: parseMsgSizeCount(desc.action?.tot_msg_size.cells),
+				bits: parseMsgSizeCount(desc.action?.tot_msg_size.bits)
+			}
+		}
+	};
+}
+function toTransactionMessage$1(msg) {
+	return {
+		hash: Base64ToHex(msg.hash),
+		normalizedHash: msg.hash_norm ? Base64ToHex(msg.hash_norm) : void 0,
+		source: asMaybeAddressFriendly(msg.source) ?? void 0,
+		destination: asMaybeAddressFriendly(msg.destination) ?? void 0,
+		value: msg.value ?? void 0,
+		valueExtraCurrencies: msg.value_extra_currencies,
+		fwdFee: msg.fwd_fee ?? void 0,
+		ihrFee: msg.ihr_fee ?? void 0,
+		creationLogicalTime: msg.created_lt ?? void 0,
+		createdAt: msg.created_at ? Number(msg.created_at) : void 0,
+		ihrDisabled: msg.ihr_disabled ?? void 0,
+		isBounce: msg.bounce ?? void 0,
+		isBounced: msg.bounced ?? void 0,
+		importFee: msg.import_fee ?? void 0,
+		opcode: msg.opcode ?? void 0,
+		messageContent: {
+			hash: msg.message_content?.hash ? Base64ToHex(msg.message_content.hash) : void 0,
+			body: msg.message_content?.body ? msg.message_content.body : void 0,
+			decoded: msg.message_content?.decoded ?? void 0
+		}
+	};
+}
+function toAccountState$1(state) {
+	return {
+		hash: Base64ToHex(state.hash),
+		balance: state.balance,
+		extraCurrencies: state.extra_currencies ?? void 0,
+		accountStatus: state.account_status ? toAccountStatus$2(state.account_status) : void 0,
+		frozenHash: state.frozen_hash ? Base64ToHex(state.frozen_hash) : void 0,
+		dataHash: state.data_hash ? Base64ToHex(state.data_hash) : void 0,
+		codeHash: state.code_hash ? Base64ToHex(state.code_hash) : void 0
+	};
+}
+var init_map_transactions$2 = __esmMin((() => {
+	init_base64();
+	init_address$1();
+	init_utils$2();
+	init_AddressBookRowV3();
+}));
+//#endregion
+//#region ../walletkit/dist/esm/clients/toncenter/types/v3/DNSRecordV3.js
 function toDnsRecord(data) {
 	return {
 		dnsNextResolver: data.dns_next_resolver,
@@ -36735,7 +36672,7 @@ var init_DNSRecordV3 = __esmMin((() => {
 	init_address$1();
 }));
 //#endregion
-//#region ../walletkit/dist/esm/types/toncenter/v3/DNSRecordsResponseV3.js
+//#region ../walletkit/dist/esm/clients/toncenter/types/v3/DNSRecordsResponseV3.js
 function toDnsRecords(data) {
 	const out = {
 		addressBook: {},
@@ -36747,6 +36684,179 @@ function toDnsRecords(data) {
 var init_DNSRecordsResponseV3 = __esmMin((() => {
 	init_DNSRecordV3();
 	init_address$1();
+}));
+//#endregion
+//#region ../walletkit/dist/esm/clients/toncenter/mappers/map-emulation.js
+function normalizeAccountStatus(status) {
+	if (status === "active") return "active";
+	if (status === "frozen") return "frozen";
+	if (status === "nonexist") return "nonexist";
+	return "uninit";
+}
+function mapTraceNode$1(node) {
+	return {
+		txHash: Base64ToHex(node.tx_hash),
+		inMsgHash: node.in_msg_hash ? Base64ToHex(node.in_msg_hash) : void 0,
+		children: node.children?.map(mapTraceNode$1) ?? []
+	};
+}
+function mapAccountState$1(state) {
+	return {
+		hash: Base64ToHex(state.hash),
+		balance: state.balance,
+		extraCurrencies: state.extra_currencies ?? void 0,
+		accountStatus: normalizeAccountStatus(state.account_status),
+		frozenHash: state.frozen_hash ? Base64ToHex(state.frozen_hash) : void 0,
+		dataHash: state.data_hash ? Base64ToHex(state.data_hash) : void 0,
+		codeHash: state.code_hash ? Base64ToHex(state.code_hash) : void 0
+	};
+}
+function mapDescription(desc) {
+	return {
+		type: desc.type,
+		isAborted: desc.aborted,
+		isDestroyed: desc.destroyed,
+		isCreditFirst: desc.credit_first,
+		isTock: desc.is_tock,
+		isInstalled: desc.installed,
+		storagePhase: {
+			storageFeesCollected: desc.storage_ph.storage_fees_collected,
+			statusChange: desc.storage_ph.status_change
+		},
+		creditPhase: desc.credit_ph ? { credit: desc.credit_ph.credit } : void 0,
+		computePhase: {
+			isSkipped: desc.compute_ph.skipped,
+			isSuccess: desc.compute_ph.success,
+			isMsgStateUsed: desc.compute_ph.msg_state_used,
+			isAccountActivated: desc.compute_ph.account_activated,
+			gasFees: desc.compute_ph.gas_fees,
+			gasUsed: desc.compute_ph.gas_used,
+			gasLimit: desc.compute_ph.gas_limit,
+			gasCredit: desc.compute_ph.gas_credit,
+			mode: desc.compute_ph.mode,
+			exitCode: desc.compute_ph.exit_code,
+			vmSteps: desc.compute_ph.vm_steps,
+			vmInitStateHash: desc.compute_ph.vm_init_state_hash ? Base64ToHex(desc.compute_ph.vm_init_state_hash) : void 0,
+			vmFinalStateHash: desc.compute_ph.vm_final_state_hash ? Base64ToHex(desc.compute_ph.vm_final_state_hash) : void 0
+		},
+		actionPhase: desc.action ? {
+			isSuccess: desc.action.success,
+			isValid: desc.action.valid,
+			hasNoFunds: desc.action.no_funds,
+			statusChange: desc.action.status_change,
+			totalFwdFees: desc.action.total_fwd_fees,
+			totalActionFees: desc.action.total_action_fees,
+			resultCode: desc.action.result_code,
+			totalActions: desc.action.tot_actions,
+			specActions: desc.action.spec_actions,
+			skippedActions: desc.action.skipped_actions,
+			msgsCreated: desc.action.msgs_created,
+			actionListHash: desc.action.action_list_hash ? Base64ToHex(desc.action.action_list_hash) : void 0,
+			totalMsgSize: {
+				cells: parseMsgSizeCount(desc.action.tot_msg_size.cells) ?? 0,
+				bits: parseMsgSizeCount(desc.action.tot_msg_size.bits) ?? 0
+			}
+		} : void 0
+	};
+}
+function mapMessage$1(msg) {
+	return {
+		hash: Base64ToHex(msg.hash),
+		normalizedHash: msg.hash_norm ? Base64ToHex(msg.hash_norm) : void 0,
+		source: asMaybeAddressFriendly(msg.source) ?? void 0,
+		destination: asMaybeAddressFriendly(msg.destination) ?? msg.destination,
+		value: msg.value ?? void 0,
+		valueExtraCurrencies: msg.value_extra_currencies,
+		fwdFee: msg.fwd_fee ?? void 0,
+		ihrFee: msg.ihr_fee ?? void 0,
+		createdLt: msg.created_lt ?? void 0,
+		createdAt: msg.created_at !== null ? Number(msg.created_at) : void 0,
+		opcode: msg.opcode ? asHex(msg.opcode) : void 0,
+		ihrDisabled: msg.ihr_disabled ?? void 0,
+		isBounce: msg.bounce ?? void 0,
+		isBounced: msg.bounced ?? void 0,
+		importFee: msg.import_fee ?? void 0,
+		messageContent: {
+			hash: msg.message_content?.hash ? Base64ToHex(msg.message_content.hash) : void 0,
+			body: msg.message_content?.body ? asBase64(msg.message_content.body) : void 0,
+			decoded: msg.message_content?.decoded ?? void 0
+		},
+		initState: msg.init_state ?? void 0
+	};
+}
+function mapTransaction$1(tx) {
+	return {
+		account: asAddressFriendly(tx.account),
+		hash: Base64ToHex(tx.hash),
+		lt: tx.lt,
+		now: tx.now,
+		mcBlockSeqno: tx.mc_block_seqno,
+		traceExternalHash: Base64ToHex(tx.trace_external_hash),
+		prevTransHash: tx.prev_trans_hash ? Base64ToHex(tx.prev_trans_hash) : void 0,
+		prevTransLt: tx.prev_trans_lt ?? void 0,
+		origStatus: normalizeAccountStatus(tx.orig_status),
+		endStatus: normalizeAccountStatus(tx.end_status),
+		totalFees: tx.total_fees,
+		totalFeesExtraCurrencies: tx.total_fees_extra_currencies,
+		description: mapDescription(tx.description),
+		blockRef: {
+			workchain: tx.block_ref.workchain,
+			shard: tx.block_ref.shard,
+			seqno: tx.block_ref.seqno
+		},
+		inMsg: tx.in_msg ? mapMessage$1(tx.in_msg) : void 0,
+		outMsgs: tx.out_msgs?.map(mapMessage$1) ?? [],
+		accountStateBefore: mapAccountState$1(tx.account_state_before),
+		accountStateAfter: mapAccountState$1(tx.account_state_after),
+		isEmulated: tx.emulated,
+		...tx.trace_id !== void 0 ? { traceId: tx.trace_id } : {}
+	};
+}
+function mapAction$1(action) {
+	return {
+		traceId: action.trace_id ?? void 0,
+		actionId: Base64ToHex(action.action_id),
+		startLt: action.start_lt,
+		endLt: action.end_lt,
+		startUtime: action.start_utime,
+		endUtime: action.end_utime,
+		traceEndLt: action.trace_end_lt,
+		traceEndUtime: action.trace_end_utime,
+		traceMcSeqnoEnd: action.trace_mc_seqno_end,
+		transactions: action.transactions.map(Base64ToHex),
+		isSuccess: action.success,
+		type: action.type,
+		traceExternalHash: Base64ToHex(action.trace_external_hash),
+		accounts: action.accounts.map(asMaybeAddressFriendly).filter((a) => a !== null),
+		details: action.details
+	};
+}
+function mapToncenterEmulationResponse(raw) {
+	const transactions = Object.fromEntries(Object.entries(raw.transactions ?? {}).map(([hash, tx]) => [Base64ToHex(hash), mapTransaction$1(tx)]));
+	const addressBook = Object.fromEntries(Object.entries(raw.address_book ?? {}).map(([addr, row]) => [addr, {
+		domain: row.domain ?? void 0,
+		userFriendly: asAddressFriendly(row.user_friendly),
+		interfaces: row.interfaces ?? []
+	}]));
+	const codeCells = Object.fromEntries(Object.entries(raw.code_cells ?? {}).map(([hash, cell]) => [Base64ToHex(hash), asBase64(cell)]));
+	const dataCells = Object.fromEntries(Object.entries(raw.data_cells ?? {}).map(([hash, cell]) => [Base64ToHex(hash), asBase64(cell)]));
+	return {
+		mcBlockSeqno: raw.mc_block_seqno,
+		trace: mapTraceNode$1(raw.trace),
+		transactions,
+		actions: raw.actions?.map(mapAction$1) ?? [],
+		randSeed: Base64ToHex(raw.rand_seed),
+		isIncomplete: raw.is_incomplete,
+		codeCells,
+		dataCells,
+		addressBook
+	};
+}
+var init_map_emulation$1 = __esmMin((() => {
+	init_base64();
+	init_hex();
+	init_address$1();
+	init_utils$2();
 }));
 //#endregion
 //#region ../walletkit/dist/esm/clients/TonClientError.js
@@ -36844,40 +36954,20 @@ var init_BaseApiClient = __esmMin((() => {
 	};
 }));
 //#endregion
-//#region ../walletkit/dist/esm/clients/toncenter/utils.js
-var import_dist$18, padBase64, prepareAddress, parseInternalTransactionId;
-var init_utils$2 = __esmMin((() => {
-	import_dist$18 = require_dist$1();
-	init_utils$4();
-	padBase64 = (data) => {
-		return data.padEnd(data.length + (4 - data.length % 4), "=");
-	};
-	prepareAddress = (address) => {
-		if (address instanceof import_dist$18.Address) address = address.toString();
-		return address;
-	};
-	parseInternalTransactionId = (data) => {
-		if (data.hash !== "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=") return {
-			lt: data.lt,
-			hash: Base64ToHex(data.hash)
-		};
-		return null;
-	};
-}));
-//#endregion
 //#region ../walletkit/dist/esm/clients/toncenter/ApiClientToncenter.js
 var import_dist$17, log$11, ApiClientToncenter;
 var init_ApiClientToncenter = __esmMin((() => {
 	import_dist$17 = require_dist$1();
 	init_base64();
 	init_NftItemsResponseV3();
-	init_emulation();
+	init_map_transactions$2();
 	init_retry();
 	init_Logger();
 	init_DNSRecordsResponseV3();
 	init_AccountEvent();
 	init_models();
 	init_address$1();
+	init_map_emulation$1();
 	init_BaseApiClient();
 	init_utils$2();
 	init_TonClientError();
@@ -36914,7 +37004,7 @@ var init_ApiClientToncenter = __esmMin((() => {
 			};
 			return {
 				result: "success",
-				emulationResult: await this.postJson("/api/emulate/v1/emulateTrace", props)
+				emulationResult: mapToncenterEmulationResponse(await this.postJson("/api/emulate/v1/emulateTrace", props))
 			};
 		}
 		async sendBoc(boc) {
@@ -37029,7 +37119,6 @@ var init_ApiClientToncenter = __esmMin((() => {
 				offset: 0
 			}));
 			if (response.records.length > 0 && response.records[0].dnsWallet) return response.records[0].dnsWallet;
-			return null;
 		}
 		async backResolveDnsWallet(wallet) {
 			if (wallet instanceof import_dist$17.Address) wallet = wallet.toString();
@@ -37039,7 +37128,6 @@ var init_ApiClientToncenter = __esmMin((() => {
 				offset: 0
 			}));
 			if (response.records.length > 0) return response.records[0].domain;
-			return null;
 		}
 		async jettonsByAddress(request) {
 			return this.getJson("/api/v3/jetton/masters", {
@@ -38170,8 +38258,8 @@ function mapTonApiDescription(raw) {
 			skippedActionsNumber: raw.action_phase?.skipped_actions ?? 0,
 			messagesCreatedNumber: raw.out_msgs?.length ?? 0,
 			totalMessagesSize: {
-				cells: "0",
-				bits: "0"
+				cells: 0,
+				bits: 0
 			}
 		}
 	};
@@ -38203,6 +38291,299 @@ var init_map_transactions$1 = __esmMin((() => {
 	init_utils$4();
 }));
 //#endregion
+//#region ../walletkit/dist/esm/clients/tonapi/mappers/map-emulation.js
+function mapTraceNode(trace) {
+	return {
+		txHash: toHex(trace.transaction.hash),
+		inMsgHash: trace.transaction.in_msg?.hash ? toHex(trace.transaction.in_msg.hash) : void 0,
+		children: (trace.children ?? []).map(mapTraceNode)
+	};
+}
+function mapMessage(raw, kind) {
+	const extraCurrencies = {};
+	for (const c of raw.value_extra ?? []) extraCurrencies[String(c.id)] = String(c.amount ?? 0);
+	const isExternal = !raw.source;
+	return {
+		hash: toHex(raw.hash),
+		source: raw.source?.address ? asAddressFriendly(raw.source.address) : void 0,
+		destination: raw.destination?.address ? asAddressFriendly(raw.destination.address) ?? "" : "",
+		value: isExternal ? void 0 : raw.value != null ? String(raw.value) : void 0,
+		valueExtraCurrencies: extraCurrencies,
+		fwdFee: isExternal ? void 0 : raw.fwd_fee != null ? String(raw.fwd_fee) : void 0,
+		ihrFee: isExternal ? void 0 : raw.ihr_fee != null ? String(raw.ihr_fee) : void 0,
+		createdLt: isExternal ? void 0 : raw.created_lt != null ? String(raw.created_lt) : void 0,
+		createdAt: isExternal ? void 0 : raw.created_at != null ? Number(raw.created_at) : void 0,
+		opcode: raw.op_code ? asHex(raw.op_code) : void 0,
+		ihrDisabled: isExternal ? void 0 : raw.ihr_disabled ?? void 0,
+		isBounce: isExternal ? void 0 : raw.bounce ?? void 0,
+		isBounced: isExternal ? void 0 : raw.bounced ?? void 0,
+		importFee: kind === "out" || !isExternal ? void 0 : raw.import_fee != null ? String(raw.import_fee) : void 0,
+		messageContent: {
+			hash: void 0,
+			body: void 0,
+			decoded: raw.decoded_body ?? void 0
+		},
+		initState: void 0
+	};
+}
+function mapAccountStatus(status) {
+	if (status === "active") return "active";
+	if (status === "frozen") return "frozen";
+	if (status === "nonexist") return "nonexist";
+	return "uninit";
+}
+function normalizeTransactionType(type) {
+	switch (type) {
+		case "TransOrd": return "ord";
+		case "TransTickTock": return "ticktock";
+		case "TransStorage": return "storage";
+		case "TransCreditFirst": return "credit_first";
+		default: return type ?? "ord";
+	}
+}
+function normalizeStatusChange(status) {
+	if (!status) return "unchanged";
+	return status.startsWith("acst_") ? status.slice(5) : status;
+}
+function mapTransaction(traceNode, rootHash) {
+	const raw = traceNode.transaction;
+	const childInMsgs = (traceNode.children ?? []).map((c) => c.transaction.in_msg).filter((m) => m != null);
+	const outMsgs = raw.out_msgs && raw.out_msgs.length > 0 ? raw.out_msgs : childInMsgs;
+	const blockRef = parseBlockRef(raw.block);
+	return {
+		account: asAddressFriendly(raw.account.address),
+		hash: toHex(raw.hash),
+		lt: String(raw.lt ?? 0),
+		now: Number(raw.utime ?? 0),
+		mcBlockSeqno: blockRef.seqno,
+		traceExternalHash: rootHash,
+		prevTransHash: raw.prev_trans_hash ? toHex(raw.prev_trans_hash) : void 0,
+		prevTransLt: raw.prev_trans_lt != null ? String(raw.prev_trans_lt) : void 0,
+		origStatus: mapAccountStatus(raw.orig_status),
+		endStatus: mapAccountStatus(raw.end_status),
+		totalFees: String(raw.total_fees ?? 0),
+		totalFeesExtraCurrencies: {},
+		description: {
+			type: normalizeTransactionType(raw.transaction_type),
+			isAborted: raw.aborted ?? !(raw.success ?? true),
+			isDestroyed: raw.destroyed ?? false,
+			isCreditFirst: !raw.in_msg?.bounce,
+			isTock: false,
+			isInstalled: false,
+			storagePhase: {
+				storageFeesCollected: String(raw.storage_phase?.storage_fees_collected ?? 0),
+				statusChange: normalizeStatusChange(raw.storage_phase?.status_change)
+			},
+			creditPhase: raw.credit_phase?.credit != null ? { credit: String(raw.credit_phase.credit) } : void 0,
+			computePhase: {
+				isSkipped: raw.compute_phase?.skipped ?? false,
+				isSuccess: raw.compute_phase?.success ?? raw.success ?? true,
+				isMsgStateUsed: false,
+				isAccountActivated: false,
+				gasFees: String(raw.compute_phase?.gas_fees ?? 0),
+				gasUsed: String(raw.compute_phase?.gas_used ?? 0),
+				gasLimit: String(raw.compute_phase?.gas_used ?? 0),
+				mode: 0,
+				exitCode: raw.compute_phase?.exit_code ?? (raw.success ? 0 : 1),
+				vmSteps: raw.compute_phase?.vm_steps ?? 0
+			},
+			actionPhase: raw.action_phase ? {
+				isSuccess: raw.action_phase.success ?? raw.success ?? true,
+				isValid: true,
+				hasNoFunds: false,
+				statusChange: "unchanged",
+				totalFwdFees: String(raw.action_phase.fwd_fees ?? 0),
+				totalActionFees: String(raw.action_phase.total_fees ?? 0),
+				resultCode: raw.action_phase.result_code ?? 0,
+				totalActions: raw.action_phase.total_actions ?? 0,
+				specActions: 0,
+				skippedActions: raw.action_phase.skipped_actions ?? 0,
+				msgsCreated: outMsgs.length,
+				totalMsgSize: {
+					cells: 0,
+					bits: 0
+				}
+			} : void 0
+		},
+		blockRef,
+		inMsg: raw.in_msg ? mapMessage(raw.in_msg, "in") : void 0,
+		outMsgs: outMsgs.map((m) => mapMessage(m, "out")),
+		accountStateBefore: {
+			balance: String(raw.end_balance ?? 0),
+			accountStatus: mapAccountStatus(raw.orig_status)
+		},
+		accountStateAfter: {
+			balance: String(raw.end_balance ?? 0),
+			accountStatus: mapAccountStatus(raw.end_status)
+		},
+		isEmulated: true,
+		traceId: void 0
+	};
+}
+function flattenTrace$1(trace) {
+	return [trace, ...(trace.children ?? []).flatMap(flattenTrace$1)];
+}
+function buildAddressBook(traces) {
+	const book = {};
+	function addRef(ref) {
+		if (!ref?.address) return;
+		const key = ref.address.toUpperCase();
+		if (!book[key]) book[key] = {
+			userFriendly: asAddressFriendly(ref.address),
+			domain: ref.name ?? void 0,
+			interfaces: []
+		};
+	}
+	for (const node of traces) {
+		const tx = node.transaction;
+		addRef(tx.account);
+		if (tx.in_msg?.source) addRef(tx.in_msg.source);
+		if (tx.in_msg?.destination) addRef(tx.in_msg.destination);
+		for (const msg of tx.out_msgs ?? []) {
+			if (msg.source) addRef(msg.source);
+			if (msg.destination) addRef(msg.destination);
+		}
+	}
+	return book;
+}
+function normalizeJettonTransferDetails(payload) {
+	const sender = payload.sender;
+	const recipient = payload.recipient;
+	return {
+		asset: payload.jetton?.address ?? null,
+		sender: sender?.address ?? null,
+		receiver: recipient?.address ?? null,
+		sender_jetton_wallet: payload.senders_wallet ?? null,
+		receiver_jetton_wallet: payload.recipients_wallet ?? null,
+		amount: payload.amount ?? "0",
+		comment: payload.comment ?? null,
+		is_encrypted_comment: payload.is_encrypted_comment ?? false,
+		query_id: payload.query_id ?? "0",
+		response_destination: payload.response_destination ?? null,
+		custom_payload: payload.custom_payload ?? null,
+		forward_payload: payload.forward_payload ?? null,
+		forward_amount: payload.forward_amount ?? "0"
+	};
+}
+function mapAction(action, event, rootHash) {
+	const lt = String(event.lt ?? 0);
+	const utime = Number(event.timestamp ?? 0);
+	const actionId = toHex(String(action.base_transactions?.[0] ?? event.event_id));
+	const transactions = (action.base_transactions ?? []).map((h) => toHex(String(h)));
+	let type = action.type ?? "unknown";
+	let details = {};
+	const payload = type ? action[type] : void 0;
+	if (type === "TonTransfer" && payload) {
+		type = "ton_transfer";
+		details = {
+			source: payload.sender?.address ?? "",
+			destination: payload.recipient?.address ?? "",
+			value: String(payload.amount ?? 0),
+			value_extra_currencies: null,
+			comment: payload.comment ?? null,
+			encrypted: false
+		};
+	} else if (type === "JettonTransfer" && payload) {
+		type = "jetton_transfer";
+		details = normalizeJettonTransferDetails(payload);
+	} else if (type === "NftItemTransfer" && payload) {
+		type = "nft_transfer";
+		const sender = payload.sender;
+		const recipient = payload.recipient;
+		details = {
+			nft_collection: null,
+			nft_item: payload.nft ?? null,
+			nft_item_index: null,
+			old_owner: sender?.address ?? null,
+			new_owner: recipient?.address ?? null,
+			is_purchase: false,
+			query_id: "0",
+			response_destination: null,
+			custom_payload: null,
+			forward_payload: null,
+			forward_amount: "0",
+			comment: null,
+			is_encrypted_comment: false,
+			marketplace: null
+		};
+	} else if (type === "JettonSwap" && payload) {
+		type = "jetton_swap";
+		const inAsset = payload.in;
+		const outAsset = payload.out;
+		const userWallet = payload.user_wallet;
+		const router = payload.router;
+		details = {
+			dex: payload.dex ?? "",
+			sender: userWallet?.address ?? "",
+			dex_incoming_transfer: {
+				asset: inAsset?.jetton?.address ?? "TON",
+				source: userWallet?.address ?? "",
+				destination: router?.address ?? "",
+				source_jetton_wallet: null,
+				destination_jetton_wallet: null,
+				amount: String(payload.amount_in ?? payload.ton_in ?? inAsset?.amount ?? 0)
+			},
+			dex_outgoing_transfer: {
+				asset: outAsset?.jetton?.address ?? "TON",
+				source: router?.address ?? "",
+				destination: userWallet?.address ?? "",
+				source_jetton_wallet: null,
+				destination_jetton_wallet: null,
+				amount: String(payload.amount_out ?? payload.ton_out ?? outAsset?.amount ?? 0)
+			},
+			peer_swaps: []
+		};
+	} else if (type === "ContractDeploy" && payload) {
+		type = "contract_deploy";
+		details = {
+			opcode: null,
+			destination: payload.address ?? null
+		};
+	} else if (payload) details = payload;
+	return {
+		actionId,
+		startLt: lt,
+		endLt: lt,
+		startUtime: utime,
+		endUtime: utime,
+		traceEndLt: "0",
+		traceEndUtime: 0,
+		traceMcSeqnoEnd: 0,
+		transactions,
+		isSuccess: action.status === "ok",
+		type,
+		traceExternalHash: rootHash,
+		accounts: (action.simple_preview?.accounts ?? []).map((a) => {
+			const addr = typeof a === "string" ? a : a.address;
+			return asMaybeAddressFriendly(addr) ?? addr;
+		}),
+		details
+	};
+}
+function mapTonApiEmulationResponse(result) {
+	const rootTxHash = toHex(result.trace.transaction.hash);
+	const externalHash = result.trace.transaction.in_msg?.hash ? toHex(result.trace.transaction.in_msg.hash) : rootTxHash;
+	const allTraces = flattenTrace$1(result.trace);
+	const transactions = Object.fromEntries(allTraces.map((traceNode) => [toHex(traceNode.transaction.hash), mapTransaction(traceNode, externalHash)]));
+	const actions = (result.event.actions ?? []).map((a) => mapAction(a, result.event, externalHash));
+	return {
+		mcBlockSeqno: transactions[rootTxHash]?.mcBlockSeqno ?? 0,
+		trace: mapTraceNode(result.trace),
+		transactions,
+		actions,
+		randSeed: asHex("0x" + "0".repeat(64)),
+		isIncomplete: false,
+		codeCells: {},
+		dataCells: {},
+		addressBook: buildAddressBook(allTraces)
+	};
+}
+var init_map_emulation = __esmMin((() => {
+	init_map_transactions$1();
+	init_hex();
+	init_address$1();
+}));
+//#endregion
 //#region ../walletkit/dist/esm/clients/tonapi/mappers/map-traces.js
 function mapTraceStatus(status) {
 	if (!status || status === "nonexist") return "uninit";
@@ -38210,9 +38591,18 @@ function mapTraceStatus(status) {
 	return status;
 }
 function flattenTrace(trace) {
-	const out = [trace.transaction];
+	const out = [trace];
 	for (const child of trace.children ?? []) out.push(...flattenTrace(child));
 	return out;
+}
+function resolveOutMsgs(node) {
+	const raw = node.transaction;
+	if (raw.out_msgs && raw.out_msgs.length > 0) return raw;
+	const childInMsgs = (node.children ?? []).map((c) => c.transaction.in_msg).filter((m) => m != null);
+	return {
+		...raw,
+		out_msgs: childInMsgs
+	};
 }
 function mapTonApiTraceNode(trace) {
 	return {
@@ -38269,7 +38659,7 @@ function mapTonApiTraceTransaction(raw) {
 			type: raw.transaction_type ?? "ord",
 			aborted: raw.aborted ?? !(raw.success ?? true),
 			destroyed: raw.destroyed ?? false,
-			credit_first: false,
+			credit_first: !raw.in_msg?.bounce,
 			is_tock: false,
 			installed: false,
 			storage_ph: {
@@ -38340,18 +38730,21 @@ function mapTonApiTraceTransaction(raw) {
 	};
 }
 function mapTonApiTrace(trace, mapTraceTransaction) {
-	const traceTransactions = flattenTrace(trace);
-	const transactions = Object.fromEntries(traceTransactions.map((tx) => [tx.hash, mapTraceTransaction(tx)]));
-	const transactionsOrder = [...traceTransactions].sort((a, b) => BigInt(a.lt ?? 0) < BigInt(b.lt ?? 0) ? -1 : 1).map((tx) => tx.hash);
-	const lts = traceTransactions.map((tx) => BigInt(tx.lt ?? 0));
-	const times = traceTransactions.map((tx) => Number(tx.utime ?? 0));
+	const traceNodes = flattenTrace(trace);
+	const transactions = Object.fromEntries(traceNodes.map((node) => {
+		const tx = resolveOutMsgs(node);
+		return [tx.hash, mapTraceTransaction(tx)];
+	}));
+	const transactionsOrder = [...traceNodes].sort((a, b) => BigInt(a.transaction.lt ?? 0) < BigInt(b.transaction.lt ?? 0) ? -1 : 1).map((node) => node.transaction.hash);
+	const lts = traceNodes.map((node) => BigInt(node.transaction.lt ?? 0));
+	const times = traceNodes.map((node) => Number(node.transaction.utime ?? 0));
 	const startLt = lts.length > 0 ? lts.reduce((min, value) => value < min ? value : min, lts[0]) : 0n;
 	const endLt = lts.length > 0 ? lts.reduce((max, value) => value > max ? value : max, lts[0]) : 0n;
 	const startUtime = times.length > 0 ? Math.min(...times) : 0;
 	const endUtime = times.length > 0 ? Math.max(...times) : 0;
 	const traceId = trace.transaction.hash;
-	const rootTx = mapTraceTransaction(trace.transaction);
-	const messagesCount = traceTransactions.reduce((acc, tx) => acc + (tx.in_msg ? 1 : 0) + (tx.out_msgs?.length ?? 0), 0);
+	const rootTx = mapTraceTransaction(resolveOutMsgs(trace));
+	const messagesCount = traceNodes.reduce((acc, node) => acc + (node.transaction.in_msg ? 1 : 0) + (node.transaction.out_msgs?.length ?? node.children?.length ?? 0), 0);
 	return {
 		address_book: {},
 		metadata: {},
@@ -38372,7 +38765,7 @@ function mapTonApiTrace(trace, mapTraceTransaction) {
 				messages: messagesCount,
 				pending_messages: 0,
 				trace_state: "complete",
-				transactions: traceTransactions.length
+				transactions: traceNodes.length
 			},
 			transactions,
 			transactions_order: transactionsOrder,
@@ -38392,7 +38785,7 @@ function normalizeTonApiAccountAddress(account) {
 function mapTonApiEvent(raw) {
 	return {
 		eventId: toHex(raw.event_id),
-		account: toAccount(raw.account, {}),
+		account: toAccount(raw.account.address, {}),
 		timestamp: Number(raw.timestamp ?? 0),
 		actions: (raw.actions ?? []).map((action) => {
 			const status = action.status === "failed" ? "failure" : "success";
@@ -38456,6 +38849,7 @@ var init_ApiClientTonApi = __esmMin((() => {
 	init_map_user_jettons();
 	init_map_nft_items();
 	init_map_methods();
+	init_map_emulation();
 	init_utils$4();
 	init_map_transactions$1();
 	init_map_traces();
@@ -38525,8 +38919,14 @@ var init_ApiClientTonApi = __esmMin((() => {
 			const { hash } = getNormalizedExtMessageHash(boc);
 			return Base64ToBigInt(hash).toString(16);
 		}
-		async fetchEmulation(_messageBoc, _ignoreSignature) {
-			throw new Error("Method not implemented.");
+		async fetchEmulation(messageBoc, ignoreSignature) {
+			return {
+				result: "success",
+				emulationResult: mapTonApiEmulationResponse(await this.postJson("/v2/wallet/emulate", {
+					boc: messageBoc,
+					ignore_signature_check: ignoreSignature === true
+				}))
+			};
 		}
 		async runGetMethod(address, method, stack, _seqno) {
 			const args = mapTonApiGetMethodArgs(stack);
@@ -38611,17 +39011,17 @@ var init_ApiClientTonApi = __esmMin((() => {
 		async resolveDnsWallet(domain) {
 			try {
 				const address = (await this.getJson(`/v2/dns/${domain}/resolve`))?.wallet?.address;
-				return address ? asAddressFriendly(address) : null;
+				return address ? asAddressFriendly(address) : void 0;
 			} catch (_e) {
-				return null;
+				return;
 			}
 		}
 		async backResolveDnsWallet(address) {
 			try {
 				const raw = await this.getJson(`/v2/accounts/${address}/dns/backresolve`);
-				return raw.domains && raw.domains.length > 0 ? raw.domains[0] : null;
+				return raw.domains && raw.domains.length > 0 ? raw.domains[0] : void 0;
 			} catch (_e) {
-				return null;
+				return;
 			}
 		}
 		async getEvents(request) {
@@ -39545,6 +39945,7 @@ var toAccountStatus, toAccountState, toTransactionBlockRef, toTransactionMessage
 var init_map_transaction = __esmMin((() => {
 	init_base64();
 	init_address$1();
+	init_utils$2();
 	toAccountStatus = (status) => {
 		if (!status) return void 0;
 		if (status === "active") return { type: "active" };
@@ -39647,7 +40048,10 @@ var init_map_transaction = __esmMin((() => {
 				skippedActionsNumber: action.skipped_actions,
 				messagesCreatedNumber: action.msgs_created,
 				actionListHash: action.action_list_hash ? Base64ToHex(action.action_list_hash) : void 0,
-				totalMessagesSize: action.tot_msg_size
+				totalMessagesSize: action.tot_msg_size ? {
+					cells: parseMsgSizeCount(action.tot_msg_size.cells),
+					bits: parseMsgSizeCount(action.tot_msg_size.bits)
+				} : void 0
 			} : void 0
 		};
 	};
@@ -45233,6 +45637,11 @@ var init_main = __esmMin((() => {
 				walletKit.removeSignDataRequestCallback();
 				walletKit.removeDisconnectCallback();
 				console.log("🗑️ All event listeners removed");
+			},
+			async createMnemonic() {
+				if (!initialized) throw new Error("WalletKit Bridge not initialized");
+				console.log("➕ Bridge: Creating mnemonic");
+				return await CreateTonMnemonic();
 			},
 			async createSignerFromMnemonic(mnemonic) {
 				if (!initialized) throw new Error("WalletKit Bridge not initialized");
