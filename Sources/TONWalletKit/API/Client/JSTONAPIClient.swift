@@ -1,9 +1,9 @@
 //
-//  TONAPIClient.swift
+//  JSTONAPIClient.swift
 //  TONWalletKit
 //
-//  Created by Nikita Rodionov on 20.01.2026.
-//  
+//  Created by Nikita Rodionov on 18.05.2026.
+//
 //  Copyright (c) 2026 TON Connect
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -12,10 +12,10 @@
 //  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 //  copies of the Software, and to permit persons to whom the Software is
 //  furnished to do so, subject to the following conditions:
-//  
+//
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-//  
+//
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,18 +25,33 @@
 //  SOFTWARE.
 
 import Foundation
+import JavaScriptCore
 
-public protocol TONAPIClient: AnyObject {
-    func network() throws -> TONNetwork
+final class JSTONAPIClient: TONAPIClient {
+    private let jsClient: any JSDynamicObject
 
-    func send(boc: TONBase64) async throws -> String
+    init(jsClient: any JSDynamicObject) {
+        self.jsClient = jsClient
+    }
+
+    func network() throws -> TONNetwork {
+        try jsClient.getNetwork()
+    }
+
+    func send(boc: TONBase64) async throws -> String {
+        try await jsClient.sendBoc(boc.value)
+    }
 
     func runGetMethod(
         address: TONUserFriendlyAddress,
         method: String,
         stack: [TONRawStackItem]?,
         seqno: UInt?
-    ) async throws -> TONGetMethodResult
+    ) async throws -> TONGetMethodResult {
+        try await jsClient.runGetMethod(address.value, method, stack, seqno)
+    }
 
-    func masterchainInfo() async throws -> TONMasterchainInfo
+    func masterchainInfo() async throws -> TONMasterchainInfo {
+        try await jsClient.getMasterchainInfo()
+    }
 }

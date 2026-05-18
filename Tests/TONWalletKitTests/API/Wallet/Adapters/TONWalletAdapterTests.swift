@@ -144,6 +144,29 @@ struct TONWalletAdapterTests {
         }
     }
 
+    @Test("signedSignMessage() calls getSignedSignMessage")
+    func signedSignMessageCalls() async throws {
+        let (sut, mock) = makeSUT()
+        mock.stubbedAsyncResults["getSignedSignMessage"] = "dGVzdA==" as String
+        let input = TONTransactionRequest(messages: [])
+
+        let result = try await sut.signedSignMessage(input: input, fakeSignature: nil)
+
+        #expect(mock.callRecords.first?.path == "getSignedSignMessage")
+        #expect(result.value == "dGVzdA==")
+    }
+
+    @Test("signedSignMessage() throws when JSDynamic throws")
+    func signedSignMessageThrowsOnError() async {
+        let (sut, mock) = makeSUT()
+        mock.shouldThrowOnCall = true
+        let input = TONTransactionRequest(messages: [])
+
+        await #expect(throws: (any Error).self) {
+            try await sut.signedSignMessage(input: input, fakeSignature: nil)
+        }
+    }
+
     @Test("signedSignData() calls getSignedSignData")
     func signedSignDataCalls() async throws {
         let (sut, mock) = makeSUT()

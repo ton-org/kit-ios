@@ -25,6 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
+import JavaScriptCore
 
 public class TONWalletKit {
     let configuration: TONWalletKitConfiguration
@@ -156,17 +157,17 @@ public class TONWalletKit {
 
         return wallet
     }
-    
+
     public func wallet(id: TONWalletID) async throws -> any TONWalletProtocol {
         let wallet: TONWallet = try await jsWalletKit().getWallet(id)
-        
+
         return wallet
     }
-    
+
     public func wallets() async throws -> [any TONWalletProtocol] {
         let value: JSValue = try await jsWalletKit().getWallets()
         let jsWallets = value.toObjectsArray()
-        
+
         return try jsWallets.map {
             let wallet: TONWallet = try $0.decode()
             return wallet

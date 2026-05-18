@@ -119,7 +119,7 @@ class StakingViewModel: ObservableObject {
                     userAddress: wallet.address
                 ))
 
-                try await wallet.send(transactionRequest: tx)
+                _ = try await wallet.send(transactionRequest: tx)
                 clearQuote()
                 amount = ""
                 await loadStakingData()

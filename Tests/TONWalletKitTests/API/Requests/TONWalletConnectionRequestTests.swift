@@ -36,7 +36,7 @@ struct TONWalletConnectionRequestTests {
         let event = makeEvent()
         let sut = TONWalletConnectionRequest(context: mock, event: event)
         let walletMock = MockJSDynamicObject()
-        let wallet = TONWallet(jsWallet: walletMock, id: "w1", address: testAddress)
+        let wallet = TONWallet(jsWallet: walletMock, id: "w1", address: testAddress, client: MockAPIClient())
 
         try await sut.approve(wallet: wallet)
 
@@ -63,7 +63,7 @@ struct TONWalletConnectionRequestTests {
         let event = makeEvent()
         let sut = TONWalletConnectionRequest(context: mock, event: event)
         let walletMock = MockJSDynamicObject()
-        let wallet = TONWallet(jsWallet: walletMock, id: "w1", address: testAddress)
+        let wallet = TONWallet(jsWallet: walletMock, id: "w1", address: testAddress, client: MockAPIClient())
 
         await #expect(throws: (any Error).self) {
             try await sut.approve(wallet: wallet)
