@@ -44,8 +44,7 @@ struct MockStakingProvider: TONStakingProviderProtocol {
             amountIn: "1",
             amountOut: "0.95",
             network: TONNetwork(chainId: "-239"),
-            providerId: "tonstakers",
-            apy: 500
+            providerId: "tonstakers"
         )
     }
 
@@ -61,8 +60,7 @@ struct MockStakingProvider: TONStakingProviderProtocol {
 
     private func makeStubProviderInfo() -> TONStakingProviderInfo {
         TONStakingProviderInfo(
-            apy: 500,
-            providerId: "tonstakers"
+            apy: 500
         )
     }
 }
