@@ -29,25 +29,21 @@ import Foundation
 class TONAPIClientJSAdapter: NSObject, JSAPIClient {
     private weak var context: JSContext?
     private let apiClient: any TONAPIClient
-    private let network: TONNetwork
-    
+
     init(
         context: JSContext,
-        apiClient: any TONAPIClient,
-        network: TONNetwork,
+        apiClient: any TONAPIClient
     ) {
-        
         self.context = context
         self.apiClient = apiClient
-        self.network = network
     }
-    
+
     @objc(getNetwork) func getNetwork() -> JSValue {
         guard let context else {
             return JSValue(undefinedIn: JSContext())
         }
         do {
-            return JSValue(object: try network.encode(in: context), in: context)
+            return JSValue(object: try apiClient.network().encode(in: context), in: context)
         } catch {
             return JSValue(undefinedIn: context)
         }

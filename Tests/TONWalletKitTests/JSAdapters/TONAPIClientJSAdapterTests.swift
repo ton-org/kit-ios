@@ -37,10 +37,10 @@ struct TONAPIClientJSAdapterTests {
         client: MockAPIClient = MockAPIClient(),
         network: TONNetwork = .mainnet
     ) -> (sut: TONAPIClientJSAdapter, client: MockAPIClient) {
+        client.stubbedNetwork = network
         let sut = TONAPIClientJSAdapter(
             context: context,
-            apiClient: client,
-            network: network
+            apiClient: client
         )
         return (sut, client)
     }
@@ -63,14 +63,35 @@ struct TONAPIClientJSAdapterTests {
         #expect(result == TONNetwork.testnet)
     }
 
+    @Test("getNetwork returns custom chainId from client")
+    func getNetworkReturnsCustomChainId() throws {
+        let custom = TONNetwork(chainId: "123456")
+        let (sut, _) = makeSUT(network: custom)
+
+        let result: TONNetwork = try sut.getNetwork().decode()
+
+        #expect(result == custom)
+    }
+
+    @Test("getNetwork reflects updates to the client's network after init")
+    func getNetworkReflectsUpdatedNetwork() throws {
+        let (sut, client) = makeSUT(network: .mainnet)
+
+        let initial: TONNetwork = try sut.getNetwork().decode()
+        #expect(initial == .mainnet)
+
+        client.stubbedNetwork = .testnet
+        let updated: TONNetwork = try sut.getNetwork().decode()
+        #expect(updated == .testnet)
+    }
+
     @Test("getNetwork throws when context is deallocated")
     func getNetworkThrowsWhenDeallocated() {
         let client = MockAPIClient()
         var jsContext: JSContext? = JSContext()!
         let sut = TONAPIClientJSAdapter(
             context: jsContext!,
-            apiClient: client,
-            network: .mainnet
+            apiClient: client
         )
         jsContext = nil
 
@@ -120,7 +141,7 @@ struct TONAPIClientJSAdapterTests {
     func sendRejectsWhenDeallocated() async {
         let client = MockAPIClient()
         var jsContext: JSContext? = JSContext()!
-        let sut = TONAPIClientJSAdapter(context: jsContext!, apiClient: client, network: .mainnet)
+        let sut = TONAPIClientJSAdapter(context: jsContext!, apiClient: client)
         let boc = JSValue(object: "dGVzdA==", in: context)!
         jsContext = nil
 
@@ -135,7 +156,7 @@ struct TONAPIClientJSAdapterTests {
     func runGetMethodRejectsWhenDeallocated() async {
         let client = MockAPIClient()
         var jsContext: JSContext? = JSContext()!
-        let sut = TONAPIClientJSAdapter(context: jsContext!, apiClient: client, network: .mainnet)
+        let sut = TONAPIClientJSAdapter(context: jsContext!, apiClient: client)
         let address = JSValue(undefinedIn: context)!
         let method = JSValue(undefinedIn: context)!
         let stack = JSValue(undefinedIn: context)!
@@ -199,7 +220,7 @@ struct TONAPIClientJSAdapterTests {
     func masterchainInfoRejectsWhenDeallocated() async {
         let client = MockAPIClient()
         var jsContext: JSContext? = JSContext()!
-        let sut = TONAPIClientJSAdapter(context: jsContext!, apiClient: client, network: .mainnet)
+        let sut = TONAPIClientJSAdapter(context: jsContext!, apiClient: client)
         jsContext = nil
 
         let result = sut.masterchainInfo()
@@ -217,6 +238,28 @@ struct TONAPIClientJSAdapterTests {
         let result: JSValue = try context.callGetNetwork(sut)
 
         #expect(result.forProperty("chainId")?.toString() == "-239")
+    }
+
+    @Test("getNetwork from JS returns testnet chainId")
+    func getNetworkFromJSReturnsTestnetChainId() throws {
+        let (sut, _) = makeSUT(network: .testnet)
+        context.evaluateScript("function callGetNetwork(client) { return client.getNetwork(); }")
+
+        let result: JSValue = try context.callGetNetwork(sut)
+
+        #expect(result.forProperty("chainId")?.toString() == "-3")
+    }
+
+    @Test("getNetwork from JS returns a plain object, not a Promise")
+    func getNetworkFromJSIsSynchronous() throws {
+        let (sut, _) = makeSUT(network: .mainnet)
+        context.evaluateScript(
+            "function isPromiseFromGetNetwork(client) { return client.getNetwork() instanceof Promise; }"
+        )
+
+        let isPromise: Bool = try context.isPromiseFromGetNetwork(sut)
+
+        #expect(isPromise == false)
     }
 
     @Test("masterchainInfo resolves from JS call")

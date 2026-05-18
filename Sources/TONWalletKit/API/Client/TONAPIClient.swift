@@ -27,14 +27,16 @@
 import Foundation
 
 public protocol TONAPIClient: AnyObject {
+    func network() -> TONNetwork
+
     func send(boc: TONBase64) async throws -> String
-    
+
     func runGetMethod(
         address: TONUserFriendlyAddress,
         method: String,
         stack: [TONRawStackItem]?,
         seqno: UInt?
     ) async throws -> TONGetMethodResult
-    
+
     func masterchainInfo() async throws -> TONMasterchainInfo
 }

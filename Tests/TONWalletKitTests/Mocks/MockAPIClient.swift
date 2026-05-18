@@ -29,6 +29,11 @@
 class MockAPIClient: TONAPIClient {
     var sentBoc: TONBase64?
     var shouldThrow = false
+    var stubbedNetwork: TONNetwork = .mainnet
+
+    func network() -> TONNetwork {
+        stubbedNetwork
+    }
 
     func send(boc: TONBase64) async throws -> String {
         if shouldThrow { throw "Mock API error" }
