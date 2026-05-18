@@ -41,13 +41,11 @@ public struct TONStakingQuote: Codable {
     public var network: TONNetwork
     /** Identifier of the staking provider */
     public var providerId: String
-    /** Annual Percentage Yield in basis points (100 = 1%) */
-    public var apy: Double?
     public var unstakeMode: TONUnstakeMode?
     /** Provider-specific metadata for the quote */
     public var metadata: AnyCodable?
 
-    public init(direction: TONStakingQuoteDirection, rawAmountIn: TONTokenAmount, rawAmountOut: TONTokenAmount, amountIn: String, amountOut: String, network: TONNetwork, providerId: String, apy: Double? = nil, unstakeMode: TONUnstakeMode? = nil, metadata: AnyCodable? = nil) {
+    public init(direction: TONStakingQuoteDirection, rawAmountIn: TONTokenAmount, rawAmountOut: TONTokenAmount, amountIn: String, amountOut: String, network: TONNetwork, providerId: String, unstakeMode: TONUnstakeMode? = nil, metadata: AnyCodable? = nil) {
         self.direction = direction
         self.rawAmountIn = rawAmountIn
         self.rawAmountOut = rawAmountOut
@@ -55,7 +53,6 @@ public struct TONStakingQuote: Codable {
         self.amountOut = amountOut
         self.network = network
         self.providerId = providerId
-        self.apy = apy
         self.unstakeMode = unstakeMode
         self.metadata = metadata
     }
@@ -68,7 +65,6 @@ public struct TONStakingQuote: Codable {
         case amountOut
         case network
         case providerId
-        case apy
         case unstakeMode
         case metadata
     }
@@ -84,7 +80,6 @@ public struct TONStakingQuote: Codable {
         try container.encode(amountOut, forKey: .amountOut)
         try container.encode(network, forKey: .network)
         try container.encode(providerId, forKey: .providerId)
-        try container.encodeIfPresent(apy, forKey: .apy)
         try container.encodeIfPresent(unstakeMode, forKey: .unstakeMode)
         try container.encodeIfPresent(metadata, forKey: .metadata)
     }

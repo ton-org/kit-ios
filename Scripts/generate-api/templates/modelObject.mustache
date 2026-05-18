@@ -6,7 +6,7 @@
   Vendor extensions used:
   - x-frozen: boolean indicating the field should use AnyCodable type with private let access
   - x-constant-fields: array of {name, value, type} for discriminator constant fields
-  - x-interface-union: boolean on property indicating it is an inline discriminated union
+  - x-inline-interface-union: boolean on property indicating it is an inline discriminated union (renders nested enum named after the property)
   - x-inline-interface-unions: array on model with nested enum case data
 --}}
 {{^objcCompatible}}{{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} {{#useClasses}}final class{{/useClasses}}{{^useClasses}}struct{{/useClasses}} {{{classname}}}: {{#useVapor}}Content{{/useVapor}}{{^useVapor}}Codable{{#useJsonEncodable}}, JSONEncodable{{/useJsonEncodable}}{{/useVapor}}{{#vendorExtensions.x-swift-hashable}}, Hashable{{/vendorExtensions.x-swift-hashable}} {
@@ -109,12 +109,12 @@
     {{/deprecated}}private let {{{name}}}: AnyCodable{{^required}}?{{/required}}
 {{/vendorExtensions.x-frozen}}
 {{^vendorExtensions.x-frozen}}
-{{#vendorExtensions.x-interface-union}}
+{{#vendorExtensions.x-inline-interface-union}}
     {{#description}}/** {{{.}}} */
     {{/description}}{{#deprecated}}@available(*, deprecated, message: "This property is deprecated.")
     {{/deprecated}}{{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} {{#readonlyProperties}}private(set) {{/readonlyProperties}}var {{{name}}}: {{#lambda.titlecase}}{{{name}}}{{/lambda.titlecase}}{{#required}}{{#isNullable}}?{{/isNullable}}{{/required}}{{^required}}?{{/required}}
-{{/vendorExtensions.x-interface-union}}
-{{^vendorExtensions.x-interface-union}}
+{{/vendorExtensions.x-inline-interface-union}}
+{{^vendorExtensions.x-inline-interface-union}}
 {{#isEnum}}
     {{#description}}/** {{{.}}} */
     {{/description}}{{#deprecated}}@available(*, deprecated, message: "This property is deprecated.")
@@ -143,7 +143,7 @@
     {{/vendorExtensions.x-swift-optional-scalar}}
     {{/objcCompatible}}
 {{/isEnum}}
-{{/vendorExtensions.x-interface-union}}
+{{/vendorExtensions.x-inline-interface-union}}
 {{/vendorExtensions.x-frozen}}
 {{/allVars}}
 {{#vendorExtensions.x-constant-fields}}
@@ -151,7 +151,7 @@
 {{/vendorExtensions.x-constant-fields}}
 {{#hasVars}}
 
-    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} init({{#allVars}}{{{name}}}: {{#vendorExtensions.x-frozen}}AnyCodable{{/vendorExtensions.x-frozen}}{{^vendorExtensions.x-frozen}}{{#vendorExtensions.x-interface-union}}{{#lambda.titlecase}}{{{name}}}{{/lambda.titlecase}}{{/vendorExtensions.x-interface-union}}{{^vendorExtensions.x-interface-union}}{{#isEnum}}{{#vendorExtensions.x-null-encodable}}NullEncodable<{{#lambda.titlecase}}{{{name}}}{{/lambda.titlecase}}>{{/vendorExtensions.x-null-encodable}}{{^vendorExtensions.x-null-encodable}}{{#lambda.titlecase}}{{{name}}}{{/lambda.titlecase}}{{/vendorExtensions.x-null-encodable}}{{/isEnum}}{{^isEnum}}{{#vendorExtensions.x-null-encodable}}NullEncodable<{{{datatypeWithEnum}}}>{{/vendorExtensions.x-null-encodable}}{{^vendorExtensions.x-null-encodable}}{{{datatypeWithEnum}}}{{/vendorExtensions.x-null-encodable}}{{/isEnum}}{{/vendorExtensions.x-interface-union}}{{/vendorExtensions.x-frozen}}{{#required}}{{#isNullable}}?{{/isNullable}}{{/required}}{{^required}}?{{/required}}{{#defaultValue}} = {{#vendorExtensions.x-null-encodable}}{{{vendorExtensions.x-null-encodable-default-value}}}{{/vendorExtensions.x-null-encodable}}{{^vendorExtensions.x-null-encodable}}{{{.}}}{{/vendorExtensions.x-null-encodable}}{{/defaultValue}}{{^defaultValue}}{{^required}} = {{#vendorExtensions.x-null-encodable}}.encodeNull{{/vendorExtensions.x-null-encodable}}{{^vendorExtensions.x-null-encodable}}nil{{/vendorExtensions.x-null-encodable}}{{/required}}{{/defaultValue}}{{^-last}}, {{/-last}}{{/allVars}}) {
+    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} init({{#allVars}}{{{name}}}: {{#vendorExtensions.x-frozen}}AnyCodable{{/vendorExtensions.x-frozen}}{{^vendorExtensions.x-frozen}}{{#vendorExtensions.x-inline-interface-union}}{{#lambda.titlecase}}{{{name}}}{{/lambda.titlecase}}{{/vendorExtensions.x-inline-interface-union}}{{^vendorExtensions.x-inline-interface-union}}{{#isEnum}}{{#vendorExtensions.x-null-encodable}}NullEncodable<{{#lambda.titlecase}}{{{name}}}{{/lambda.titlecase}}>{{/vendorExtensions.x-null-encodable}}{{^vendorExtensions.x-null-encodable}}{{#lambda.titlecase}}{{{name}}}{{/lambda.titlecase}}{{/vendorExtensions.x-null-encodable}}{{/isEnum}}{{^isEnum}}{{#vendorExtensions.x-null-encodable}}NullEncodable<{{{datatypeWithEnum}}}>{{/vendorExtensions.x-null-encodable}}{{^vendorExtensions.x-null-encodable}}{{{datatypeWithEnum}}}{{/vendorExtensions.x-null-encodable}}{{/isEnum}}{{/vendorExtensions.x-inline-interface-union}}{{/vendorExtensions.x-frozen}}{{#required}}{{#isNullable}}?{{/isNullable}}{{/required}}{{^required}}?{{/required}}{{#defaultValue}} = {{#vendorExtensions.x-null-encodable}}{{{vendorExtensions.x-null-encodable-default-value}}}{{/vendorExtensions.x-null-encodable}}{{^vendorExtensions.x-null-encodable}}{{{.}}}{{/vendorExtensions.x-null-encodable}}{{/defaultValue}}{{^defaultValue}}{{^required}} = {{#vendorExtensions.x-null-encodable}}.encodeNull{{/vendorExtensions.x-null-encodable}}{{^vendorExtensions.x-null-encodable}}nil{{/vendorExtensions.x-null-encodable}}{{/required}}{{/defaultValue}}{{^-last}}, {{/-last}}{{/allVars}}) {
         {{#vendorExtensions.x-constant-fields}}
         self.{{{name}}} = "{{{value}}}"
         {{/vendorExtensions.x-constant-fields}}
@@ -224,7 +224,7 @@
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         {{#allVars}}
-        {{{name}}} = try container.decode{{#required}}{{#isNullable}}IfPresent{{/isNullable}}{{/required}}{{^required}}IfPresent{{/required}}({{#vendorExtensions.x-frozen}}AnyCodable{{/vendorExtensions.x-frozen}}{{^vendorExtensions.x-frozen}}{{#vendorExtensions.x-interface-union}}{{#lambda.titlecase}}{{{name}}}{{/lambda.titlecase}}{{/vendorExtensions.x-interface-union}}{{^vendorExtensions.x-interface-union}}{{#isEnum}}{{#lambda.titlecase}}{{{name}}}{{/lambda.titlecase}}{{/isEnum}}{{^isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{/vendorExtensions.x-interface-union}}{{/vendorExtensions.x-frozen}}.self, forKey: .{{{name}}})
+        {{{name}}} = try container.decode{{#required}}{{#isNullable}}IfPresent{{/isNullable}}{{/required}}{{^required}}IfPresent{{/required}}({{#vendorExtensions.x-frozen}}AnyCodable{{/vendorExtensions.x-frozen}}{{^vendorExtensions.x-frozen}}{{#vendorExtensions.x-inline-interface-union}}{{#lambda.titlecase}}{{{name}}}{{/lambda.titlecase}}{{/vendorExtensions.x-inline-interface-union}}{{^vendorExtensions.x-inline-interface-union}}{{#isEnum}}{{#lambda.titlecase}}{{{name}}}{{/lambda.titlecase}}{{/isEnum}}{{^isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{/vendorExtensions.x-inline-interface-union}}{{/vendorExtensions.x-frozen}}.self, forKey: .{{{name}}})
         {{/allVars}}
         var nonAdditionalPropertyKeys = Set<String>()
         {{#allVars}}
