@@ -1,8 +1,8 @@
 //
-//  JSStakingProvider.swift
+//  AnyTONStakingProviderIdentifier.swift
 //  TONWalletKit
 //
-//  Created by Nikita Rodionov on 06.04.2026.
+//  Created by Nikita Rodionov on 18.05.2026.
 //
 //  Copyright (c) 2026 TON Connect
 //
@@ -25,16 +25,15 @@
 //  SOFTWARE.
 
 import Foundation
-import JavaScriptCore
 
-@objc protocol JSStakingProvider: JSExport {
-    var type: String { get }
-    var providerId: String { get }
+public struct AnyTONStakingProviderIdentifier: TONStakingProviderIdentifier {
+    public typealias Provider = TONStakingProvider<AnyTONStakingProviderIdentifier>
+    public typealias QuoteOptions = AnyCodable
+    public typealias StakeOptions = AnyCodable
 
-    @objc(getStakingProviderMetadata:) func metadata(network: JSValue) -> JSValue
-    @objc(getSupportedNetworks) func supportedNetworks() -> JSValue
-    @objc(getQuote:) func quote(params: JSValue) -> JSValue
-    @objc(buildStakeTransaction:) func stakeTransaction(params: JSValue) -> JSValue
-    @objc(getStakedBalance::) func stakedBalance(userAddress: JSValue, network: JSValue) -> JSValue
-    @objc(getStakingProviderInfo:) func info(network: JSValue) -> JSValue
+    public let name: String
+
+    public init(name: String) {
+        self.name = name
+    }
 }

@@ -30,16 +30,21 @@ public protocol TONStakingProviderProtocol: TONProvider {
     associatedtype QuoteOptions: Codable
     associatedtype StakeOptions: Codable
 
+    func metadata(network: TONNetwork?) throws -> TONStakingProviderMetadata
+    func supportedNetworks() throws -> [TONNetwork]
     func quote(params: TONStakingQuoteParams<QuoteOptions>) async throws -> TONStakingQuote
     func stakeTransaction(params: TONStakeParams<StakeOptions>) async throws -> TONTransactionRequest
     func stakedBalance(userAddress: TONUserFriendlyAddress, network: TONNetwork?) async throws -> TONStakingBalance
-    func stakingProviderInfo(network: TONNetwork?) async throws -> TONStakingProviderInfo
-    func supportedUnstakeModes() throws -> [TONUnstakeMode]
+    func info(network: TONNetwork?) async throws -> TONStakingProviderInfo
 }
 
 public extension TONStakingProviderProtocol {
 
     var type: TONProviderType { .staking }
+
+    func supportedUnstakeModes(network: TONNetwork? = nil) throws -> [TONUnstakeMode] {
+        try metadata(network: network).supportedUnstakeModes
+    }
 }
 
 public final class TONStakingProvider<Identifier: TONStakingProviderIdentifier>: TONStakingProviderProtocol {
@@ -55,6 +60,14 @@ public final class TONStakingProvider<Identifier: TONStakingProviderIdentifier>:
         self.identifier = identifier
     }
 
+    public func metadata(network: TONNetwork?) throws -> TONStakingProviderMetadata {
+        try jsObject.getStakingProviderMetadata(network)
+    }
+
+    public func supportedNetworks() throws -> [TONNetwork] {
+        try jsObject.getSupportedNetworks()
+    }
+
     public func quote(params: TONStakingQuoteParams<QuoteOptions>) async throws -> TONStakingQuote {
         try await jsObject.getQuote(params)
     }
@@ -67,12 +80,8 @@ public final class TONStakingProvider<Identifier: TONStakingProviderIdentifier>:
         try await jsObject.getStakedBalance(userAddress, network)
     }
 
-    public func stakingProviderInfo(network: TONNetwork?) async throws -> TONStakingProviderInfo {
+    public func info(network: TONNetwork?) async throws -> TONStakingProviderInfo {
         try await jsObject.getStakingProviderInfo(network)
-    }
-
-    public func supportedUnstakeModes() throws -> [TONUnstakeMode] {
-        try jsObject.getSupportedUnstakeModes()
     }
 }
 

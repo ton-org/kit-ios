@@ -81,8 +81,8 @@ struct TONStakingProviderJSAdapterTests {
         }
     }
 
-    @Test("stakingProviderInfo rejects when context is deallocated")
-    func stakingProviderInfoRejectsWhenDeallocated() async {
+    @Test("info rejects when context is deallocated")
+    func infoRejectsWhenDeallocated() async {
         var jsContext: JSContext? = JSContext()!
         let provider = MockStakingProvider(
             identifier: TONTonStakersStakingProviderIdentifier(name: "tonstakers")
@@ -90,23 +90,69 @@ struct TONStakingProviderJSAdapterTests {
         let sut = TONStakingProviderJSAdapter(context: jsContext!, stakingProvider: provider)
         jsContext = nil
 
-        let result = sut.stakingProviderInfo(network: JSValue(undefinedIn: context)!)
+        let result = sut.info(network: JSValue(undefinedIn: context)!)
 
         await #expect(throws: (any Error).self) {
             try await result.then()
         }
     }
 
-    @Test("supportedUnstakeModes returns undefined when context is deallocated")
-    func supportedUnstakeModesReturnsUndefinedWhenDeallocated() {
-        var jsContext: JSContext? = JSContext()!
-        let provider = MockStakingProvider(
+    @Test("metadata returns the encoded provider metadata")
+    func metadataReturnsEncodedValue() throws {
+        var provider = MockStakingProvider(
             identifier: TONTonStakersStakingProviderIdentifier(name: "tonstakers")
         )
-        let sut = TONStakingProviderJSAdapter(context: jsContext!, stakingProvider: provider)
-        jsContext = nil
+        provider.mockMetadata = TONStakingProviderMetadata(
+            name: "Tonstakers",
+            supportedUnstakeModes: [.instant, .roundEnd],
+            supportsReversedQuote: true,
+            stakeToken: TONStakingTokenInfo(ticker: "TON", decimals: 9, address: "ton")
+        )
+        let sut = TONStakingProviderJSAdapter(context: context, stakingProvider: provider)
 
-        let result = sut.supportedUnstakeModes()
+        let result = sut.metadata(network: JSValue(undefinedIn: context)!)
+
+        #expect(result.forProperty("name")?.toString() == "Tonstakers")
+        #expect(result.forProperty("supportsReversedQuote")?.toBool() == true)
+    }
+
+    @Test("metadata returns undefined when provider throws")
+    func metadataReturnsUndefinedOnError() {
+        var provider = MockStakingProvider(
+            identifier: TONTonStakersStakingProviderIdentifier(name: "tonstakers")
+        )
+        provider.shouldThrow = true
+        let sut = TONStakingProviderJSAdapter(context: context, stakingProvider: provider)
+
+        let result = sut.metadata(network: JSValue(undefinedIn: context)!)
+
+        #expect(result.isUndefined)
+    }
+
+    @Test("supportedNetworks returns the encoded networks")
+    func supportedNetworksReturnsEncodedValue() throws {
+        var provider = MockStakingProvider(
+            identifier: TONTonStakersStakingProviderIdentifier(name: "tonstakers")
+        )
+        provider.mockSupportedNetworks = [.mainnet, .testnet]
+        let sut = TONStakingProviderJSAdapter(context: context, stakingProvider: provider)
+
+        let result = sut.supportedNetworks()
+
+        #expect(result.isArray)
+        let networks: [TONNetwork] = try #require(try result.decode())
+        #expect(networks == [.mainnet, .testnet])
+    }
+
+    @Test("supportedNetworks returns undefined when provider throws")
+    func supportedNetworksReturnsUndefinedOnError() {
+        var provider = MockStakingProvider(
+            identifier: TONTonStakersStakingProviderIdentifier(name: "tonstakers")
+        )
+        provider.shouldThrow = true
+        let sut = TONStakingProviderJSAdapter(context: context, stakingProvider: provider)
+
+        let result = sut.supportedNetworks()
 
         #expect(result.isUndefined)
     }
@@ -193,8 +239,8 @@ struct TONStakingProviderJSAdapterTests {
         #expect(providerId == "tonstakers")
     }
 
-    @Test("stakingProviderInfo resolves from JS call")
-    func stakingProviderInfoResolvesFromJS() async throws {
+    @Test("info resolves from JS call")
+    func infoResolvesFromJS() async throws {
         let sut = makeSUT()
 
         context.evaluateScript("""
@@ -208,14 +254,50 @@ struct TONStakingProviderJSAdapterTests {
         #expect(apy == 500)
     }
 
-    @Test("supportedUnstakeModes returns first mode from JS")
-    func supportedUnstakeModesReturnsFromJS() throws {
+    @Test("getMetadata is callable from JS and returns encoded object")
+    func metadataCallableFromJS() throws {
+        var provider = MockStakingProvider(
+            identifier: TONTonStakersStakingProviderIdentifier(name: "tonstakers")
+        )
+        provider.mockMetadata = TONStakingProviderMetadata(
+            name: "Tonstakers",
+            supportedUnstakeModes: [.instant, .whenAvailable, .roundEnd],
+            supportsReversedQuote: true,
+            stakeToken: TONStakingTokenInfo(ticker: "TON", decimals: 9, address: "ton")
+        )
+        let sut = TONStakingProviderJSAdapter(context: context, stakingProvider: provider)
+        context.setObject(sut, forKeyedSubscript: "adapter" as NSString)
+
+        let result = context.evaluateScript("adapter.getStakingProviderMetadata()")
+
+        #expect(result?.forProperty("name")?.toString() == "Tonstakers")
+        #expect(result?.forProperty("supportedUnstakeModes")?.isArray == true)
+    }
+
+    @Test("getSupportedNetworks is callable from JS and returns encoded networks")
+    func supportedNetworksCallableFromJS() throws {
+        var provider = MockStakingProvider(
+            identifier: TONTonStakersStakingProviderIdentifier(name: "tonstakers")
+        )
+        provider.mockSupportedNetworks = [.mainnet]
+        let sut = TONStakingProviderJSAdapter(context: context, stakingProvider: provider)
+        context.setObject(sut, forKeyedSubscript: "adapter" as NSString)
+
+        let result = context.evaluateScript("adapter.getSupportedNetworks()")
+
+        #expect(result?.isArray == true)
+        let networks: [TONNetwork] = try #require(try result?.decode())
+        #expect(networks == [.mainnet])
+    }
+
+    @Test("getSupportedNetworks from JS returns a plain array, not a Promise")
+    func supportedNetworksFromJSIsSynchronous() {
         let sut = makeSUT()
-        context.evaluateScript("function callFirstMode(adapter) { return adapter.getSupportedUnstakeModes()[0]; }")
-        
-        let result: String = try context.callFirstMode(sut)
-        
-        #expect(result == "INSTANT")
+        context.setObject(sut, forKeyedSubscript: "adapter" as NSString)
+
+        let isPromise = context.evaluateScript("adapter.getSupportedNetworks() instanceof Promise")
+
+        #expect(isPromise?.toBool() == false)
     }
 
     @Test("adapter works as JS function argument")

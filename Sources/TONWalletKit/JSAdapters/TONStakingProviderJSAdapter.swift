@@ -42,6 +42,32 @@ class TONStakingProviderJSAdapter<Provider: TONStakingProviderProtocol>: NSObjec
         self.stakingProvider = stakingProvider
     }
 
+    @objc(getStakingProviderMetadata:) func metadata(network: JSValue) -> JSValue {
+        guard let context else {
+            return JSValue(undefinedIn: JSContext())
+        }
+
+        do {
+            let network: TONNetwork? = try network.decode()
+            let result = try stakingProvider.metadata(network: network)
+            return JSValue(object: try result.encode(in: context), in: context)
+        } catch {
+            return JSValue(undefinedIn: context)
+        }
+    }
+
+    @objc(getSupportedNetworks) func supportedNetworks() -> JSValue {
+        guard let context else {
+            return JSValue(undefinedIn: JSContext())
+        }
+
+        do {
+            return JSValue(object: try stakingProvider.supportedNetworks().encode(in: context), in: context)
+        } catch {
+            return JSValue(undefinedIn: context)
+        }
+    }
+
     @objc(getQuote:) func quote(params: JSValue) -> JSValue {
         guard let context else {
             return JSValue(
@@ -118,7 +144,7 @@ class TONStakingProviderJSAdapter<Provider: TONStakingProviderProtocol>: NSObjec
         }
     }
 
-    @objc(getStakingProviderInfo:) func stakingProviderInfo(network: JSValue) -> JSValue {
+    @objc(getStakingProviderInfo:) func info(network: JSValue) -> JSValue {
         guard let context else {
             return JSValue(
                 newPromiseRejectedWithReason: "No context exists to perform \(#function)",
@@ -132,7 +158,7 @@ class TONStakingProviderJSAdapter<Provider: TONStakingProviderProtocol>: NSObjec
 
                 do {
                     let network: TONNetwork? = try network.decode()
-                    let result = try await self.stakingProvider.stakingProviderInfo(network: network)
+                    let result = try await self.stakingProvider.info(network: network)
                     let jsResult = try result.encode(in: context)
 
                     resolve?.call(withArguments: [jsResult])
@@ -140,20 +166,6 @@ class TONStakingProviderJSAdapter<Provider: TONStakingProviderProtocol>: NSObjec
                     reject?.call(withArguments: [error.localizedDescription])
                 }
             }
-        }
-    }
-
-    @objc(getSupportedUnstakeModes) func supportedUnstakeModes() -> JSValue {
-        guard let context else {
-            return JSValue(undefinedIn: JSContext())
-        }
-
-        do {
-            let modes = try stakingProvider.supportedUnstakeModes()
-            let encoded = try modes.encode(in: context)
-            return JSValue(object: encoded, in: context)
-        } catch {
-            return JSValue(undefinedIn: context)
         }
     }
 

@@ -74,15 +74,45 @@ struct TONStakingManagerTests {
         #expect(mock.callRecords.first?.path == "getProvider")
     }
 
-    @Test("registeredProviders calls getRegisteredProviders on jsObject")
-    func registeredProvidersCallsGetRegisteredProviders() throws {
+    @Test("remove(provider:) calls removeProvider on jsObject")
+    func removeCallsRemoveProvider() throws {
         let (sut, mock) = makeSUT()
-        mock.stubbedResults["getRegisteredProviders"] = ["tonstakers"] as [String]
 
-        let result = try sut.registeredProviders()
+        try sut.remove(provider: makeProvider())
 
-        #expect(mock.callRecords.first?.path == "getRegisteredProviders")
-        #expect(result.map { $0.name } == ["tonstakers"])
+        #expect(mock.callRecords.first?.path == "removeProvider")
+    }
+
+    @Test("providers() calls getProviders and decodes each")
+    func providersCallsGetProviders() throws {
+        let (sut, mock) = makeSUT()
+        let context = mock.jsContext
+        let arrayValue = context.evaluateScript(
+            "[{ providerId: 'tonstakers' }, { providerId: 'other' }]"
+        )!
+        mock.stubbedResults["getProviders"] = arrayValue
+
+        let result = try sut.providers()
+
+        #expect(mock.callRecords.first?.path == "getProviders")
+        #expect(result.map { $0.identifier.name } == ["tonstakers", "other"])
+    }
+
+    @Test("metadata(network:identifier:) calls getStakingProviderMetadata on jsObject")
+    func metadataCallsGetStakingProviderMetadata() throws {
+        let (sut, mock) = makeSUT()
+        let stub = TONStakingProviderMetadata(
+            name: "Tonstakers",
+            supportedUnstakeModes: [.instant],
+            supportsReversedQuote: false,
+            stakeToken: TONStakingTokenInfo(ticker: "TON", decimals: 9, address: "ton")
+        )
+        mock.stubbedResults["getStakingProviderMetadata"] = stub
+
+        let result = try sut.metadata(network: nil, identifier: makeIdentifier())
+
+        #expect(mock.callRecords.first?.path == "getStakingProviderMetadata")
+        #expect(result.name == "Tonstakers")
     }
 
     @Test("hasProvider(with:) calls hasProvider on jsObject")
@@ -163,11 +193,11 @@ struct TONStakingManagerTests {
         #expect(mock.callRecords.first?.path == "getStakedBalance")
     }
 
-    @Test("stakingProviderInfo calls getStakingProviderInfo with network and identifier name")
-    func stakingProviderInfoWithIdentifierCallsGetStakingProviderInfo() async {
+    @Test("info calls getStakingProviderInfo with network and identifier name")
+    func infoWithIdentifierCallsGetStakingProviderInfo() async {
         let (sut, mock) = makeSUT()
 
-        _ = try? await sut.stakingProviderInfo(
+        _ = try? await sut.info(
             network: TONNetwork(chainId: "-239"),
             identifier: makeIdentifier()
         )
@@ -175,22 +205,21 @@ struct TONStakingManagerTests {
         #expect(mock.callRecords.first?.path == "getStakingProviderInfo")
     }
 
-    @Test("supportedUnstakeModes calls getSupportedUnstakeModes with identifier name")
-    func supportedUnstakeModesWithIdentifierCallsGetSupportedUnstakeModes() {
+    @Test("supportedUnstakeModes reads from metadata.supportedUnstakeModes")
+    func supportedUnstakeModesReadsFromMetadata() throws {
         let (sut, mock) = makeSUT()
+        let stub = TONStakingProviderMetadata(
+            name: "Tonstakers",
+            supportedUnstakeModes: [.instant, .roundEnd],
+            supportsReversedQuote: false,
+            stakeToken: TONStakingTokenInfo(ticker: "TON", decimals: 9, address: "ton")
+        )
+        mock.stubbedResults["getStakingProviderMetadata"] = stub
 
-        _ = try? sut.supportedUnstakeModes(identifier: makeIdentifier())
+        let result = try sut.supportedUnstakeModes(network: nil, identifier: makeIdentifier())
 
-        #expect(mock.callRecords.first?.path == "getSupportedUnstakeModes")
-    }
-
-    @Test("supportedUnstakeModes with nil identifier passes nil")
-    func supportedUnstakeModesWithNilIdentifierPassesNil() {
-        let (sut, mock) = makeSUT()
-
-        _ = try? sut.supportedUnstakeModes(identifier: nil)
-
-        #expect(mock.callRecords.first?.path == "getSupportedUnstakeModes")
+        #expect(mock.callRecords.first?.path == "getStakingProviderMetadata")
+        #expect(result == [.instant, .roundEnd])
     }
 
     @Test("JSValueDecodable.from returns manager")
@@ -201,5 +230,77 @@ struct TONStakingManagerTests {
         let result = try TONStakingManager.from(jsValue)
 
         #expect(result != nil)
+    }
+
+    // MARK: - JS interop end-to-end
+
+    @Test("remove(provider:) routes through real JS removeProvider with provider object")
+    func removeRoutesThroughJS() throws {
+        let context = JSContext()!
+        context.evaluateScript(
+            """
+            var lastRemovedProviderId = null;
+            var manager = {
+                removeProvider: function(p) { lastRemovedProviderId = p.providerId; }
+            };
+            """
+        )
+        let managerJS = context.objectForKeyedSubscript("manager")!
+        let sut = TONStakingManager(jsObject: managerJS)
+
+        let providerJS = context.evaluateScript("({ providerId: 'tonstakers' })")!
+        let identifier = TONTonStakersStakingProviderIdentifier(name: "tonstakers")
+        let provider = TONStakingProvider(jsObject: providerJS, identifier: identifier)
+
+        try sut.remove(provider: provider)
+
+        let recordedId = context.objectForKeyedSubscript("lastRemovedProviderId")?.toString()
+        #expect(recordedId == "tonstakers")
+    }
+
+    @Test("providers() decodes real JS array returned by getProviders")
+    func providersDecodesRealJSArray() throws {
+        let context = JSContext()!
+        context.evaluateScript(
+            """
+            var manager = {
+                getProviders: function() {
+                    return [{ providerId: 'tonstakers' }, { providerId: 'other' }];
+                }
+            };
+            """
+        )
+        let managerJS = context.objectForKeyedSubscript("manager")!
+        let sut = TONStakingManager(jsObject: managerJS)
+
+        let result = try sut.providers()
+
+        #expect(result.map { $0.identifier.name } == ["tonstakers", "other"])
+    }
+
+    @Test("metadata(network:identifier:) decodes real JS metadata object")
+    func metadataDecodesRealJSObject() throws {
+        let context = JSContext()!
+        context.evaluateScript(
+            """
+            var manager = {
+                getStakingProviderMetadata: function(network, providerId) {
+                    return {
+                        name: 'Tonstakers',
+                        supportedUnstakeModes: ['INSTANT', 'ROUND_END'],
+                        supportsReversedQuote: true,
+                        stakeToken: { ticker: 'TON', decimals: 9, address: 'ton' }
+                    };
+                }
+            };
+            """
+        )
+        let managerJS = context.objectForKeyedSubscript("manager")!
+        let sut = TONStakingManager(jsObject: managerJS)
+
+        let result = try sut.metadata(network: nil, identifier: makeIdentifier())
+
+        #expect(result.name == "Tonstakers")
+        #expect(result.supportedUnstakeModes == [.instant, .roundEnd])
     }
 }
