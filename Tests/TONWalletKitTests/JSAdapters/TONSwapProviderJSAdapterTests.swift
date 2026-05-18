@@ -30,6 +30,62 @@ struct TONSwapProviderJSAdapterTests {
         #expect(sut.providerId == "test-provider")
     }
 
+    @Test("metadata returns the encoded provider metadata")
+    func metadataReturnsEncodedValue() throws {
+        var provider = MockSwapProvider(
+            identifier: TONOmnistonSwapProviderIdentifier(name: "omniston")
+        )
+        provider.mockMetadata = TONSwapProviderMetadata(name: "Mock", logo: "logo.png", url: "https://example.com")
+        let sut = TONSwapProviderJSAdapter(context: context, swapProvider: provider)
+
+        let result = sut.metadata()
+
+        #expect(result.forProperty("name")?.toString() == "Mock")
+        #expect(result.forProperty("logo")?.toString() == "logo.png")
+        #expect(result.forProperty("url")?.toString() == "https://example.com")
+    }
+
+    @Test("metadata returns undefined when provider throws")
+    func metadataReturnsUndefinedOnError() {
+        var provider = MockSwapProvider(
+            identifier: TONOmnistonSwapProviderIdentifier(name: "omniston")
+        )
+        provider.shouldThrow = true
+        let sut = TONSwapProviderJSAdapter(context: context, swapProvider: provider)
+
+        let result = sut.metadata()
+
+        #expect(result.isUndefined)
+    }
+
+    @Test("supportedNetworks returns the encoded networks")
+    func supportedNetworksReturnsEncodedValue() throws {
+        var provider = MockSwapProvider(
+            identifier: TONOmnistonSwapProviderIdentifier(name: "omniston")
+        )
+        provider.mockSupportedNetworks = [.mainnet, .testnet]
+        let sut = TONSwapProviderJSAdapter(context: context, swapProvider: provider)
+
+        let result = sut.supportedNetworks()
+
+        #expect(result.isArray)
+        let networks: [TONNetwork] = try result.decode()
+        #expect(networks == [.mainnet, .testnet])
+    }
+
+    @Test("supportedNetworks returns undefined when provider throws")
+    func supportedNetworksReturnsUndefinedOnError() {
+        var provider = MockSwapProvider(
+            identifier: TONOmnistonSwapProviderIdentifier(name: "omniston")
+        )
+        provider.shouldThrow = true
+        let sut = TONSwapProviderJSAdapter(context: context, swapProvider: provider)
+
+        let result = sut.supportedNetworks()
+
+        #expect(result.isUndefined)
+    }
+
     @Test("quote rejects when context is deallocated")
     func quoteRejectsWhenDeallocated() async {
         var jsContext: JSContext? = JSContext()!
@@ -108,6 +164,48 @@ struct TONSwapProviderJSAdapterTests {
         let result: String? = try context.getProviderType(sut)
 
         #expect(result == "swap")
+    }
+
+    @Test("getMetadata is callable from JS and returns the encoded object")
+    func metadataCallableFromJS() throws {
+        var provider = MockSwapProvider(
+            identifier: TONOmnistonSwapProviderIdentifier(name: "omniston")
+        )
+        provider.mockMetadata = TONSwapProviderMetadata(name: "Mock", logo: "logo.png", url: "https://example.com")
+        let sut = TONSwapProviderJSAdapter(context: context, swapProvider: provider)
+        context.setObject(sut, forKeyedSubscript: "adapter" as NSString)
+
+        let result = context.evaluateScript("adapter.getMetadata()")
+
+        #expect(result?.forProperty("name")?.toString() == "Mock")
+        #expect(result?.forProperty("logo")?.toString() == "logo.png")
+        #expect(result?.forProperty("url")?.toString() == "https://example.com")
+    }
+
+    @Test("getSupportedNetworks is callable from JS and returns the encoded networks")
+    func supportedNetworksCallableFromJS() throws {
+        var provider = MockSwapProvider(
+            identifier: TONOmnistonSwapProviderIdentifier(name: "omniston")
+        )
+        provider.mockSupportedNetworks = [.mainnet, .testnet]
+        let sut = TONSwapProviderJSAdapter(context: context, swapProvider: provider)
+        context.setObject(sut, forKeyedSubscript: "adapter" as NSString)
+
+        let result = context.evaluateScript("adapter.getSupportedNetworks()")
+
+        #expect(result?.isArray == true)
+        let networks: [TONNetwork] = try #require(try result?.decode())
+        #expect(networks == [.mainnet, .testnet])
+    }
+
+    @Test("getSupportedNetworks from JS returns a plain array, not a Promise")
+    func supportedNetworksFromJSIsSynchronous() {
+        let sut = makeSUT()
+        context.setObject(sut, forKeyedSubscript: "adapter" as NSString)
+
+        let isPromise = context.evaluateScript("adapter.getSupportedNetworks() instanceof Promise")
+
+        #expect(isPromise?.toBool() == false)
     }
 
     @Test("swapTransaction resolves from JS call")

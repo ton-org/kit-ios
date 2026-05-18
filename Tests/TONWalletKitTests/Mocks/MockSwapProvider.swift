@@ -10,6 +10,18 @@ struct MockSwapProvider: TONSwapProviderProtocol {
     var identifier: TONOmnistonSwapProviderIdentifier
 
     var shouldThrow = false
+    var mockMetadata = TONSwapProviderMetadata(name: "Mock", logo: nil, url: nil)
+    var mockSupportedNetworks: [TONNetwork] = [.mainnet]
+
+    func metadata() throws -> TONSwapProviderMetadata {
+        if shouldThrow { throw "Mock metadata error" }
+        return mockMetadata
+    }
+
+    func supportedNetworks() throws -> [TONNetwork] {
+        if shouldThrow { throw "Mock supportedNetworks error" }
+        return mockSupportedNetworks
+    }
 
     func quote(params: TONSwapQuoteParams<TONOmnistonProviderOptions>) async throws -> TONSwapQuote {
         if shouldThrow { throw "Mock quote error" }
