@@ -81,4 +81,94 @@ struct TONWalletConnectionRequestTests {
             try await sut.reject()
         }
     }
+
+    @Test("approve(wallet:) returns .transactionRequest when JS yields embedded send-transaction event")
+    func approveReturnsTransactionFollowUp() async throws {
+        let mock = MockJSDynamicObject()
+        let event = makeEvent()
+        let sut = TONWalletConnectionRequest(context: mock, event: event)
+        let walletMock = MockJSDynamicObject()
+        let wallet = TONWallet(jsWallet: walletMock, id: "w1", address: testAddress, client: MockAPIClient())
+        let embedded = TONEmbeddedSendTransactionRequestEvent(
+            id: "embedded-1",
+            preview: TONSendTransactionRequestEventPreview(),
+            request: TONTransactionRequest(messages: []),
+            connectionResult: AnyCodable("token")
+        )
+        mock.stubbedAsyncResults["walletKit.approveConnectRequest"] = TONEmbeddedRequestEvent.sendTransaction(embedded)
+
+        let result = try await sut.approve(wallet: wallet)
+
+        guard case .transactionRequest(let request) = result else {
+            Issue.record("Expected .transactionRequest, got \(String(describing: result))")
+            return
+        }
+        #expect(request.event.id == "embedded-1")
+    }
+
+    @Test("approve(wallet:) returns .signMessageRequest when JS yields embedded sign-message event")
+    func approveReturnsSignMessageFollowUp() async throws {
+        let mock = MockJSDynamicObject()
+        let event = makeEvent()
+        let sut = TONWalletConnectionRequest(context: mock, event: event)
+        let walletMock = MockJSDynamicObject()
+        let wallet = TONWallet(jsWallet: walletMock, id: "w1", address: testAddress, client: MockAPIClient())
+        let embedded = TONEmbeddedSignMessageRequestEvent(
+            id: "embedded-2",
+            preview: TONSendTransactionRequestEventPreview(),
+            request: TONTransactionRequest(messages: []),
+            connectionResult: AnyCodable("token")
+        )
+        mock.stubbedAsyncResults["walletKit.approveConnectRequest"] = TONEmbeddedRequestEvent.signMessage(embedded)
+
+        let result = try await sut.approve(wallet: wallet)
+
+        guard case .signMessageRequest(let request) = result else {
+            Issue.record("Expected .signMessageRequest, got \(String(describing: result))")
+            return
+        }
+        #expect(request.event.id == "embedded-2")
+    }
+
+    @Test("approve(wallet:) returns .signDataRequest when JS yields embedded sign-data event")
+    func approveReturnsSignDataFollowUp() async throws {
+        let mock = MockJSDynamicObject()
+        let event = makeEvent()
+        let sut = TONWalletConnectionRequest(context: mock, event: event)
+        let walletMock = MockJSDynamicObject()
+        let wallet = TONWallet(jsWallet: walletMock, id: "w1", address: testAddress, client: MockAPIClient())
+        let embedded = TONEmbeddedSignDataRequestEvent(
+            id: "embedded-3",
+            payload: TONSignDataPayload(data: .text(TONSignDataText(content: "msg"))),
+            preview: TONSignDataRequestEventPreview(data: .text(TONSignDataPreviewText(content: "msg"))),
+            connectionResult: AnyCodable("token")
+        )
+        mock.stubbedAsyncResults["walletKit.approveConnectRequest"] = TONEmbeddedRequestEvent.signData(embedded)
+
+        let result = try await sut.approve(wallet: wallet)
+
+        guard case .signDataRequest(let request) = result else {
+            Issue.record("Expected .signDataRequest, got \(String(describing: result))")
+            return
+        }
+        #expect(request.event.id == "embedded-3")
+    }
+
+    @Test("approve(wallet:) returns nil when JS yields no embedded request")
+    func approveReturnsNilWhenNoEmbeddedRequest() async throws {
+        let mock = MockJSDynamicObject()
+        let event = makeEvent()
+        let sut = TONWalletConnectionRequest(context: mock, event: event)
+        let walletMock = MockJSDynamicObject()
+        let wallet = TONWallet(jsWallet: walletMock, id: "w1", address: testAddress, client: MockAPIClient())
+        // No stubbed result: mock will throw "cannot decode to" when the typed call runs.
+        // But Optional<T> decode should return nil from undefined — to model that we set
+        // the stub to an explicit Optional<TONEmbeddedRequestEvent>.none.
+        let none: TONEmbeddedRequestEvent? = nil
+        mock.stubbedAsyncResults["walletKit.approveConnectRequest"] = none as Any
+
+        let result = try await sut.approve(wallet: wallet)
+
+        #expect(result == nil)
+    }
 }

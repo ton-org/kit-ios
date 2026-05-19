@@ -46562,6 +46562,10 @@ var init_main = __esmMin((() => {
 					console.log("📨 Sign data request received:", event);
 					await callback("signDataRequest", event);
 				});
+				walletKit.onSignMessageRequest(async (event) => {
+					console.log("📨 Sign message request received:", event);
+					await callback("signMessageRequest", event);
+				});
 				walletKit.onDisconnect(async (event) => {
 					console.log("📨 Disconnect event received:", event);
 					await callback("disconnect", event);
@@ -46573,6 +46577,7 @@ var init_main = __esmMin((() => {
 				walletKit.removeConnectRequestCallback();
 				walletKit.removeTransactionRequestCallback();
 				walletKit.removeSignDataRequestCallback();
+				walletKit.removeSignMessageRequestCallback();
 				walletKit.removeDisconnectCallback();
 				console.log("🗑️ All event listeners removed");
 			},

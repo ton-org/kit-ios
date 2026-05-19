@@ -1,10 +1,10 @@
 //
-//  WalletConnectionRequestViewModel.swift
+//  WalletSignMessageRequestViewModel.swift
 //  TONWalletApp
 //
-//  Created by Nikita Rodionov on 03.10.2025.
+//  Created by Nikita Rodionov on 19.05.2026.
 //
-//  Copyright (c) 2025 TON Connect
+//  Copyright (c) 2026 TON Connect
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -12,10 +12,10 @@
 //  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 //  copies of the Software, and to permit persons to whom the Software is
 //  furnished to do so, subject to the following conditions:
-//  
+//
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-//  
+//
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,63 +29,36 @@ import Combine
 import TONWalletKit
 
 @MainActor
-class WalletConnectionRequestViewModel: ObservableObject {
-    @Published var selectedWallet: SelectableWallet?
-    
-    let wallets: [SelectableWallet]
-    private let request: TONWalletConnectionRequest
-    
-    var dAppInfo: TONDAppInfo? { request.event.preview.dAppInfo }
-    var permissions: [TONConnectionRequestEventPreviewPermission] { request.event.preview.permissions }
-    
+class WalletSignMessageRequestViewModel: ObservableObject {
+    private let request: TONWalletSignMessageRequest
+
+    var dAppInfo: TONDAppInfo? { request.event.dAppInfo }
+
     let dismiss = PassthroughSubject<Void, Never>()
 
-    init(request: TONWalletConnectionRequest, wallets: [any TONWalletProtocol]) {
+    init(request: TONWalletSignMessageRequest) {
         self.request = request
-        self.wallets = wallets.map { SelectableWallet(wallet: $0) }
-
-        self.selectedWallet = self.wallets.first
     }
 
     func approve() {
-        guard let selectedWallet else {
-            return
-        }
-
         Task {
             do {
-                let followUp = try await request.approve(wallet: selectedWallet.wallet)
+                _ = try await request.approve()
                 dismiss.send()
-                if let followUp {
-                    TONEventsHandler.shared.events.send(followUp)
-                }
             } catch {
-                debugPrint(error.localizedDescription)
+                debugPrint("Error approving sign message: \(error.localizedDescription)")
             }
         }
     }
-    
+
     func reject() {
         Task {
             do {
-                try await request.reject()
+                try await request.reject(reason: "User rejected sign message")
                 dismiss.send()
             } catch {
-                debugPrint(error.localizedDescription)
+                debugPrint("Error rejecting sign message: \(error.localizedDescription)")
             }
-        }
-    }
-}
-
-extension WalletConnectionRequestViewModel {
-    
-    struct SelectableWallet: Identifiable {
-        let id = UUID()
-        let wallet: any TONWalletProtocol
-        var address: String { wallet.address.value }
-        
-        init(wallet: any TONWalletProtocol) {
-            self.wallet = wallet
         }
     }
 }

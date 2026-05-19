@@ -121,12 +121,22 @@ struct WalletsListView: View {
                     animated: true,
                     completion: nil
                 )
+            } else if let signMessageRequest = event.signMessageRequest {
+                let controller = UIHostingController(
+                    rootView: WalletSignMessageRequestView(viewModel: .init(request: signMessageRequest))
+                        .presentationDragIndicator(.visible)
+                )
+                UIApplication.shared.topViewController()?.present(
+                    controller,
+                    animated: true,
+                    completion: nil
+                )
             } else if let signDataRequest = event.signDataRequest {
                 let controller = UIHostingController(
                     rootView: WalletSignDataRequestView(viewModel: .init(request: signDataRequest))
                         .presentationDragIndicator(.visible)
                 )
-                
+
                 UIApplication.shared.topViewController()?.present(
                     controller,
                     animated: true,
@@ -137,7 +147,7 @@ struct WalletsListView: View {
                     rootView: WalletConnectionRequestView(
                         viewModel: .init(
                             request: connectRequest,
-                            wallets: viewModel.wallets.map { $0.tonWallet}
+                            wallets: viewModel.wallets.map { $0.tonWallet }
                         )
                     )
                     .presentationDragIndicator(.visible)
