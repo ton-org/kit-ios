@@ -54,4 +54,42 @@ final class JSTONAPIClient: TONAPIClient {
     func masterchainInfo() async throws -> TONMasterchainInfo {
         try await jsClient.getMasterchainInfo()
     }
+
+    func nftItemsByAddress(request: TONNFTsRequest) async throws -> TONNFTsResponse {
+        try await jsClient.nftItemsByAddress(request)
+    }
+
+    func nftItemsByOwner(request: TONUserNFTsRequest) async throws -> TONNFTsResponse {
+        try await jsClient.nftItemsByOwner(request)
+    }
+
+    func fetchEmulation(messageBoc: TONBase64, ignoreSignature: Bool?) async throws -> TONEmulationResult {
+        try await jsClient.fetchEmulation(messageBoc.value, ignoreSignature)
+    }
+
+    func accountState(address: TONUserFriendlyAddress, seqno: UInt?) async throws -> TONAccountState {
+        try await jsClient.getAccountState(address.value, seqno)
+    }
+    
+    func accountStates(addresses: [TONUserFriendlyAddress]) async throws -> [TONUserFriendlyAddress: TONAccountState] {
+        let raw: [String: TONAccountState] = try await jsClient.getAccountStates(addresses)
+        var result: [TONUserFriendlyAddress: TONAccountState] = [:]
+        for (key, value) in raw {
+            let address = try TONUserFriendlyAddress(value: key)
+            result[address] = value
+        }
+        return result
+    }
+
+    func balance(address: TONUserFriendlyAddress, seqno: UInt?) async throws -> TONTokenAmount {
+        try await jsClient.getBalance(address.value, seqno)
+    }
+
+    func resolveDnsWallet(domain: String) async throws -> String? {
+        try await jsClient.resolveDnsWallet(domain)
+    }
+
+    func backResolveDnsWallet(address: TONUserFriendlyAddress) async throws -> String? {
+        try await jsClient.backResolveDnsWallet(address.value)
+    }
 }

@@ -28053,24 +28053,24 @@ function createStorageAdapter(config = {}) {
 	if (typeof localStorage !== "undefined") try {
 		return new LocalStorageAdapter(config);
 	} catch (error) {
-		log$36.warn("Failed to create LocalStorageAdapter, falling back to memory", { error });
+		log$37.warn("Failed to create LocalStorageAdapter, falling back to memory", { error });
 	}
 	if (config.allowMemory) return new MemoryStorageAdapter(config);
 	else throw new Error("No storage adapter available");
 }
-var log$36;
+var log$37;
 var init_adapters = __esmMin((() => {
 	init_Logger();
 	init_local();
 	init_memory();
-	log$36 = globalLogger.createChild("StorageAdapter");
+	log$37 = globalLogger.createChild("StorageAdapter");
 }));
 //#endregion
 //#region ../walletkit/dist/esm/storage/Storage.js
-var log$35, Storage;
+var log$36, Storage;
 var init_Storage = __esmMin((() => {
 	init_Logger();
-	log$35 = globalLogger.createChild("Storage");
+	log$36 = globalLogger.createChild("Storage");
 	Storage = class {
 		adapter;
 		constructor(adapter) {
@@ -28087,7 +28087,7 @@ var init_Storage = __esmMin((() => {
 				if (value === null) return null;
 				return JSON.parse(value);
 			} catch (error) {
-				log$35.warn("Failed to parse stored value", {
+				log$36.warn("Failed to parse stored value", {
 					key,
 					error
 				});
@@ -28104,7 +28104,7 @@ var init_Storage = __esmMin((() => {
 				const serialized = JSON.stringify(value);
 				await this.adapter.set(key, serialized);
 			} catch (error) {
-				log$35.error("Failed to serialize value for storage", {
+				log$36.error("Failed to serialize value for storage", {
 					key,
 					error
 				});
@@ -28487,11 +28487,11 @@ var init_WalletManager = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/core/TONConnectStoredSessionManager.js
-var log$34, TONConnectStoredSessionManager;
+var log$35, TONConnectStoredSessionManager;
 var init_TONConnectStoredSessionManager = __esmMin((() => {
 	init_esm$1();
 	init_Logger();
-	log$34 = globalLogger.createChild("TONConnectStoredSessionManager");
+	log$35 = globalLogger.createChild("TONConnectStoredSessionManager");
 	TONConnectStoredSessionManager = class {
 		sessions = /* @__PURE__ */ new Map();
 		storage;
@@ -28624,16 +28624,16 @@ var init_TONConnectStoredSessionManager = __esmMin((() => {
 							const wallet = this.walletManager.getWallet(session.walletId);
 							if (wallet) session.walletAddress = wallet.getAddress();
 							else {
-								log$34.warn("Session Wallet not found for session", { sessionId: session.sessionId });
+								log$35.warn("Session Wallet not found for session", { sessionId: session.sessionId });
 								continue;
 							}
 						}
 						this.sessions.set(session.sessionId, session);
 					}
-					log$34.debug("Loaded session metadata", { count: storedSessions.length });
+					log$35.debug("Loaded session metadata", { count: storedSessions.length });
 				}
 			} catch (error) {
-				log$34.warn("Failed to load sessions from storage", { error });
+				log$35.warn("Failed to load sessions from storage", { error });
 			}
 		}
 		/**
@@ -28644,7 +28644,7 @@ var init_TONConnectStoredSessionManager = __esmMin((() => {
 				const sessionsToStore = Array.from(this.sessions.values());
 				await this.storage.set(this.storageKey, sessionsToStore);
 			} catch (error) {
-				log$34.warn("Failed to persist sessions to storage", { error });
+				log$35.warn("Failed to persist sessions to storage", { error });
 			}
 		}
 		async migrateSessions() {
@@ -30117,7 +30117,7 @@ var init_JSBridgeInjector = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/core/BridgeManager.js
-var log$32, BridgeManager;
+var log$33, BridgeManager;
 var init_BridgeManager = __esmMin((() => {
 	init_esm$1();
 	init_dist$2();
@@ -30125,7 +30125,7 @@ var init_BridgeManager = __esmMin((() => {
 	init_uuid();
 	init_errors$3();
 	init_JSBridgeInjector();
-	log$32 = globalLogger.createChild("BridgeManager");
+	log$33 = globalLogger.createChild("BridgeManager");
 	BridgeManager = class {
 		config;
 		bridgeProvider;
@@ -30164,7 +30164,7 @@ var init_BridgeManager = __esmMin((() => {
 			this.walletKitConfig = walletKitConfig;
 			this.jsBridgeTransport = config?.jsBridgeTransport;
 			if (this.config.bridgeUrl && !this.config.disableHttpConnection) this.bridgeProvider = new C$1(this.config.bridgeUrl, this.queueBridgeEvent.bind(this), (error) => {
-				log$32.error("Bridge listener error", { error: error.toString() });
+				log$33.error("Bridge listener error", { error: error.toString() });
 				this.analytics?.emitBridgeClientConnectError({
 					error_message: `${error?.toString() || "Unknown error"}${error?.errorCode ? ` (Code: ${error?.errorCode})` : ""}`,
 					trace_id: error?.traceId,
@@ -30178,12 +30178,12 @@ var init_BridgeManager = __esmMin((() => {
 		*/
 		async start() {
 			if (this.isActive === true) {
-				log$32.warn("Bridge already started");
+				log$33.warn("Bridge already started");
 				return;
 			}
 			this.isActive = true;
 			if (this.isConnected === true) {
-				log$32.warn("Bridge already connected");
+				log$33.warn("Bridge already connected");
 				return;
 			}
 			try {
@@ -30195,7 +30195,7 @@ var init_BridgeManager = __esmMin((() => {
 				}
 			} catch (error) {
 				this.isActive = false;
-				log$32.error("Failed to start bridge", { error });
+				log$33.error("Failed to start bridge", { error });
 				throw error;
 			}
 			const requestProcessing = () => {
@@ -30208,10 +30208,10 @@ var init_BridgeManager = __esmMin((() => {
 		* Create new session for a dApp connection
 		*/
 		async createSession(appSessionId) {
-			log$32.info("[BRIDGE] Creating session", { appSessionId });
+			log$33.info("[BRIDGE] Creating session", { appSessionId });
 			if (!await this.sessionManager.getSession(appSessionId)) throw new WalletKitError(ERROR_CODES.SESSION_NOT_FOUND, `Session not found`, void 0, { appSessionId });
 			if (this.bridgeProvider && this.isConnected) {
-				log$32.info("[BRIDGE] Updating clients");
+				log$33.info("[BRIDGE] Updating clients");
 				await this.updateClients();
 			}
 		}
@@ -30220,7 +30220,7 @@ var init_BridgeManager = __esmMin((() => {
 		*/
 		async removeSession(appSessionId) {
 			if (this.bridgeProvider && this.isConnected) await this.updateClients();
-			log$32.debug("Session removed", { appSessionId });
+			log$33.debug("Session removed", { appSessionId });
 		}
 		/**
 		* Send response to dApp
@@ -30245,12 +30245,12 @@ var init_BridgeManager = __esmMin((() => {
 			}
 			try {
 				await this.bridgeProvider.send(response, sessionCrypto, sessionId, { traceId: event?.traceId });
-				log$32.debug("Response sent successfully", {
+				log$33.debug("Response sent successfully", {
 					sessionId,
 					requestId: event.id
 				});
 			} catch (error) {
-				log$32.error("Failed to send response through bridge", {
+				log$33.error("Failed to send response through bridge", {
 					sessionId,
 					requestId: event.id,
 					error
@@ -30332,7 +30332,7 @@ var init_BridgeManager = __esmMin((() => {
 				await this.bridgeProvider?.restoreConnection(clients, { lastEventId: this.lastEventId });
 				this.isConnected = true;
 				this.reconnectAttempts = 0;
-				log$32.info("Bridge connected successfully");
+				log$33.info("Bridge connected successfully");
 				if (this.analytics) {
 					const client = clients[0];
 					this.analytics.emitBridgeClientConnectEstablished({
@@ -30341,7 +30341,7 @@ var init_BridgeManager = __esmMin((() => {
 					});
 				}
 			} catch (error) {
-				log$32.error("Bridge connection failed", { error: error?.toString() });
+				log$33.error("Bridge connection failed", { error: error?.toString() });
 				this.analytics?.emitBridgeClientConnectError({
 					error_message: `${error?.toString() || "Unknown error"}${error?.errorCode ? ` (Code: ${error?.errorCode})` : ""}`,
 					trace_id: error?.traceId ?? connectTraceId,
@@ -30350,9 +30350,9 @@ var init_BridgeManager = __esmMin((() => {
 				if (!this.config.disableHttpConnection) {
 					if (this.reconnectAttempts < (this.config.maxReconnectAttempts || 5)) {
 						this.reconnectAttempts++;
-						log$32.info("Bridge reconnection attempt", { attempt: this.reconnectAttempts });
+						log$33.info("Bridge reconnection attempt", { attempt: this.reconnectAttempts });
 						setTimeout(() => {
-							this.connectToSSEBridge().catch((error) => log$32.error("Bridge reconnection failed", { error }));
+							this.connectToSSEBridge().catch((error) => log$33.error("Bridge reconnection failed", { error }));
 						}, this.config.reconnectInterval);
 					}
 				}
@@ -30373,10 +30373,10 @@ var init_BridgeManager = __esmMin((() => {
 		* Add client to existing bridge connection
 		*/
 		async updateClients() {
-			log$32.debug("Updating clients");
+			log$33.debug("Updating clients");
 			if (this.bridgeProvider) {
 				const clients = await this.getClients();
-				log$32.info("[BRIDGE] Restoring connection", { clients: clients.length });
+				log$33.info("[BRIDGE] Restoring connection", { clients: clients.length });
 				await this.bridgeProvider.restoreConnection(clients, { lastEventId: this.lastEventId });
 			}
 		}
@@ -30384,17 +30384,17 @@ var init_BridgeManager = __esmMin((() => {
 		* Queue incoming bridge events for processing
 		*/
 		queueBridgeEvent(event) {
-			log$32.debug("Bridge event queued", {
+			log$33.debug("Bridge event queued", {
 				eventId: event?.id,
 				event
 			});
 			this.eventQueue.push(event);
 			this.processBridgeEvents().catch((error) => {
-				log$32.error("Error in background event processing", { error });
+				log$33.error("Error in background event processing", { error });
 			});
 		}
 		queueJsBridgeEvent(messageInfo, event) {
-			log$32.debug("JS Bridge event queued", { eventId: messageInfo?.messageId });
+			log$33.debug("JS Bridge event queued", { eventId: messageInfo?.messageId });
 			if (!event) return;
 			if (!event.traceId) event.traceId = v7();
 			if (event.method == "connect") this.eventQueue.push({
@@ -30423,7 +30423,7 @@ var init_BridgeManager = __esmMin((() => {
 				walletId: messageInfo.walletId
 			});
 			this.processBridgeEvents().catch((error) => {
-				log$32.error("Error in background event processing", { error });
+				log$33.error("Error in background event processing", { error });
 			});
 		}
 		/**
@@ -30435,7 +30435,7 @@ var init_BridgeManager = __esmMin((() => {
 		*/
 		async processBridgeEvents() {
 			if (this.isProcessing) {
-				log$32.debug("Event processing already in progress, skipping");
+				log$33.debug("Event processing already in progress, skipping");
 				return;
 			}
 			this.isProcessing = true;
@@ -30448,7 +30448,7 @@ var init_BridgeManager = __esmMin((() => {
 					}
 				}
 			} catch (error) {
-				log$32.error("Error during event processing", { error });
+				log$33.error("Error during event processing", { error });
 				this.isProcessing = false;
 				this.restartConnection();
 				return;
@@ -30461,7 +30461,7 @@ var init_BridgeManager = __esmMin((() => {
 		*/
 		async handleBridgeEvent(event) {
 			try {
-				log$32.info("Bridge event received", { event });
+				log$33.info("Bridge event received", { event });
 				const rawEvent = {
 					id: event.id || crypto.randomUUID(),
 					method: event.method || "unknown",
@@ -30515,12 +30515,12 @@ var init_BridgeManager = __esmMin((() => {
 				try {
 					await this.eventStore.storeEvent(rawEvent);
 					if (this.eventEmitter) this.eventEmitter.emit("bridgeStorageUpdated", {}, "bridge-manager");
-					log$32.info("Event stored durably", {
+					log$33.info("Event stored durably", {
 						eventId: rawEvent.id,
 						method: rawEvent.method
 					});
 				} catch (error) {
-					log$32.error("Failed to store event durably", {
+					log$33.error("Failed to store event durably", {
 						eventId: rawEvent.id,
 						error: error.message
 					});
@@ -30529,13 +30529,13 @@ var init_BridgeManager = __esmMin((() => {
 						method: rawEvent.method
 					});
 				}
-				log$32.info("Bridge event processed", { rawEvent });
+				log$33.info("Bridge event processed", { rawEvent });
 				if (event?.lastEventId && event.lastEventId !== this.lastEventId) {
 					this.lastEventId = event.lastEventId;
 					await this.saveLastEventId();
 				}
 			} catch (error) {
-				log$32.error("Error handling bridge event", { error });
+				log$33.error("Error handling bridge event", { error });
 			}
 		}
 		/**
@@ -30546,11 +30546,11 @@ var init_BridgeManager = __esmMin((() => {
 				const savedEventId = await this.storage.get(this.storageKey);
 				if (savedEventId) {
 					this.lastEventId = savedEventId;
-					log$32.debug("Loaded last event ID from storage", { lastEventId: this.lastEventId });
+					log$33.debug("Loaded last event ID from storage", { lastEventId: this.lastEventId });
 				}
 			} catch (error) {
 				const storageError = WalletKitError.fromError(ERROR_CODES.STORAGE_READ_FAILED, "Failed to load last event ID from storage", error);
-				log$32.warn("Failed to load last event ID from storage", { error: storageError });
+				log$33.warn("Failed to load last event ID from storage", { error: storageError });
 			}
 		}
 		/**
@@ -30560,11 +30560,11 @@ var init_BridgeManager = __esmMin((() => {
 			try {
 				if (this.lastEventId) {
 					await this.storage.set(this.storageKey, this.lastEventId);
-					log$32.debug("Saved last event ID to storage", { lastEventId: this.lastEventId });
+					log$33.debug("Saved last event ID to storage", { lastEventId: this.lastEventId });
 				}
 			} catch (error) {
 				const storageError = WalletKitError.fromError(ERROR_CODES.STORAGE_WRITE_FAILED, "Failed to save last event ID to storage", error);
-				log$32.warn("Failed to save last event ID to storage", { error: storageError });
+				log$33.warn("Failed to save last event ID to storage", { error: storageError });
 			}
 		}
 	};
@@ -30610,14 +30610,14 @@ function isValidHost(host) {
 var init_url = __esmMin((() => {}));
 //#endregion
 //#region ../walletkit/dist/esm/handlers/ConnectHandler.js
-var log$31, ConnectHandler;
+var log$32, ConnectHandler;
 var init_ConnectHandler = __esmMin((() => {
 	init_esm$1();
 	init_Logger();
 	init_BasicHandler();
 	init_url();
-	log$31 = globalLogger.createChild("ConnectHandler");
-	ConnectHandler = class ConnectHandler extends BasicHandler {
+	log$32 = globalLogger.createChild("ConnectHandler");
+	ConnectHandler = class extends BasicHandler {
 		config;
 		analytics;
 		constructor(notify, config, analyticsManager) {
@@ -30637,7 +30637,7 @@ var init_ConnectHandler = __esmMin((() => {
 				manifest = result.manifest;
 				manifestFetchErrorCode = result.manifestFetchErrorCode;
 			} catch (error) {
-				log$31.warn("Failed to fetch manifest", { error });
+				log$32.warn("Failed to fetch manifest", { error });
 			}
 			const preview = this.createPreview(event, manifestUrl, manifest, manifestFetchErrorCode);
 			const connectEvent = {
@@ -30698,14 +30698,14 @@ var init_ConnectHandler = __esmMin((() => {
 				if (!finalManifestFetchErrorCode && dAppUrl) try {
 					const parsedDAppUrl = new URL(dAppUrl);
 					if (!isValidHost(parsedDAppUrl.host)) {
-						log$31.warn("Invalid dApp URL in manifest - invalid host format", {
+						log$32.warn("Invalid dApp URL in manifest - invalid host format", {
 							dAppUrl,
 							host: parsedDAppUrl.host
 						});
 						finalManifestFetchErrorCode = CONNECT_EVENT_ERROR_CODES.MANIFEST_CONTENT_ERROR;
 					}
 				} catch (_) {
-					log$31.warn("Invalid dApp URL in manifest - failed to parse", { dAppUrl });
+					log$32.warn("Invalid dApp URL in manifest - failed to parse", { dAppUrl });
 					finalManifestFetchErrorCode = CONNECT_EVENT_ERROR_CODES.MANIFEST_CONTENT_ERROR;
 				}
 			}
@@ -30740,7 +30740,6 @@ var init_ConnectHandler = __esmMin((() => {
 				manifestFetchErrorCode: finalManifestFetchErrorCode ?? void 0
 			};
 		}
-		static MANIFEST_PROXY_URL = "https://walletbot.me/tonconnect-proxy/";
 		/**
 		* Fetch manifest from URL
 		*/
@@ -30758,15 +30757,16 @@ var init_ConnectHandler = __esmMin((() => {
 			}
 			const directResult = await this.tryFetchManifest(manifestUrl);
 			if (directResult.manifest) return directResult;
-			log$31.info("Direct manifest fetch failed, trying proxy", { manifestUrl });
-			const proxyUrl = `${ConnectHandler.MANIFEST_PROXY_URL}${manifestUrl}`;
-			return this.tryFetchManifest(proxyUrl);
+			return {
+				manifest: null,
+				manifestFetchErrorCode: CONNECT_EVENT_ERROR_CODES.MANIFEST_CONTENT_ERROR
+			};
 		}
 		async tryFetchManifest(url) {
 			try {
 				const response = await fetch(url);
 				if (!response.ok) {
-					log$31.error("Failed to fetch manifest not ok", {
+					log$32.error("Failed to fetch manifest not ok", {
 						url,
 						status: response.status
 					});
@@ -30780,7 +30780,7 @@ var init_ConnectHandler = __esmMin((() => {
 					manifestFetchErrorCode: void 0
 				};
 			} catch (e) {
-				log$31.error("Failed to fetch manifest catched", {
+				log$32.error("Failed to fetch manifest catched", {
 					url,
 					error: e
 				});
@@ -31399,7 +31399,7 @@ async function resolveItemsToMessages(items, wallet) {
 			messages.push(resolveNftItem(item, wallet));
 			break;
 		default:
-			log$30.warn("Unknown item type, skipping", { item });
+			log$31.warn("Unknown item type, skipping", { item });
 			break;
 	}
 	return messages;
@@ -31452,13 +31452,13 @@ function resolveNftItem(item, wallet) {
 		mode: { flags: [SendModeFlag.IGNORE_ERRORS, SendModeFlag.PAY_GAS_SEPARATELY] }
 	};
 }
-var import_dist$37, log$30;
+var import_dist$37, log$31;
 var init_itemsResolver = __esmMin((() => {
 	import_dist$37 = require_dist$1();
 	init_models();
 	init_messageBuilders();
 	init_Logger();
-	log$30 = globalLogger.createChild("ItemsResolver");
+	log$31 = globalLogger.createChild("ItemsResolver");
 }));
 //#endregion
 //#region ../walletkit/dist/esm/utils/events.js
@@ -31520,7 +31520,7 @@ function parseTonConnectTransactionRequest(event, wallet) {
 			validation: validateTransactionRequestForWallet(request, wallet, event.isLocal)
 		};
 	} catch (error) {
-		log$29.error("Failed to parse transaction request", { error });
+		log$30.error("Failed to parse transaction request", { error });
 		errors.push("Failed to parse transaction request");
 		return {
 			result: void 0,
@@ -31531,7 +31531,7 @@ function parseTonConnectTransactionRequest(event, wallet) {
 		};
 	}
 }
-var log$29;
+var log$30;
 var init_events = __esmMin((() => {
 	init_errors$3();
 	init_transactionValidators();
@@ -31539,7 +31539,7 @@ var init_events = __esmMin((() => {
 	init_transaction$1();
 	init_itemsResolver();
 	init_Logger();
-	log$29 = globalLogger.createChild("EventsUtils");
+	log$30 = globalLogger.createChild("EventsUtils");
 }));
 //#endregion
 //#region ../../node_modules/@scure/bip39/node_modules/@noble/hashes/utils.js
@@ -32540,23 +32540,11 @@ function emulationAccountStateToAccountState(state) {
 		hash: state.hash ?? void 0,
 		balance: state.balance,
 		extraCurrencies: state.extraCurrencies ?? void 0,
-		accountStatus: toAccountStatus$3(state.accountStatus),
+		accountStatus: state.accountStatus,
 		frozenHash: state.frozenHash ?? void 0,
 		dataHash: state.dataHash ?? void 0,
 		codeHash: state.codeHash ?? void 0
 	};
-}
-function toAccountStatus$3(status) {
-	switch (status) {
-		case "active": return { type: "active" };
-		case "frozen": return { type: "frozen" };
-		case "uninit": return { type: "uninit" };
-		case "nonexist": return { type: "nonexist" };
-		default: return {
-			type: "unknown",
-			value: status
-		};
-	}
 }
 function emulationMsgToTransactionMessage(msg) {
 	return {
@@ -32641,8 +32629,8 @@ function emulationTxToTransaction(tx) {
 		traceId: tx.traceId,
 		previousTransactionHash: tx.prevTransHash ?? void 0,
 		previousTransactionLogicalTime: tx.prevTransLt ?? void 0,
-		origStatus: toAccountStatus$3(tx.origStatus),
-		endStatus: toAccountStatus$3(tx.endStatus),
+		origStatus: tx.origStatus,
+		endStatus: tx.endStatus,
 		totalFees: tx.totalFees,
 		totalFeesExtraCurrencies: tx.totalFeesExtraCurrencies,
 		blockRef: tx.blockRef,
@@ -33687,7 +33675,7 @@ async function createTransactionPreviewIfPossible(config, client, request, walle
 	try {
 		preview = await CallForSuccess(() => createTransactionPreview(client, request, wallet, options));
 	} catch (error) {
-		log$28.error("Failed to create transaction preview", { error });
+		log$29.error("Failed to create transaction preview", { error });
 		preview = {
 			error: {
 				code: ERROR_CODES.UNKNOWN_EMULATION_ERROR,
@@ -33698,7 +33686,7 @@ async function createTransactionPreviewIfPossible(config, client, request, walle
 	}
 	return preview;
 }
-var import_dist$24, log$28, SIGN_MODE_EMULATION_VALUE;
+var import_dist$24, log$29, SIGN_MODE_EMULATION_VALUE;
 var init_transactionPreview = __esmMin((() => {
 	import_dist$24 = require_dist$1();
 	init_map_emulation_trace();
@@ -33707,7 +33695,7 @@ var init_transactionPreview = __esmMin((() => {
 	init_retry();
 	init_models();
 	init_Logger();
-	log$28 = globalLogger.createChild("TransactionPreview");
+	log$29 = globalLogger.createChild("TransactionPreview");
 	SIGN_MODE_EMULATION_VALUE = 2000000000n;
 }));
 //#endregion
@@ -33830,14 +33818,14 @@ var init_utils$4 = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/handlers/TransactionHandler.js
-var log$27, TransactionHandler;
+var log$28, TransactionHandler;
 var init_TransactionHandler = __esmMin((() => {
 	init_esm$1();
 	init_Logger();
 	init_BasicHandler();
 	init_events();
 	init_utils$4();
-	log$27 = globalLogger.createChild("TransactionHandler");
+	log$28 = globalLogger.createChild("TransactionHandler");
 	TransactionHandler = class extends BasicHandler {
 		config;
 		walletManager;
@@ -33859,7 +33847,7 @@ var init_TransactionHandler = __esmMin((() => {
 		async handle(event) {
 			const wallet = getWalletFromEvent(this.walletManager, event);
 			if (!wallet) {
-				log$27.error("Wallet not found", { event });
+				log$28.error("Wallet not found", { event });
 				return {
 					error: {
 						code: SEND_TRANSACTION_ERROR_CODES.UNKNOWN_APP_ERROR,
@@ -33870,7 +33858,7 @@ var init_TransactionHandler = __esmMin((() => {
 			}
 			const requestValidation = this.parseTonConnectTransactionRequest(event, wallet);
 			if (!requestValidation.result || !requestValidation?.validation?.isValid) {
-				log$27.error("Failed to parse transaction request", {
+				log$28.error("Failed to parse transaction request", {
 					event,
 					requestValidation
 				});
@@ -33916,13 +33904,13 @@ var init_TransactionHandler = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/handlers/SignDataHandler.js
-var log$26, SignDataHandler;
+var log$27, SignDataHandler;
 var init_SignDataHandler = __esmMin((() => {
 	init_internal();
 	init_BasicHandler();
 	init_Logger();
 	init_errors$3();
-	log$26 = globalLogger.createChild("SignDataHandler");
+	log$27 = globalLogger.createChild("SignDataHandler");
 	SignDataHandler = class extends BasicHandler {
 		analytics;
 		walletManager;
@@ -33943,12 +33931,12 @@ var init_SignDataHandler = __esmMin((() => {
 			const wallet = walletId ? this.walletManager.getWallet(walletId) : void 0;
 			const payload = this.parseDataToSign(event);
 			if (!payload) {
-				log$26.error("No data to sign found in request", { event });
+				log$27.error("No data to sign found in request", { event });
 				throw new WalletKitError(ERROR_CODES.INVALID_REQUEST_EVENT, "No data to sign found in request", void 0, { eventId: event.id });
 			}
 			const preview = this.createDataPreview(payload.data, event);
 			if (!preview) {
-				log$26.error("No preview found for data", { data: payload });
+				log$27.error("No preview found for data", { data: payload });
 				throw new WalletKitError(ERROR_CODES.RESPONSE_CREATION_FAILED, "Failed to create preview for sign data request", void 0, {
 					eventId: event.id,
 					data: payload
@@ -34005,7 +33993,7 @@ var init_SignDataHandler = __esmMin((() => {
 					}
 				};
 			} catch (error) {
-				log$26.error("Error deserializing cell", { error });
+				log$27.error("Error deserializing cell", { error });
 				return {
 					type: "cell",
 					value: {
@@ -34019,14 +34007,14 @@ var init_SignDataHandler = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/handlers/SignMessageHandler.js
-var log$25, SignMessageHandler;
+var log$26, SignMessageHandler;
 var init_SignMessageHandler = __esmMin((() => {
 	init_esm$1();
 	init_Logger();
 	init_BasicHandler();
 	init_utils$4();
 	init_events();
-	log$25 = globalLogger.createChild("SignMessageHandler");
+	log$26 = globalLogger.createChild("SignMessageHandler");
 	SignMessageHandler = class extends BasicHandler {
 		config;
 		walletManager;
@@ -34048,7 +34036,7 @@ var init_SignMessageHandler = __esmMin((() => {
 		async handle(event) {
 			const wallet = getWalletFromEvent(this.walletManager, event);
 			if (!wallet) {
-				log$25.error("Wallet not found", { event });
+				log$26.error("Wallet not found", { event });
 				return {
 					error: {
 						code: SIGN_MESSAGE_ERROR_CODES.UNKNOWN_APP_ERROR,
@@ -34059,7 +34047,7 @@ var init_SignMessageHandler = __esmMin((() => {
 			}
 			const requestValidation = this.parseTonConnectTransactionRequest(event, wallet);
 			if (!requestValidation.result || !requestValidation?.validation?.isValid) {
-				log$25.error("Failed to parse sign message request", {
+				log$26.error("Failed to parse sign message request", {
 					event,
 					requestValidation
 				});
@@ -34144,7 +34132,7 @@ var init_DisconnectHandler = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/core/EventRouter.js
-var log$24, EventRouter;
+var log$25, EventRouter;
 var init_EventRouter = __esmMin((() => {
 	init_ConnectHandler();
 	init_TransactionHandler();
@@ -34153,7 +34141,7 @@ var init_EventRouter = __esmMin((() => {
 	init_DisconnectHandler();
 	init_events$1();
 	init_Logger();
-	log$24 = globalLogger.createChild("EventRouter");
+	log$25 = globalLogger.createChild("EventRouter");
 	EventRouter = class {
 		config;
 		eventEmitter;
@@ -34185,7 +34173,7 @@ var init_EventRouter = __esmMin((() => {
 		async routeEvent(event) {
 			const validation = validateBridgeEvent(event);
 			if (!validation.isValid) {
-				log$24.error("Invalid bridge event", { errors: validation.errors });
+				log$25.error("Invalid bridge event", { errors: validation.errors });
 				return;
 			}
 			try {
@@ -34200,7 +34188,7 @@ var init_EventRouter = __esmMin((() => {
 						try {
 							await this.bridgeManager.sendResponse(event, result);
 						} catch (error) {
-							log$24.error("Error sending response for error event", {
+							log$25.error("Error sending response for error event", {
 								error,
 								event,
 								result
@@ -34212,7 +34200,7 @@ var init_EventRouter = __esmMin((() => {
 					break;
 				}
 			} catch (error) {
-				log$24.error("Error routing event", { error });
+				log$25.error("Error routing event", { error });
 				throw error;
 			}
 		}
@@ -34341,7 +34329,7 @@ function hasConnectionResult(event) {
 */
 async function signTransactionInternal(wallet, request) {
 	const signedBoc = await wallet.getSignedSendTransaction(request, { fakeSignature: false });
-	log$23.debug("Signing transaction", {
+	log$24.debug("Signing transaction", {
 		messagesNumber: request.messages.length,
 		fromAddress: request.fromAddress,
 		validUntil: request.validUntil
@@ -34397,7 +34385,7 @@ function parseDomain(url) {
 			value: parsedUrl.host
 		};
 	} catch (error) {
-		log$23.error("Failed to parse domain", { error });
+		log$24.error("Failed to parse domain", { error });
 		return {
 			lengthBytes: 0,
 			value: ""
@@ -34425,7 +34413,7 @@ function toTonConnectSignDataPayload(payload) {
 		bytes: payload.data.value.content
 	};
 }
-var import_dist$20, import_dist$21, log$23, RequestProcessor;
+var import_dist$20, import_dist$21, log$24, RequestProcessor;
 var init_RequestProcessor = __esmMin((() => {
 	import_dist$20 = require_dist$1();
 	init_esm$1();
@@ -34440,7 +34428,7 @@ var init_RequestProcessor = __esmMin((() => {
 	init_transaction$1();
 	init_utils$4();
 	init_events();
-	log$23 = globalLogger.createChild("RequestProcessor");
+	log$24 = globalLogger.createChild("RequestProcessor");
 	RequestProcessor = class {
 		walletKitOptions;
 		sessionManager;
@@ -34503,7 +34491,7 @@ var init_RequestProcessor = __esmMin((() => {
 				}
 				return;
 			} catch (error) {
-				log$23.error("Failed to approve connect request", { error });
+				log$24.error("Failed to approve connect request", { error });
 				throw error;
 			}
 		}
@@ -34638,7 +34626,7 @@ var init_RequestProcessor = __esmMin((() => {
 		*/
 		async rejectConnectRequest(event, reason, errorCode) {
 			try {
-				log$23.info("Connect request rejected", {
+				log$24.info("Connect request rejected", {
 					id: event.id,
 					dAppName: event.preview.dAppInfo?.name || "",
 					reason: reason || "User rejected connection"
@@ -34655,7 +34643,7 @@ var init_RequestProcessor = __esmMin((() => {
 				try {
 					await this.bridgeManager.sendResponse(event, response, new SessionCrypto());
 				} catch (error) {
-					log$23.error("Failed to send connect request rejection response", { error });
+					log$24.error("Failed to send connect request rejection response", { error });
 				}
 				if (this.analytics) {
 					const sessionData = event.from ? await this.sessionManager.getSession(sessionId) : void 0;
@@ -34684,7 +34672,7 @@ var init_RequestProcessor = __esmMin((() => {
 				}
 				return;
 			} catch (error) {
-				log$23.error("Failed to reject connect request", { error });
+				log$24.error("Failed to reject connect request", { error });
 				throw error;
 			}
 		}
@@ -34716,7 +34704,7 @@ var init_RequestProcessor = __esmMin((() => {
 					return { signedBoc };
 				}
 			} catch (error) {
-				log$23.error("Failed to approve transaction request", { error });
+				log$24.error("Failed to approve transaction request", { error });
 				if (error instanceof WalletKitError) throw error;
 				if (error?.message?.includes("Ledger device")) throw new WalletKitError(ERROR_CODES.LEDGER_DEVICE_ERROR, "Ledger device error", error);
 				throw error;
@@ -34766,7 +34754,7 @@ var init_RequestProcessor = __esmMin((() => {
 				}
 				return;
 			} catch (error) {
-				log$23.error("Failed to reject transaction request", { error });
+				log$24.error("Failed to reject transaction request", { error });
 				throw error;
 			}
 		}
@@ -34797,7 +34785,7 @@ var init_RequestProcessor = __esmMin((() => {
 					return { internalBoc };
 				}
 			} catch (error) {
-				log$23.error("Failed to approve sign message request", { error });
+				log$24.error("Failed to approve sign message request", { error });
 				throw error;
 			}
 		}
@@ -34815,7 +34803,7 @@ var init_RequestProcessor = __esmMin((() => {
 				};
 				await this.sendBridgeMessage(event, void 0, response);
 			} catch (error) {
-				log$23.error("Failed to reject sign message request", { error });
+				log$24.error("Failed to reject sign message request", { error });
 				throw error;
 			}
 		}
@@ -34918,7 +34906,7 @@ var init_RequestProcessor = __esmMin((() => {
 					};
 				}
 			} catch (error) {
-				log$23.error("Failed to approve sign data request", { error: error?.message?.toString() ?? error?.toString() });
+				log$24.error("Failed to approve sign data request", { error: error?.message?.toString() ?? error?.toString() });
 				if (error instanceof WalletKitError) throw error;
 				throw error;
 			}
@@ -34953,7 +34941,7 @@ var init_RequestProcessor = __esmMin((() => {
 				}
 				return;
 			} catch (error) {
-				log$23.error("Failed to reject sign data request", { error });
+				log$24.error("Failed to reject sign data request", { error });
 				throw error;
 			}
 		}
@@ -35030,14 +35018,14 @@ var init_RequestProcessor = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/core/EventStore.js
-var getEventUUID, log$22, MAX_EVENT_SIZE_BYTES, StorageEventStore;
+var getEventUUID, log$23, MAX_EVENT_SIZE_BYTES, StorageEventStore;
 var init_EventStore = __esmMin((() => {
 	init_Logger();
 	init_events$1();
 	getEventUUID = () => {
 		return crypto.randomUUID();
 	};
-	log$22 = globalLogger.createChild("EventStore");
+	log$23 = globalLogger.createChild("EventStore");
 	MAX_EVENT_SIZE_BYTES = 100 * 1024;
 	StorageEventStore = class {
 		storage;
@@ -35070,7 +35058,7 @@ var init_EventStore = __esmMin((() => {
 				sizeBytes
 			};
 			await this.saveEvent(storedEvent);
-			log$22.info("Event stored", {
+			log$23.info("Event stored", {
 				eventId: storedEvent.id,
 				eventType,
 				sizeBytes,
@@ -35098,11 +35086,11 @@ var init_EventStore = __esmMin((() => {
 				const allEvents = await this.getAllEventsFromStorage();
 				const event = allEvents[eventId];
 				if (!event) {
-					log$22.warn("Cannot lock non-existent event", { eventId });
+					log$23.warn("Cannot lock non-existent event", { eventId });
 					return;
 				}
 				if (event.status !== "new") {
-					log$22.debug("Cannot lock event - not in new status", {
+					log$23.debug("Cannot lock event - not in new status", {
 						eventId,
 						status: event.status,
 						lockedBy: event.lockedBy
@@ -35117,7 +35105,7 @@ var init_EventStore = __esmMin((() => {
 				};
 				allEvents[eventId] = updatedEvent;
 				await this.storage.set(this.storageKey, allEvents);
-				log$22.debug("Event lock acquired", {
+				log$23.debug("Event lock acquired", {
 					eventId,
 					walletAddress: walletId
 				});
@@ -35144,7 +35132,7 @@ var init_EventStore = __esmMin((() => {
 				};
 				allEvents[eventId] = updatedEvent;
 				await this.storage.set(this.storageKey, allEvents);
-				log$22.debug("Event retry count incremented", {
+				log$23.debug("Event retry count incremented", {
 					eventId,
 					retryCount: updatedEvent.retryCount,
 					error
@@ -35168,7 +35156,7 @@ var init_EventStore = __esmMin((() => {
 				if (status === "completed") updatedEvent.completedAt = Date.now();
 				allEvents[eventId] = updatedEvent;
 				await this.storage.set(this.storageKey, allEvents);
-				log$22.debug("Event status updated", {
+				log$23.debug("Event status updated", {
 					eventId,
 					oldStatus,
 					newStatus: status
@@ -35183,7 +35171,7 @@ var init_EventStore = __esmMin((() => {
 			try {
 				return (await this.getAllEventsFromStorage())[eventId] || null;
 			} catch (error) {
-				log$22.warn("Failed to get event", {
+				log$23.warn("Failed to get event", {
 					eventId,
 					error
 				});
@@ -35205,14 +35193,14 @@ var init_EventStore = __esmMin((() => {
 				};
 				await this.saveEvent(recoveredEvent);
 				recoveredCount++;
-				log$22.info("Recovered stale event", {
+				log$23.info("Recovered stale event", {
 					eventId: event.id,
 					lockedBy: event.lockedBy,
 					staleMinutes: Math.round((now - event.processingStartedAt) / 6e4),
 					retryCount: event.retryCount || 0
 				});
 			}
-			if (recoveredCount > 0) log$22.info("Event recovery completed", { recoveredCount });
+			if (recoveredCount > 0) log$23.info("Event recovery completed", { recoveredCount });
 			return recoveredCount;
 		}
 		/**
@@ -35225,7 +35213,7 @@ var init_EventStore = __esmMin((() => {
 			const eventsToRemove = [];
 			for (const event of events) if (event.status === "completed" && event.completedAt && event.completedAt < cutoffTime || event.status === "errored" && event.createdAt < cutoffTime) {
 				eventsToRemove.push(event.id);
-				log$22.debug("Marked event for cleanup", {
+				log$23.debug("Marked event for cleanup", {
 					eventId: event.id,
 					status: event.status
 				});
@@ -35239,7 +35227,7 @@ var init_EventStore = __esmMin((() => {
 					}
 					await this.storage.set(this.storageKey, allEvents);
 				});
-				log$22.info("Event cleanup completed", { cleanedUpCount });
+				log$23.info("Event cleanup completed", { cleanedUpCount });
 			}
 			return cleanedUpCount;
 		}
@@ -35251,7 +35239,7 @@ var init_EventStore = __esmMin((() => {
 				const allEvents = await this.getAllEventsFromStorage();
 				return Object.values(allEvents);
 			} catch (error) {
-				log$22.warn("Failed to get all events", { error });
+				log$23.warn("Failed to get all events", { error });
 				return [];
 			}
 		}
@@ -35273,7 +35261,7 @@ var init_EventStore = __esmMin((() => {
 			try {
 				return await this.storage.get(this.storageKey) || {};
 			} catch (error) {
-				log$22.warn("Failed to get events from storage", { error });
+				log$23.warn("Failed to get events from storage", { error });
 				return {};
 			}
 		}
@@ -35306,10 +35294,10 @@ var init_EventStore = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/core/EventProcessor.js
-var log$21, StorageEventProcessor;
+var log$22, StorageEventProcessor;
 var init_EventProcessor = __esmMin((() => {
 	init_Logger();
-	log$21 = globalLogger.createChild("EventProcessor");
+	log$22 = globalLogger.createChild("EventProcessor");
 	StorageEventProcessor = class {
 		eventStore;
 		config;
@@ -35341,14 +35329,14 @@ var init_EventProcessor = __esmMin((() => {
 		*/
 		async startProcessing(walletId) {
 			if (this.processorConfig.disableEvents) return;
-			if (walletId) if (this.registeredWallets.has(walletId)) log$21.debug("Processing already registered for wallet", { walletId });
+			if (walletId) if (this.registeredWallets.has(walletId)) log$22.debug("Processing already registered for wallet", { walletId });
 			else {
 				this.registeredWallets.add(walletId);
-				log$21.info("Registered wallet for event processing", { walletId });
+				log$22.info("Registered wallet for event processing", { walletId });
 			}
 			if (!this.isProcessing) {
 				this.isProcessing = true;
-				log$21.info("Started global event processing loop");
+				log$22.info("Started global event processing loop");
 				this.processEventsLoop();
 			} else this.triggerProcessing();
 		}
@@ -35359,7 +35347,7 @@ var init_EventProcessor = __esmMin((() => {
 			if (this.processorConfig.disableEvents) return;
 			if (walletId) {
 				this.registeredWallets.delete(walletId);
-				log$21.info("Unregistered wallet from event processing", { walletId });
+				log$22.info("Unregistered wallet from event processing", { walletId });
 			}
 			if (this.registeredWallets.size === 0 && this.isProcessing && !walletId) {
 				this.isProcessing = false;
@@ -35367,12 +35355,12 @@ var init_EventProcessor = __esmMin((() => {
 					this.wakeUpResolver();
 					this.wakeUpResolver = void 0;
 				}
-				log$21.info("Stopped global event processing loop (no more wallets)");
+				log$22.info("Stopped global event processing loop (no more wallets)");
 			}
 		}
 		async clearRegisteredWallets() {
 			this.registeredWallets.clear();
-			log$21.info("Cleared registered wallets from event processing");
+			log$22.info("Cleared registered wallets from event processing");
 		}
 		/**
 		* Process next available event from any source (wallet or no-wallet)
@@ -35402,7 +35390,7 @@ var init_EventProcessor = __esmMin((() => {
 				const walletId = allSessions.find((s) => s.sessionId === eventToUse.sessionId)?.walletId || "no-wallet";
 				return await this.processEvent(eventToUse, walletId);
 			} catch (error) {
-				log$21.error("Error in processNextAvailableEvent", { error: error.message });
+				log$22.error("Error in processNextAvailableEvent", { error: error.message });
 				return false;
 			}
 		}
@@ -35412,9 +35400,9 @@ var init_EventProcessor = __esmMin((() => {
 		async completeEvent(eventId) {
 			try {
 				await this.eventStore.updateEventStatus(eventId, "completed", "processing");
-				log$21.debug("Event marked as completed", { eventId });
+				log$22.debug("Event marked as completed", { eventId });
 			} catch (error) {
-				log$21.error("Failed to mark event as completed", {
+				log$22.error("Failed to mark event as completed", {
 					eventId,
 					error: error.message
 				});
@@ -35425,14 +35413,14 @@ var init_EventProcessor = __esmMin((() => {
 		*/
 		startRecoveryLoop() {
 			if (this.recoveryTimeoutId) {
-				log$21.debug("Recovery loop already running");
+				log$22.debug("Recovery loop already running");
 				return;
 			}
 			const recoveryLoop = async () => {
 				try {
 					if (await this.eventStore.recoverStaleEvents(this.config.processingTimeoutMs) > 0) this.triggerProcessing();
 				} catch (error) {
-					log$21.error("Error in recovery loop", { error: error.message });
+					log$22.error("Error in recovery loop", { error: error.message });
 				}
 				if (this.recoveryTimeoutId !== void 0) this.recoveryTimeoutId = setTimeout(recoveryLoop, this.config.recoveryIntervalMs);
 			};
@@ -35440,13 +35428,13 @@ var init_EventProcessor = __esmMin((() => {
 				try {
 					await this.eventStore.cleanupOldEvents(this.config.retentionMs);
 				} catch (error) {
-					log$21.error("Error in cleanup loop", { error: error.message });
+					log$22.error("Error in cleanup loop", { error: error.message });
 				}
 				if (this.cleanupTimeoutId !== void 0) this.cleanupTimeoutId = setTimeout(cleanupLoop, this.config.cleanupIntervalMs);
 			};
 			this.recoveryTimeoutId = setTimeout(recoveryLoop, this.config.recoveryIntervalMs);
 			this.cleanupTimeoutId = setTimeout(cleanupLoop, this.config.cleanupIntervalMs);
-			log$21.info("Recovery and cleanup loops started");
+			log$22.info("Recovery and cleanup loops started");
 		}
 		/**
 		* Stop the recovery process
@@ -35460,7 +35448,7 @@ var init_EventProcessor = __esmMin((() => {
 				clearTimeout(this.cleanupTimeoutId);
 				this.cleanupTimeoutId = void 0;
 			}
-			log$21.info("Recovery and cleanup loops stopped");
+			log$22.info("Recovery and cleanup loops stopped");
 		}
 		/**
 		* Process a single event with retry logic
@@ -35468,7 +35456,7 @@ var init_EventProcessor = __esmMin((() => {
 		*/
 		async processEvent(event, walletId) {
 			if (!await this.eventStore.acquireLock(event.id, walletId)) {
-				log$21.debug("Failed to acquire lock on event", {
+				log$22.debug("Failed to acquire lock on event", {
 					eventId: event.id,
 					walletId
 				});
@@ -35476,7 +35464,7 @@ var init_EventProcessor = __esmMin((() => {
 			}
 			const retryCount = event.retryCount || 0;
 			if (retryCount >= this.config.maxRetries) {
-				log$21.error("Event exceeded max retries, marking as errored", {
+				log$22.error("Event exceeded max retries, marking as errored", {
 					eventId: event.id,
 					retryCount,
 					maxRetries: this.config.maxRetries
@@ -35484,14 +35472,14 @@ var init_EventProcessor = __esmMin((() => {
 				try {
 					await this.eventStore.updateEventStatus(event.id, "errored", "processing");
 				} catch (error) {
-					log$21.error("Failed to mark event as errored", {
+					log$22.error("Failed to mark event as errored", {
 						eventId: event.id,
 						error: error.message
 					});
 				}
 				return false;
 			}
-			log$21.info("Processing event", {
+			log$22.info("Processing event", {
 				eventId: event.id,
 				eventType: event.eventType,
 				walletId,
@@ -35511,11 +35499,11 @@ var init_EventProcessor = __esmMin((() => {
 					...walletAddress ? { walletAddress } : {}
 				});
 				await this.eventStore.updateEventStatus(event.id, "completed", "processing");
-				log$21.info("Event processing completed", { eventId: event.id });
+				log$22.info("Event processing completed", { eventId: event.id });
 				return true;
 			} catch (error) {
 				const errorMessage = error.message ?? "Unknown error";
-				log$21.error("Error processing event", {
+				log$22.error("Error processing event", {
 					eventId: event.id,
 					error: errorMessage,
 					retryCount
@@ -35523,7 +35511,7 @@ var init_EventProcessor = __esmMin((() => {
 				try {
 					await this.eventStore.releaseLock(event.id, errorMessage);
 				} catch (updateError) {
-					log$21.error("Failed to increment retry count", {
+					log$22.error("Failed to increment retry count", {
 						eventId: event.id,
 						error: updateError.message
 					});
@@ -35538,18 +35526,18 @@ var init_EventProcessor = __esmMin((() => {
 			while (this.isProcessing) try {
 				if (!await this.processNextAvailableEvent()) await this.waitForWakeUpOrTimeout(500);
 			} catch (error) {
-				log$21.error("Error in global processing loop", { error: error.message });
+				log$22.error("Error in global processing loop", { error: error.message });
 				await this.waitForWakeUpOrTimeout(500);
 			}
 			this.wakeUpResolver = void 0;
-			log$21.debug("Global processing loop ended");
+			log$22.debug("Global processing loop ended");
 		}
 		/**
 		* Trigger the global processing loop
 		*/
 		triggerProcessing() {
 			if (this.isProcessing && this.wakeUpResolver) {
-				log$21.debug("Waking up global processing loop");
+				log$22.debug("Waking up global processing loop");
 				this.wakeUpResolver();
 			}
 		}
@@ -35586,7 +35574,7 @@ var init_EventProcessor = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/core/wallet/extensions/ton.js
-var log$20, WalletTonClass;
+var log$21, WalletTonClass;
 var init_ton = __esmMin((() => {
 	init_address$1();
 	init_validation();
@@ -35596,7 +35584,7 @@ var init_ton = __esmMin((() => {
 	init_getNormalizedExtMessageHash();
 	init_errors$3();
 	init_Logger();
-	log$20 = globalLogger.createChild("WalletTonClass");
+	log$21 = globalLogger.createChild("WalletTonClass");
 	WalletTonClass = class {
 		async createTransferTonTransaction(param) {
 			if (!isValidAddress(param.recipientAddress)) throw new Error(`Invalid to address: ${param.recipientAddress}`);
@@ -35657,7 +35645,7 @@ var init_ton = __esmMin((() => {
 					normalizedHash
 				};
 			} catch (error) {
-				log$20.error("Failed to send transaction", { error });
+				log$21.error("Failed to send transaction", { error });
 				if (error instanceof WalletKitError) throw error;
 				if (error?.message?.includes("Ledger device")) throw new WalletKitError(ERROR_CODES.LEDGER_DEVICE_ERROR, "Ledger device error", error);
 				throw error;
@@ -35773,7 +35761,7 @@ async function wrapWalletInterface(wallet) {
 	} });
 	return newProxy;
 }
-var log$19, Initializer;
+var log$20, Initializer;
 var init_Initializer = __esmMin((() => {
 	init_types$3();
 	init_storage();
@@ -35788,7 +35776,7 @@ var init_Initializer = __esmMin((() => {
 	init_ton();
 	init_jetton$1();
 	init_nft();
-	log$19 = globalLogger.createChild("Initializer");
+	log$20 = globalLogger.createChild("Initializer");
 	Initializer = class {
 		config;
 		networkManager;
@@ -35804,12 +35792,12 @@ var init_Initializer = __esmMin((() => {
 		*/
 		async initialize(options, networkManager) {
 			try {
-				log$19.info("Initializing TonWalletKit...");
+				log$20.info("Initializing TonWalletKit...");
 				this.networkManager = networkManager;
 				const storage = this.initializeStorage(options);
 				const { walletManager, sessionManager, bridgeManager, eventRouter, eventProcessor } = await this.initializeManagers(options, storage);
 				const { requestProcessor } = this.initializeProcessors(sessionManager, bridgeManager, walletManager);
-				log$19.info("TonWalletKit initialized successfully");
+				log$20.info("TonWalletKit initialized successfully");
 				return {
 					walletManager,
 					sessionManager,
@@ -35820,7 +35808,7 @@ var init_Initializer = __esmMin((() => {
 					eventProcessor
 				};
 			} catch (error) {
-				log$19.error("Failed to initialize TonWalletKit", { error });
+				log$20.error("Failed to initialize TonWalletKit", { error });
 				throw error;
 			}
 		}
@@ -35856,9 +35844,9 @@ var init_Initializer = __esmMin((() => {
 			const bridgeManager = new BridgeManager(options?.walletManifest, options?.bridge, sessionManager, storage, eventStore, eventRouter, options, this.eventEmitter, this.analyticsManager);
 			eventRouter.setBridgeManager(bridgeManager);
 			bridgeManager.start().then(() => {
-				log$19.info("Bridge manager started successfully");
+				log$20.info("Bridge manager started successfully");
 			}).catch((e) => {
-				log$19.error("Could not start bridge manager", { error: e?.toString?.() });
+				log$20.error("Could not start bridge manager", { error: e?.toString?.() });
 			});
 			const eventProcessor = new StorageEventProcessor(options?.eventProcessor, eventStore, DEFAULT_DURABLE_EVENTS_CONFIG, walletManager, sessionManager, eventRouter, this.eventEmitter);
 			return {
@@ -35880,7 +35868,7 @@ var init_Initializer = __esmMin((() => {
 		*/
 		async cleanup(components) {
 			try {
-				log$19.info("Cleaning up TonWalletKit components...");
+				log$20.info("Cleaning up TonWalletKit components...");
 				if (components.eventProcessor) {
 					components.eventProcessor.stopRecoveryLoop();
 					await components.eventProcessor.clearRegisteredWallets();
@@ -35888,9 +35876,9 @@ var init_Initializer = __esmMin((() => {
 				}
 				if (components.bridgeManager) await components.bridgeManager.close();
 				if (components.eventRouter) components.eventRouter.clearCallbacks();
-				log$19.info("TonWalletKit cleanup completed");
+				log$20.info("TonWalletKit cleanup completed");
 			} catch (error) {
-				log$19.error("Error during cleanup", { error });
+				log$20.error("Error during cleanup", { error });
 			}
 		}
 	};
@@ -35906,14 +35894,14 @@ function isTonAddress(address) {
 function createCacheKey(network, address) {
 	return `${network.chainId}:${address}`;
 }
-var import_dist$19, log$18, TON_ADDRESS, TON_INFO, JettonsManager;
+var import_dist$19, log$19, TON_ADDRESS, TON_INFO, JettonsManager;
 var init_JettonsManager = __esmMin((() => {
 	import_dist$19 = require_dist$1();
 	init_index_min();
 	init_Logger();
 	init_jettons();
 	init_utils$4();
-	log$18 = globalLogger.createChild("JettonsManager");
+	log$19 = globalLogger.createChild("JettonsManager");
 	TON_ADDRESS = "TON";
 	TON_INFO = {
 		address: TON_ADDRESS,
@@ -35940,7 +35928,7 @@ var init_JettonsManager = __esmMin((() => {
 				ttl: 1e3 * 60 * 10
 			});
 			for (const network of this.networkManager.getConfiguredNetworks()) this.addTonToCache(network);
-			log$18.info("JettonsManager initialized", { cacheSize });
+			log$19.info("JettonsManager initialized", { cacheSize });
 		}
 		/**
 		* Add TON native token to cache for a specific network
@@ -35961,19 +35949,19 @@ var init_JettonsManager = __esmMin((() => {
 				const cacheKey = this.normalizedCacheKey(targetNetwork, jettonAddress);
 				const cachedInfo = this.cache.get(cacheKey);
 				if (cachedInfo) {
-					log$18.debug("Jetton info found in cache", {
+					log$19.debug("Jetton info found in cache", {
 						jettonAddress,
 						network: targetNetwork
 					});
 					return cachedInfo;
 				}
-				log$18.debug("Jetton info not found in cache", {
+				log$19.debug("Jetton info not found in cache", {
 					jettonAddress,
 					network: targetNetwork
 				});
 				const address = asMaybeAddressFriendly(jettonAddress);
 				if (!address) {
-					log$18.error("Invalid jetton address format", {
+					log$19.error("Invalid jetton address format", {
 						jettonAddress,
 						network: targetNetwork
 					});
@@ -36008,7 +35996,7 @@ var init_JettonsManager = __esmMin((() => {
 				}
 				return null;
 			} catch (error) {
-				log$18.error("Error getting jetton info", {
+				log$19.error("Error getting jetton info", {
 					error,
 					jettonAddress,
 					network: targetNetwork
@@ -36027,7 +36015,7 @@ var init_JettonsManager = __esmMin((() => {
 			const targetNetwork = network;
 			try {
 				const apiClient = this.networkManager.getClient(targetNetwork);
-				log$18.debug("Getting address jettons", {
+				log$19.debug("Getting address jettons", {
 					userAddress,
 					network: targetNetwork,
 					offset,
@@ -36041,13 +36029,13 @@ var init_JettonsManager = __esmMin((() => {
 				if (!response.jettons) return [];
 				const addressJettons = [];
 				for (const item of response.jettons) addressJettons.push(item);
-				log$18.debug("Retrieved address jettons", {
+				log$19.debug("Retrieved address jettons", {
 					count: addressJettons.length,
 					network: targetNetwork
 				});
 				return addressJettons;
 			} catch (error) {
-				log$18.error("Failed to get address jettons", {
+				log$19.error("Failed to get address jettons", {
 					error,
 					userAddress,
 					network: targetNetwork
@@ -36071,14 +36059,14 @@ var init_JettonsManager = __esmMin((() => {
 					uri: emulationInfo.extra.uri
 				};
 				this.cache.set(cacheKey, jettonInfo);
-				log$18.debug("Added jetton info from emulation to cache", {
+				log$19.debug("Added jetton info from emulation to cache", {
 					jettonAddress,
 					network,
 					name: jettonInfo.name,
 					symbol: jettonInfo.symbol
 				});
 			} catch (error) {
-				log$18.error("Error adding jetton from emulation", {
+				log$19.error("Error adding jetton from emulation", {
 					error,
 					jettonAddress,
 					network
@@ -36095,7 +36083,7 @@ var init_JettonsManager = __esmMin((() => {
 					if (!addressMetadata.is_indexed || !addressMetadata.token_info) continue;
 					const jettonMasterInfo = addressMetadata.token_info.find((info) => typeof info === "object" && info !== null && "type" in info && info.type === "jetton_masters");
 					if (jettonMasterInfo) {
-						log$18.debug("Adding jetton from emulation metadata", {
+						log$19.debug("Adding jetton from emulation metadata", {
 							jettonAddress,
 							network
 						});
@@ -36103,12 +36091,12 @@ var init_JettonsManager = __esmMin((() => {
 						addedCount++;
 					}
 				}
-				if (addedCount > 0) log$18.info("Added jettons from emulation metadata", {
+				if (addedCount > 0) log$19.info("Added jettons from emulation metadata", {
 					addedCount,
 					network
 				});
 			} catch (error) {
-				log$18.error("Error adding jettons from emulation metadata", {
+				log$19.error("Error adding jettons from emulation metadata", {
 					error,
 					network
 				});
@@ -36149,11 +36137,11 @@ var init_JettonsManager = __esmMin((() => {
 			if (network) {
 				for (const key of this.cache.keys()) if (key.startsWith(`${network.chainId}:`)) this.cache.delete(key);
 				this.addTonToCache(network);
-				log$18.info("Jetton cache cleared for network", { network });
+				log$19.info("Jetton cache cleared for network", { network });
 			} else {
 				this.cache.clear();
 				for (const net of this.networkManager.getConfiguredNetworks()) this.addTonToCache(net);
-				log$18.info("Jetton cache cleared for all networks");
+				log$19.info("Jetton cache cleared for all networks");
 			}
 		}
 	};
@@ -36168,15 +36156,17 @@ var init_SwapProvider = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/defi/errors.js
-var DefiError;
+var DefiErrorCode, DefiError;
 var init_errors$2 = __esmMin((() => {
+	(function(DefiErrorCode) {
+		DefiErrorCode["ProviderNotFound"] = "PROVIDER_NOT_FOUND";
+		DefiErrorCode["NoDefaultProvider"] = "NO_DEFAULT_PROVIDER";
+		DefiErrorCode["NetworkError"] = "NETWORK_ERROR";
+		DefiErrorCode["UnsupportedNetwork"] = "UNSUPPORTED_NETWORK";
+		DefiErrorCode["InvalidParams"] = "INVALID_PARAMS";
+		DefiErrorCode["InvalidProvider"] = "INVALID_PROVIDER";
+	})(DefiErrorCode || (DefiErrorCode = {}));
 	DefiError = class extends Error {
-		static PROVIDER_NOT_FOUND = "PROVIDER_NOT_FOUND";
-		static NO_DEFAULT_PROVIDER = "NO_DEFAULT_PROVIDER";
-		static NETWORK_ERROR = "NETWORK_ERROR";
-		static UNSUPPORTED_NETWORK = "UNSUPPORTED_NETWORK";
-		static INVALID_PARAMS = "INVALID_PARAMS";
-		static INVALID_PROVIDER = "INVALID_PROVIDER";
 		code;
 		details;
 		constructor(message, code, details) {
@@ -36189,17 +36179,22 @@ var init_errors$2 = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/defi/swap/errors.js
-var SwapError;
+var SwapErrorCode, SwapError;
 var init_errors$1 = __esmMin((() => {
 	init_errors$2();
+	(function(SwapErrorCode) {
+		SwapErrorCode["InvalidQuote"] = "INVALID_QUOTE";
+		SwapErrorCode["InsufficientLiquidity"] = "INSUFFICIENT_LIQUIDITY";
+		SwapErrorCode["QuoteExpired"] = "QUOTE_EXPIRED";
+		SwapErrorCode["BuildTxFailed"] = "BUILD_TX_FAILED";
+		SwapErrorCode["NetworkError"] = "NETWORK_ERROR";
+	})(SwapErrorCode || (SwapErrorCode = {}));
 	SwapError = class extends DefiError {
-		static INVALID_QUOTE = "INVALID_QUOTE";
-		static INSUFFICIENT_LIQUIDITY = "INSUFFICIENT_LIQUIDITY";
-		static QUOTE_EXPIRED = "QUOTE_EXPIRED";
-		static BUILD_TX_FAILED = "BUILD_TX_FAILED";
+		code;
 		constructor(message, code, details) {
 			super(message, code, details);
 			this.name = "SwapError";
+			this.code = code;
 		}
 	};
 }));
@@ -36228,7 +36223,7 @@ var init_DefiManager = __esmMin((() => {
 		registerProvider(input) {
 			const provider = resolveProvider(input, this.createFactoryContext());
 			const providerId = provider.providerId;
-			if (!providerId) throw this.createError("Provider must have a providerId", DefiError.INVALID_PROVIDER);
+			if (!providerId) throw this.createError("Provider must have a providerId", DefiErrorCode.InvalidProvider);
 			const oldProvider = this.providers.find((p) => p.providerId === providerId);
 			if (oldProvider) this.removeProvider(oldProvider);
 			this.providers = [...this.providers, provider];
@@ -36260,7 +36255,7 @@ var init_DefiManager = __esmMin((() => {
 		*/
 		setDefaultProvider(providerId) {
 			const provider = this.providers.find((p) => p.providerId === providerId);
-			if (!provider) throw this.createError(`Provider '${providerId}' not found`, DefiError.PROVIDER_NOT_FOUND, {
+			if (!provider) throw this.createError(`Provider '${providerId}' not found`, DefiErrorCode.ProviderNotFound, {
 				provider: providerId,
 				registered: this.providers.map((p) => p.providerId)
 			});
@@ -36278,9 +36273,9 @@ var init_DefiManager = __esmMin((() => {
 		*/
 		getProvider(providerId) {
 			const providerName = providerId || this.defaultProviderId;
-			if (!providerName) throw this.createError("No default provider set. Register a provider first.", DefiError.NO_DEFAULT_PROVIDER);
+			if (!providerName) throw this.createError("No default provider set. Register a provider first.", DefiErrorCode.NoDefaultProvider);
 			const provider = this.providers.find((p) => p.providerId === providerName);
-			if (!provider) throw this.createError(`Provider '${providerName}' not found`, DefiError.PROVIDER_NOT_FOUND, {
+			if (!provider) throw this.createError(`Provider '${providerName}' not found`, DefiErrorCode.ProviderNotFound, {
 				provider: providerName,
 				registered: this.providers.map((p) => p.providerId)
 			});
@@ -36306,12 +36301,12 @@ var init_DefiManager = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/defi/swap/SwapManager.js
-var log$17, SwapManager;
+var log$18, SwapManager;
 var init_SwapManager = __esmMin((() => {
 	init_errors$1();
 	init_Logger();
 	init_DefiManager();
-	log$17 = globalLogger.createChild("SwapManager");
+	log$18 = globalLogger.createChild("SwapManager");
 	SwapManager = class extends DefiManager {
 		constructor(createFactoryContext) {
 			super(createFactoryContext);
@@ -36323,7 +36318,7 @@ var init_SwapManager = __esmMin((() => {
 		* @returns Promise resolving to swap quote
 		*/
 		async getQuote(params, providerId) {
-			log$17.debug("Getting swap quote", {
+			log$18.debug("Getting swap quote", {
 				fromToken: params.from,
 				toToken: params.to,
 				amount: params.amount,
@@ -36332,14 +36327,14 @@ var init_SwapManager = __esmMin((() => {
 			});
 			try {
 				const quote = await this.getProvider(providerId || this.defaultProviderId).getQuote(params);
-				log$17.debug("Received swap quote", {
+				log$18.debug("Received swap quote", {
 					fromAmount: quote.fromAmount,
 					toAmount: quote.toAmount,
 					priceImpact: quote.priceImpact
 				});
 				return quote;
 			} catch (error) {
-				log$17.error("Failed to get swap quote", {
+				log$18.error("Failed to get swap quote", {
 					error,
 					params
 				});
@@ -36353,16 +36348,16 @@ var init_SwapManager = __esmMin((() => {
 		*/
 		async buildSwapTransaction(params) {
 			const providerId = params.quote.providerId || this.defaultProviderId;
-			log$17.debug("Building swap transaction", {
+			log$18.debug("Building swap transaction", {
 				providerId,
 				userAddress: params.userAddress
 			});
 			try {
 				const transaction = await this.getProvider(providerId).buildSwapTransaction(params);
-				log$17.debug("Built swap transaction", params.quote);
+				log$18.debug("Built swap transaction", params.quote);
 				return transaction;
 			} catch (error) {
-				log$17.error("Failed to build swap transaction", {
+				log$18.error("Failed to build swap transaction", {
 					error,
 					params
 				});
@@ -36413,12 +36408,12 @@ var init_errors = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/defi/staking/StakingManager.js
-var log$16, StakingManager;
+var log$17, StakingManager;
 var init_StakingManager = __esmMin((() => {
 	init_errors();
 	init_Logger();
 	init_DefiManager();
-	log$16 = globalLogger.createChild("StakingManager");
+	log$17 = globalLogger.createChild("StakingManager");
 	StakingManager = class extends DefiManager {
 		constructor(createFactoryContext) {
 			super(createFactoryContext);
@@ -36429,10 +36424,10 @@ var init_StakingManager = __esmMin((() => {
 		* @param providerId - Optional provider id to use
 		*/
 		async getQuote(params, providerId) {
-			log$16.debug("Getting staking quote", params);
+			log$17.debug("Getting staking quote", params);
 			try {
 				const quote = await this.getProvider(providerId).getQuote(params);
-				log$16.debug("Received staking quote", quote);
+				log$17.debug("Received staking quote", quote);
 				return quote;
 			} catch (error) {
 				throw this.createError("Failed to get staking quote", StakingErrorCode.InvalidParams, {
@@ -36447,7 +36442,7 @@ var init_StakingManager = __esmMin((() => {
 		* @param providerId - Optional provider id to use
 		*/
 		async buildStakeTransaction(params, providerId) {
-			log$16.debug("Building staking transaction", params);
+			log$17.debug("Building staking transaction", params);
 			try {
 				return await this.getProvider(providerId).buildStakeTransaction(params);
 			} catch (error) {
@@ -36464,7 +36459,7 @@ var init_StakingManager = __esmMin((() => {
 		* @param providerId - Optional provider id to use
 		*/
 		async getStakedBalance(userAddress, network, providerId) {
-			log$16.debug("Getting staking balance", {
+			log$17.debug("Getting staking balance", {
 				userAddress,
 				network,
 				provider: providerId || this.defaultProviderId
@@ -36485,7 +36480,7 @@ var init_StakingManager = __esmMin((() => {
 		* @param providerId - Optional provider id to use
 		*/
 		async getStakingProviderInfo(network, providerId) {
-			log$16.debug("Getting staking info", {
+			log$17.debug("Getting staking info", {
 				network,
 				provider: providerId || this.defaultProviderId
 			});
@@ -36504,7 +36499,7 @@ var init_StakingManager = __esmMin((() => {
 		* @param providerId - Optional provider id to use
 		*/
 		getStakingProviderMetadata(network, providerId) {
-			log$16.debug("Getting staking metadata", {
+			log$17.debug("Getting staking metadata", {
 				network,
 				provider: providerId || this.defaultProviderId
 			});
@@ -36519,7 +36514,7 @@ var init_StakingManager = __esmMin((() => {
 		}
 		createError(message, code, details) {
 			const errorCode = Object.values(StakingErrorCode).includes(code) ? code : StakingErrorCode.InvalidParams;
-			log$16.error(message, {
+			log$17.error(message, {
 				code,
 				details
 			});
@@ -36536,10 +36531,10 @@ var init_staking = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/core/EventEmitter.js
-var log$15, EventEmitter;
+var log$16, EventEmitter;
 var init_EventEmitter = __esmMin((() => {
 	init_Logger();
-	log$15 = globalLogger.createChild("EventEmitter");
+	log$16 = globalLogger.createChild("EventEmitter");
 	EventEmitter = class {
 		listeners = {};
 		/**
@@ -36550,7 +36545,7 @@ var init_EventEmitter = __esmMin((() => {
 			const eventListeners = this.listeners[eventName];
 			if (!eventListeners) this.listeners[eventName] = new Set([listener]);
 			else eventListeners.add(listener);
-			log$15.debug("Event listener added", {
+			log$16.debug("Event listener added", {
 				eventName: String(eventName),
 				totalListeners: this.listeners[eventName]?.size
 			});
@@ -36594,10 +36589,10 @@ var init_EventEmitter = __esmMin((() => {
 		removeAllListeners(eventName) {
 			if (eventName) {
 				delete this.listeners[eventName];
-				log$15.debug("All listeners removed for event", { eventName: String(eventName) });
+				log$16.debug("All listeners removed for event", { eventName: String(eventName) });
 			} else {
 				this.listeners = {};
-				log$15.debug("All event listeners cleared");
+				log$16.debug("All event listeners cleared");
 			}
 		}
 		/**
@@ -36616,12 +36611,12 @@ var init_EventEmitter = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/streaming/StreamingManager.js
-var log$14, StreamingManager;
+var log$15, StreamingManager;
 var init_StreamingManager = __esmMin((() => {
 	init_Logger();
 	init_utils$4();
 	init_factory$2();
-	log$14 = globalLogger.createChild("StreamingManager");
+	log$15 = globalLogger.createChild("StreamingManager");
 	StreamingManager = class {
 		createFactoryContext;
 		providers = /* @__PURE__ */ new Map();
@@ -36637,7 +36632,7 @@ var init_StreamingManager = __esmMin((() => {
 			const provider = resolveProvider(input, this.createFactoryContext());
 			const networkId = String(provider.network.chainId);
 			if (this.providers.has(networkId)) {
-				log$14.warn(`Provider for network ${networkId} is already registered. Overriding.`);
+				log$15.warn(`Provider for network ${networkId} is already registered. Overriding.`);
 				this.providerConnectionUnsubs.get(networkId)?.();
 				this.providers.get(networkId)?.disconnect();
 			}
@@ -36881,13 +36876,13 @@ function pascalToKebab(value) {
 var init_utils$3 = __esmMin((() => {}));
 //#endregion
 //#region ../walletkit/dist/esm/analytics/AnalyticsManager.js
-var log$13, AnalyticsManager;
+var log$14, AnalyticsManager;
 var init_AnalyticsManager = __esmMin((() => {
 	init_Logger();
 	init_swagger();
 	init_utils$3();
 	init_utils$4();
-	log$13 = globalLogger.createChild("AnalyticsManager");
+	log$14 = globalLogger.createChild("AnalyticsManager");
 	AnalyticsManager = class AnalyticsManager {
 		api;
 		baseEvent;
@@ -36951,12 +36946,12 @@ var init_AnalyticsManager = __esmMin((() => {
 			};
 			if (this.appInfo?.getLocale) enhancedEvent.locale = this.appInfo.getLocale();
 			if (this.appInfo?.getCurrentUserId) enhancedEvent.user_id = this.appInfo.getCurrentUserId();
-			log$13.debug("Analytics event emitted", { event: enhancedEvent });
+			log$14.debug("Analytics event emitted", { event: enhancedEvent });
 			this.events.push(enhancedEvent);
 			if (this.events.length > this.maxQueueSize) {
 				const removed = this.events.length - this.maxQueueSize;
 				this.events = this.events.slice(removed);
-				log$13.warn("Analytics queue overflow, dropped oldest events", { count: removed });
+				log$14.warn("Analytics queue overflow, dropped oldest events", { count: removed });
 			}
 			if (this.events.length >= this.maxBatchSize) {
 				this.flush();
@@ -36977,10 +36972,10 @@ var init_AnalyticsManager = __esmMin((() => {
 			const eventsToSend = this.extractEventsToSend();
 			try {
 				await this.processEventsBatch(eventsToSend);
-				log$13.debug("Analytics events sent successfully");
+				log$14.debug("Analytics events sent successfully");
 			} catch (error) {
 				this.restoreEvents(eventsToSend);
-				log$13.error("Failed to send analytics events", { error });
+				log$14.error("Failed to send analytics events", { error });
 			} finally {
 				this.isProcessing = false;
 				this.scheduleNextFlushIfNeeded();
@@ -36998,7 +36993,7 @@ var init_AnalyticsManager = __esmMin((() => {
 			return eventsToSend;
 		}
 		async processEventsBatch(eventsToSend) {
-			log$13.debug("Sending analytics events", { count: eventsToSend.length });
+			log$14.debug("Sending analytics events", { count: eventsToSend.length });
 			try {
 				const response = await this.sendEvents(eventsToSend);
 				this.handleResponse(response);
@@ -37020,7 +37015,7 @@ var init_AnalyticsManager = __esmMin((() => {
 			if (this.events.length > this.maxQueueSize) {
 				const removed = this.events.length - this.maxQueueSize;
 				this.events = this.events.slice(0, this.maxQueueSize);
-				log$13.warn("Analytics queue overflow after restore, dropped oldest events", { count: removed });
+				log$14.warn("Analytics queue overflow after restore, dropped oldest events", { count: removed });
 			}
 		}
 		scheduleNextFlushIfNeeded() {
@@ -37039,7 +37034,7 @@ var init_AnalyticsManager = __esmMin((() => {
 			return status === AnalyticsManager.HTTP_STATUS.TOO_MANY_REQUESTS;
 		}
 		handleClientError(status, statusText) {
-			log$13.error("Analytics API client error", {
+			log$14.error("Analytics API client error", {
 				status,
 				statusText
 			});
@@ -37313,8 +37308,8 @@ function toTransaction(tx) {
 		traceId: tx.trace_id ?? void 0,
 		previousTransactionHash: tx.prev_trans_hash ? Base64ToHex(tx.prev_trans_hash) : void 0,
 		previousTransactionLogicalTime: tx.prev_trans_lt ?? void 0,
-		origStatus: toAccountStatus$2(tx.orig_status),
-		endStatus: toAccountStatus$2(tx.end_status),
+		origStatus: toAccountStatus$3(tx.orig_status),
+		endStatus: toAccountStatus$3(tx.end_status),
 		totalFees: tx.total_fees,
 		totalFeesExtraCurrencies: tx.total_fees_extra_currencies,
 		blockRef: toTransactionBlockRef$1(tx.block_ref),
@@ -37323,14 +37318,11 @@ function toTransaction(tx) {
 		isEmulated: tx.emulated
 	};
 }
-function toAccountStatus$2(status) {
-	if (status === "active") return { type: "active" };
-	else if (status === "frozen") return { type: "frozen" };
-	else if (status === "uninit") return { type: "uninit" };
-	else return {
-		type: "unknown",
-		value: status
-	};
+function toAccountStatus$3(status) {
+	if (status === "active") return "active";
+	if (status === "frozen") return "frozen";
+	if (status === "uninit") return "uninitialized";
+	return "non-existing";
 }
 function toTransactionBlockRef$1(ref) {
 	return {
@@ -37416,7 +37408,7 @@ function toAccountState$1(state) {
 		hash: Base64ToHex(state.hash),
 		balance: state.balance,
 		extraCurrencies: state.extra_currencies ?? void 0,
-		accountStatus: state.account_status ? toAccountStatus$2(state.account_status) : void 0,
+		accountStatus: state.account_status ? toAccountStatus$3(state.account_status) : void 0,
 		frozenHash: state.frozen_hash ? Base64ToHex(state.frozen_hash) : void 0,
 		dataHash: state.data_hash ? Base64ToHex(state.data_hash) : void 0,
 		codeHash: state.code_hash ? Base64ToHex(state.code_hash) : void 0
@@ -37459,12 +37451,125 @@ var init_DNSRecordsResponseV3 = __esmMin((() => {
 	init_address$1();
 }));
 //#endregion
+//#region ../walletkit/dist/esm/utils/units.js
+/**
+* Copyright (c) TonTech.
+*
+* This source code is licensed under the MIT license found in the
+* LICENSE file in the root directory of this source tree.
+*
+*/
+/**
+* Multiplies a string representation of a number by a given exponent of base 10 (10exponent).
+*
+* - Docs: https://viem.sh/docs/utilities/parseUnits
+*
+* @example
+* import { parseUnits } from 'viem'
+*
+* parseUnits('420', 9)
+* // 420000000000n
+*/
+function parseUnits(value, decimals) {
+	let [integer, fraction = "0"] = value.split(".");
+	const negative = integer.startsWith("-");
+	if (negative) integer = integer.slice(1);
+	fraction = fraction.replace(/(0+)$/, "");
+	if (decimals === 0) {
+		if (Math.round(Number(`.${fraction}`)) === 1) integer = `${BigInt(integer) + 1n}`;
+		fraction = "";
+	} else if (fraction.length > decimals) {
+		const [left, unit, right] = [
+			fraction.slice(0, decimals - 1),
+			fraction.slice(decimals - 1, decimals),
+			fraction.slice(decimals)
+		];
+		const rounded = Math.round(Number(`${unit}.${right}`));
+		if (rounded > 9) fraction = `${BigInt(left) + BigInt(1)}0`.padStart(left.length + 1, "0");
+		else fraction = `${left}${rounded}`;
+		if (fraction.length > decimals) {
+			fraction = fraction.slice(1);
+			integer = `${BigInt(integer) + 1n}`;
+		}
+		fraction = fraction.slice(0, decimals);
+	} else fraction = fraction.padEnd(decimals, "0");
+	return BigInt(`${negative ? "-" : ""}${integer}${fraction}`);
+}
+/**
+*  Divides a number by a given exponent of base 10 (10exponent), and formats it into a string representation of the number..
+*
+* - Docs: https://viem.sh/docs/utilities/formatUnits
+*
+* @example
+* import { formatUnits } from 'viem'
+*
+* formatUnits(420000000000n, 9)
+* // '420'
+*/
+function formatUnits(value, decimals) {
+	let display = value.toString();
+	const negative = display.startsWith("-");
+	if (negative) display = display.slice(1);
+	display = display.padStart(decimals, "0");
+	let [integer, fraction] = [display.slice(0, display.length - decimals), display.slice(display.length - decimals)];
+	fraction = fraction.replace(/(0+)$/, "");
+	return `${negative ? "-" : ""}${integer || "0"}${fraction ? `.${fraction}` : ""}`;
+}
+var init_units = __esmMin((() => {}));
+//#endregion
+//#region ../walletkit/dist/esm/clients/toncenter/mappers/map-account-states-entry.js
+function toAccountStatus$2(raw) {
+	switch (raw) {
+		case "active": return "active";
+		case "uninit": return "uninitialized";
+		case "frozen": return "frozen";
+		case "nonexist": return "non-existing";
+	}
+}
+function mapAccountStatesEntry(raw, address) {
+	const extraCurrencies = { ...raw.extra_currencies ?? {} };
+	const out = {
+		address: asAddressFriendly(address),
+		status: toAccountStatus$2(raw.status),
+		rawBalance: raw.balance,
+		balance: formatUnits(raw.balance, 9),
+		extraCurrencies,
+		code: raw.code_boc ?? void 0,
+		data: raw.data_boc ?? void 0,
+		lastTransaction: parseInternalTransactionId({
+			hash: raw.last_transaction_hash ?? "",
+			lt: raw.last_transaction_lt ?? ""
+		}) ?? void 0
+	};
+	if (raw.frozen_hash) out.frozenHash = Base64ToHex(raw.frozen_hash) ?? void 0;
+	return out;
+}
+/**
+* Synthesizes a `non-existing` AccountState entry for addresses that toncenter
+* silently dropped from a bulk response. Keeps the contract uniform across providers.
+*/
+function makeNonExistingAccountState(address) {
+	return {
+		address: asAddressFriendly(address),
+		status: "non-existing",
+		rawBalance: "0",
+		balance: "0",
+		extraCurrencies: {}
+	};
+}
+var init_map_account_states_entry = __esmMin((() => {
+	init_address$1();
+	init_base64();
+	init_units();
+	init_utils$2();
+}));
+//#endregion
 //#region ../walletkit/dist/esm/clients/toncenter/mappers/map-emulation.js
 function normalizeAccountStatus(status) {
 	if (status === "active") return "active";
 	if (status === "frozen") return "frozen";
-	if (status === "nonexist") return "nonexist";
-	return "uninit";
+	if (status === "nonexist") return "non-existing";
+	return "uninitialized";
 }
 function mapTraceNode$1(node) {
 	return {
@@ -37697,8 +37802,8 @@ var init_BaseApiClient = __esmMin((() => {
 			const url = new URL(path.replace(/^\/*/, "/"), this.endpoint);
 			for (const [key, value] of Object.entries(query)) if (typeof value === "string") url.searchParams.set(key, value);
 			else if (Array.isArray(value)) {
-				for (const item of value) if (typeof item === "string") url.searchParams.set(key, item);
-				else if (item != null && typeof item.toString === "function") url.searchParams.set(key, item.toString());
+				for (const item of value) if (typeof item === "string") url.searchParams.append(key, item);
+				else if (item != null && typeof item.toString === "function") url.searchParams.append(key, item.toString());
 			} else if (value != null && typeof value.toString === "function") url.searchParams.set(key, value.toString());
 			return url;
 		}
@@ -37729,7 +37834,7 @@ var init_BaseApiClient = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/clients/toncenter/ApiClientToncenter.js
-var import_dist$17, log$12, ApiClientToncenter;
+var import_dist$17, log$13, MAX_ACCOUNT_STATES_BATCH$1, ApiClientToncenter;
 var init_ApiClientToncenter = __esmMin((() => {
 	import_dist$17 = require_dist$1();
 	init_base64();
@@ -37741,12 +37846,15 @@ var init_ApiClientToncenter = __esmMin((() => {
 	init_AccountEvent();
 	init_models();
 	init_address$1();
+	init_units();
+	init_map_account_states_entry();
 	init_map_emulation$1();
 	init_BaseApiClient();
 	init_utils$2();
 	init_TonClientError();
 	init_utils$4();
-	log$12 = globalLogger.createChild("ApiClientToncenter");
+	log$13 = globalLogger.createChild("ApiClientToncenter");
+	MAX_ACCOUNT_STATES_BATCH$1 = 100;
 	ApiClientToncenter = class extends BaseApiClient {
 		constructor(config = {}) {
 			const defaultEndpoint = config.network?.chainId === Network.mainnet().chainId ? "https://toncenter.com" : "https://testnet.toncenter.com";
@@ -37809,25 +37917,44 @@ var init_ApiClientToncenter = __esmMin((() => {
 			};
 			if (typeof seqno === "number") query.seqno = seqno.toString();
 			const raw = await this.getJson("/api/v3/addressInformation", query);
-			const balance = BigInt(raw.balance);
+			const rawBalance = BigInt(raw.balance).toString();
 			const extraCurrencies = {};
-			for (const currency of raw.extra_currencies || []) extraCurrencies[currency.id] = BigInt(currency.amount);
+			for (const currency of raw.extra_currencies || []) extraCurrencies[String(currency.id)] = currency.amount;
 			const out = {
+				address: asAddressFriendly(address),
 				status: raw.status,
-				balance: balance.toString(),
+				rawBalance,
+				balance: formatUnits(rawBalance, 9),
 				extraCurrencies,
-				code: raw.code,
-				data: raw.data,
+				code: raw.code ?? void 0,
+				data: raw.data ?? void 0,
 				lastTransaction: parseInternalTransactionId({
 					hash: raw.last_transaction_hash,
 					lt: raw.last_transaction_lt
-				})
+				}) ?? void 0
 			};
 			if (raw.frozen_hash) out.frozenHash = Base64ToHex(raw.frozen_hash) ?? void 0;
 			return out;
 		}
+		async getAccountStates(addresses) {
+			if (addresses.length > MAX_ACCOUNT_STATES_BATCH$1) throw new Error(`ApiClientToncenter.getAccountStates: requested ${addresses.length} addresses, maximum is ${MAX_ACCOUNT_STATES_BATCH$1} per call.`);
+			const unique = /* @__PURE__ */ new Set();
+			for (const addr of addresses) unique.add(asAddressFriendly(addr));
+			const uniqueAddrs = [...unique];
+			if (uniqueAddrs.length === 0) return {};
+			const raw = await this.getJson("/api/v3/accountStates", {
+				address: uniqueAddrs,
+				include_boc: true
+			});
+			const result = {};
+			for (const inputAddr of uniqueAddrs) {
+				const account = raw.accounts.find((a) => compareAddress(a.address, inputAddr));
+				result[inputAddr] = account ? mapAccountStatesEntry(account, inputAddr) : makeNonExistingAccountState(inputAddr);
+			}
+			return result;
+		}
 		async getBalance(address, seqno) {
-			return (await this.getAccountState(address, seqno)).balance;
+			return (await this.getAccountState(address, seqno)).rawBalance;
 		}
 		async getAccountTransactions(request) {
 			const accounts = request.address?.map(prepareAddress);
@@ -37874,7 +38001,7 @@ var init_ApiClientToncenter = __esmMin((() => {
 			const fulfilledResult = results.find((result) => result.status === "fulfilled");
 			if (fulfilledResult) return fulfilledResult.value;
 			results.forEach((result) => {
-				if (result.status === "rejected") log$12.error("Error fetching trace", { error: result.reason });
+				if (result.status === "rejected") log$13.error("Error fetching trace", { error: result.reason });
 			});
 			throw new Error("Failed to fetch trace");
 		}
@@ -37885,7 +38012,7 @@ var init_ApiClientToncenter = __esmMin((() => {
 				}, void 0, void 0, (err) => err instanceof TonClientError ? err.status !== 422 : true);
 				if (response?.traces?.length > 0) return response;
 			} catch (error) {
-				log$12.error("Error fetching pending trace", { error });
+				log$13.error("Error fetching pending trace", { error });
 			}
 			throw new Error("Failed to fetch pending trace");
 		}
@@ -38014,13 +38141,13 @@ var init_toncenter$1 = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/core/NetworkManager.js
-var log$11, KitNetworkManager;
+var log$12, KitNetworkManager;
 var init_NetworkManager = __esmMin((() => {
 	init_toncenter$1();
 	init_Logger();
 	init_errors$3();
 	init_models();
-	log$11 = globalLogger.createChild("NetworkManager");
+	log$12 = globalLogger.createChild("NetworkManager");
 	KitNetworkManager = class {
 		clients = /* @__PURE__ */ new Map();
 		constructor(options) {
@@ -38033,7 +38160,7 @@ var init_NetworkManager = __esmMin((() => {
 		initializeClients(options) {
 			const networks = options.networks;
 			if (!networks) {
-				log$11.warn("No networks configured in TonWalletKitOptions");
+				log$12.warn("No networks configured in TonWalletKitOptions");
 				return;
 			}
 			for (const [chainId, networkConfig] of Object.entries(networks)) {
@@ -38041,7 +38168,7 @@ var init_NetworkManager = __esmMin((() => {
 				if (!networkConfig) continue;
 				const client = this.createClient(network, networkConfig.apiClient, options);
 				this.clients.set(network.chainId, client);
-				log$11.info("Initialized network client", { chainId });
+				log$12.info("Initialized network client", { chainId });
 			}
 		}
 		/**
@@ -38097,7 +38224,7 @@ var init_NetworkManager = __esmMin((() => {
 		*/
 		setClient(network, client) {
 			this.clients.set(network.chainId, client);
-			log$11.info("Added/updated network client", { network });
+			log$12.info("Added/updated network client", { network });
 		}
 	};
 }));
@@ -38111,7 +38238,7 @@ function parseEmbeddedRequestFromReqParam(reqParam) {
 	try {
 		return toEmbeddedRequest(decodeEmbeddedRequestParam(reqParam));
 	} catch (error) {
-		log$10.warn("Failed to parse embedded request req parameter", { error });
+		log$11.warn("Failed to parse embedded request req parameter", { error });
 		return;
 	}
 }
@@ -38137,20 +38264,20 @@ function toEmbeddedRequest(parsed) {
 			};
 		}
 		default:
-			log$10.warn("Unknown embedded request method", { method: parsed.method });
+			log$11.warn("Unknown embedded request method", { method: parsed.method });
 			return;
 	}
 }
-var log$10;
+var log$11;
 var init_embeddedRequest = __esmMin((() => {
 	init_esm$1();
 	init_internal();
 	init_Logger();
-	log$10 = globalLogger.createChild("embeddedRequestParser");
+	log$11 = globalLogger.createChild("embeddedRequestParser");
 }));
 //#endregion
 //#region ../walletkit/dist/esm/core/TonWalletKit.js
-var import_dist$16, log$9, TonWalletKit;
+var import_dist$16, log$10, TonWalletKit;
 var init_TonWalletKit = __esmMin((() => {
 	import_dist$16 = require_dist$1();
 	init_esm$1();
@@ -38170,7 +38297,7 @@ var init_TonWalletKit = __esmMin((() => {
 	init_NetworkManager();
 	init_utils$4();
 	init_embeddedRequest();
-	log$9 = globalLogger.createChild("TonWalletKit");
+	log$10 = globalLogger.createChild("TonWalletKit");
 	TonWalletKit = class {
 		walletManager;
 		sessionManager;
@@ -38209,7 +38336,7 @@ var init_TonWalletKit = __esmMin((() => {
 			this.stakingManager = new StakingManager(() => this.createFactoryContext());
 			this.eventEmitter.on("restoreConnection", async ({ payload: event }) => {
 				if (!event.domain) {
-					log$9.error("Domain is required for restore connection");
+					log$10.error("Domain is required for restore connection");
 					return this.sendErrorConnectResponse(event);
 				}
 				const sessions = await this.sessionManager.getSessions({
@@ -38219,12 +38346,12 @@ var init_TonWalletKit = __esmMin((() => {
 				});
 				const session = sessions.length > 0 ? sessions[0] : void 0;
 				if (!session) {
-					log$9.error("Session not found for domain", { domain: event.domain });
+					log$10.error("Session not found for domain", { domain: event.domain });
 					return this.sendErrorConnectResponse(event);
 				}
 				const wallet = session.walletId ? this.walletManager?.getWallet(session.walletId) : void 0;
 				if (!wallet) {
-					log$9.error("Wallet not found for session", { walletId: session.walletId });
+					log$10.error("Wallet not found for session", { walletId: session.walletId });
 					return this.sendErrorConnectResponse(event);
 				}
 				const walletAddress = wallet.getAddress();
@@ -38278,7 +38405,7 @@ var init_TonWalletKit = __esmMin((() => {
 				await this.eventProcessor.startProcessing();
 				this.isInitialized = true;
 			} catch (error) {
-				log$9.error("TonWalletKit initialization failed", { error: error?.toString() });
+				log$10.error("TonWalletKit initialization failed", { error: error?.toString() });
 				throw error;
 			}
 		}
@@ -38308,7 +38435,7 @@ var init_TonWalletKit = __esmMin((() => {
 				const walletId = wallet.getWalletId();
 				await this.eventProcessor.startProcessing(walletId);
 			} catch (error) {
-				log$9.error("Failed to start event processing for wallet", {
+				log$10.error("Failed to start event processing for wallet", {
 					walletAddress: wallet.getAddress(),
 					error
 				});
@@ -38328,7 +38455,7 @@ var init_TonWalletKit = __esmMin((() => {
 		}
 		getWallets() {
 			if (!this.isInitialized) {
-				log$9.warn("TonWalletKit not yet initialized, returning empty array");
+				log$10.warn("TonWalletKit not yet initialized, returning empty array");
 				return [];
 			}
 			return this.walletManager.getWallets();
@@ -38338,7 +38465,7 @@ var init_TonWalletKit = __esmMin((() => {
 		*/
 		getWallet(walletId) {
 			if (!this.isInitialized) {
-				log$9.warn("TonWalletKit not yet initialized, returning undefined");
+				log$10.warn("TonWalletKit not yet initialized, returning undefined");
 				return;
 			}
 			return this.walletManager.getWallet(walletId);
@@ -38398,7 +38525,7 @@ var init_TonWalletKit = __esmMin((() => {
 						payload: {}
 					}, sessionCrypto), 10, 100);
 				} catch (error) {
-					log$9.error("Failed to send disconnect to bridge", {
+					log$10.error("Failed to send disconnect to bridge", {
 						sessionId,
 						error
 					});
@@ -38408,7 +38535,7 @@ var init_TonWalletKit = __esmMin((() => {
 			if (sessionId) try {
 				await removeSession(sessionId);
 			} catch (error) {
-				log$9.error("Failed to remove session", {
+				log$10.error("Failed to remove session", {
 					sessionId,
 					error
 				});
@@ -38418,7 +38545,7 @@ var init_TonWalletKit = __esmMin((() => {
 				if (sessions.length > 0) for (const session of sessions) try {
 					await removeSession(session.sessionId);
 				} catch (error) {
-					log$9.error("Failed to remove session", {
+					log$10.error("Failed to remove session", {
 						sessionId: session.sessionId,
 						error
 					});
@@ -38492,7 +38619,7 @@ var init_TonWalletKit = __esmMin((() => {
 				const bridgeEvent = this.parseBridgeConnectEventFromUrl(url);
 				return await new ConnectHandler(() => {}, this.config, this.analyticsManager).handle(bridgeEvent);
 			} catch (error) {
-				log$9.error("Failed to create connection event from URL", {
+				log$10.error("Failed to create connection event from URL", {
 					error,
 					url
 				});
@@ -38509,7 +38636,7 @@ var init_TonWalletKit = __esmMin((() => {
 				const bridgeEvent = this.parseBridgeConnectEventFromUrl(url);
 				await this.eventRouter.routeEvent(bridgeEvent);
 			} catch (error) {
-				log$9.error("Failed to handle TON Connect URL", {
+				log$10.error("Failed to handle TON Connect URL", {
 					error,
 					url
 				});
@@ -38553,7 +38680,7 @@ var init_TonWalletKit = __esmMin((() => {
 				const params = {};
 				for (const [key, value] of parsedUrl.searchParams.entries()) params[key] = value;
 				if (!params.v || !params.id || !params.r) {
-					log$9.warn("Missing required TON Connect URL parameters");
+					log$10.warn("Missing required TON Connect URL parameters");
 					return null;
 				}
 				return {
@@ -38565,7 +38692,7 @@ var init_TonWalletKit = __esmMin((() => {
 					...params
 				};
 			} catch (error) {
-				log$9.error("Failed to parse TON Connect URL", {
+				log$10.error("Failed to parse TON Connect URL", {
 					error,
 					url
 				});
@@ -38592,7 +38719,7 @@ var init_TonWalletKit = __esmMin((() => {
 				domain: ""
 			};
 			if (params.e) if (this.config.deviceInfo?.features.some((feature) => typeof feature === "object" && feature.name === "EmbeddedRequest")) bridgeEvent.embeddedRequest = parseEmbeddedRequestFromReqParam(params.e);
-			else log$9.warn("Embedded request feature is not supported in features, but we received request with embedded request payload", { features: this.config.deviceInfo?.features });
+			else log$10.warn("Embedded request feature is not supported in features, but we received request with embedded request payload", { features: this.config.deviceInfo?.features });
 			return bridgeEvent;
 		}
 		async approveConnectRequest(event, response) {
@@ -38729,14 +38856,7 @@ var init_TonWalletKit = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/clients/tonapi/mappers/map-account-state.js
-/**
-* Copyright (c) TonTech.
-*
-* This source code is licensed under the MIT license found in the
-* LICENSE file in the root directory of this source tree.
-*
-*/
-function mapAccountState(raw) {
+function mapAccountState(raw, address) {
 	let status;
 	switch (raw.status) {
 		case "nonexist":
@@ -38754,22 +38874,28 @@ function mapAccountState(raw) {
 		default: status = "non-existing";
 	}
 	const extraCurrencies = {};
-	if (raw.extra_balance && Array.isArray(raw.extra_balance)) for (const extra of raw.extra_balance) extraCurrencies[extra.preview.id] = BigInt(extra.amount);
-	let lastTransaction = null;
+	if (raw.extra_balance && Array.isArray(raw.extra_balance)) for (const extra of raw.extra_balance) extraCurrencies[String(extra.preview.id)] = String(extra.amount);
+	let lastTransaction;
 	if (raw.last_transaction_lt && raw.last_transaction_hash) lastTransaction = {
 		lt: raw.last_transaction_lt.toString(),
 		hash: raw.last_transaction_hash.startsWith("0x") ? raw.last_transaction_hash : `0x${raw.last_transaction_hash}`
 	};
+	const rawBalance = raw.balance.toString();
 	return {
+		address: asAddressFriendly(address),
 		status,
-		balance: raw.balance.toString(),
+		rawBalance,
+		balance: formatUnits(rawBalance, 9),
 		extraCurrencies,
-		code: raw.code ? Buffer.from(raw.code, "hex").toString("base64") : null,
-		data: raw.data ? Buffer.from(raw.data, "hex").toString("base64") : null,
+		code: raw.code ? Buffer.from(raw.code, "hex").toString("base64") : void 0,
+		data: raw.data ? Buffer.from(raw.data, "hex").toString("base64") : void 0,
 		lastTransaction
 	};
 }
-var init_map_account_state = __esmMin((() => {}));
+var init_map_account_state = __esmMin((() => {
+	init_address$1();
+	init_units();
+}));
 //#endregion
 //#region ../walletkit/dist/esm/clients/tonapi/mappers/map-jetton-masters.js
 function toRaw(address) {
@@ -39028,17 +39154,11 @@ function parseBlockRef(block) {
 }
 function toAccountStatus$1(status) {
 	if (!status) return void 0;
-	if (status === "active") return { type: "active" };
-	if (status === "frozen") return { type: "frozen" };
-	if (status === "uninit") return { type: "uninit" };
-	if (status === "nonexist") return {
-		type: "unknown",
-		value: "nonexist"
-	};
-	return {
-		type: "unknown",
-		value: status
-	};
+	if (status === "active") return "active";
+	if (status === "frozen") return "frozen";
+	if (status === "uninit") return "uninitialized";
+	if (status === "nonexist") return "non-existing";
+	return "non-existing";
 }
 function mapTonApiMessage(raw) {
 	const extra = {};
@@ -39173,8 +39293,8 @@ function mapMessage(raw, kind) {
 function mapAccountStatus(status) {
 	if (status === "active") return "active";
 	if (status === "frozen") return "frozen";
-	if (status === "nonexist") return "nonexist";
-	return "uninit";
+	if (status === "nonexist") return "non-existing";
+	return "uninitialized";
 }
 function normalizeTransactionType(type) {
 	switch (type) {
@@ -39577,12 +39697,13 @@ var init_map_masterchain_info = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/clients/tonapi/ApiClientTonApi.js
-var import_dist$14, ApiClientTonApi;
+var import_dist$14, log$9, MAX_ACCOUNT_STATES_BATCH, ApiClientTonApi;
 var init_ApiClientTonApi = __esmMin((() => {
 	import_dist$14 = require_dist$1();
 	init_models();
 	init_BaseApiClient();
 	init_TonClientError();
+	init_Logger();
 	init_address$1();
 	init_map_account_state();
 	init_map_jetton_masters();
@@ -39595,6 +39716,8 @@ var init_ApiClientTonApi = __esmMin((() => {
 	init_map_traces();
 	init_map_events();
 	init_map_masterchain_info();
+	log$9 = globalLogger.createChild("ApiClientTonApi");
+	MAX_ACCOUNT_STATES_BATCH = 100;
 	ApiClientTonApi = class extends BaseApiClient {
 		constructor(config = {}) {
 			let defaultEndpoint;
@@ -39614,23 +39737,37 @@ var init_ApiClientTonApi = __esmMin((() => {
 		getNetwork() {
 			return this.network;
 		}
-		async getAccountState(address, _seqno) {
+		async getAccountState(address, seqno) {
+			if (typeof seqno === "number") log$9.warn(`getAccountState: seqno=${seqno} is ignored — TonApi /v2/accounts endpoint does not support historical state queries.`);
 			try {
-				return mapAccountState(await this.getJson(`/v2/blockchain/accounts/${address}`));
+				return mapAccountState(await this.getJson(`/v2/blockchain/accounts/${address}`), address);
 			} catch (e) {
 				if (e instanceof TonClientError && e.status === 404) return {
+					address: asAddressFriendly(address),
 					status: "non-existing",
+					rawBalance: "0",
 					balance: "0",
-					extraCurrencies: {},
-					code: null,
-					data: null,
-					lastTransaction: null
+					extraCurrencies: {}
 				};
 				throw e;
 			}
 		}
+		async getAccountStates(addresses) {
+			if (addresses.length > MAX_ACCOUNT_STATES_BATCH) throw new Error(`ApiClientTonApi.getAccountStates: requested ${addresses.length} addresses, maximum is ${MAX_ACCOUNT_STATES_BATCH} per call.`);
+			const unique = /* @__PURE__ */ new Set();
+			for (const addr of addresses) unique.add(asAddressFriendly(addr));
+			const uniqueAddrs = [...unique];
+			if (uniqueAddrs.length === 0) return {};
+			const raw = await this.postJson("/v2/blockchain/accounts/_bulk", { account_ids: uniqueAddrs });
+			const result = {};
+			for (const inputAddr of uniqueAddrs) {
+				const account = raw.accounts.find((a) => compareAddress(a.address, inputAddr));
+				if (account) result[inputAddr] = mapAccountState(account, inputAddr);
+			}
+			return result;
+		}
 		async getBalance(address, seqno) {
-			return (await this.getAccountState(address, seqno)).balance;
+			return (await this.getAccountState(address, seqno)).rawBalance;
 		}
 		async jettonsByAddress(request) {
 			return mapJettonMasters(await this.getJson(`/v2/jettons/${request.address}`));
@@ -40638,72 +40775,6 @@ var init_WalletV4R2Adapter = __esmMin((() => {
 	};
 }));
 //#endregion
-//#region ../walletkit/dist/esm/utils/units.js
-/**
-* Copyright (c) TonTech.
-*
-* This source code is licensed under the MIT license found in the
-* LICENSE file in the root directory of this source tree.
-*
-*/
-/**
-* Multiplies a string representation of a number by a given exponent of base 10 (10exponent).
-*
-* - Docs: https://viem.sh/docs/utilities/parseUnits
-*
-* @example
-* import { parseUnits } from 'viem'
-*
-* parseUnits('420', 9)
-* // 420000000000n
-*/
-function parseUnits(value, decimals) {
-	let [integer, fraction = "0"] = value.split(".");
-	const negative = integer.startsWith("-");
-	if (negative) integer = integer.slice(1);
-	fraction = fraction.replace(/(0+)$/, "");
-	if (decimals === 0) {
-		if (Math.round(Number(`.${fraction}`)) === 1) integer = `${BigInt(integer) + 1n}`;
-		fraction = "";
-	} else if (fraction.length > decimals) {
-		const [left, unit, right] = [
-			fraction.slice(0, decimals - 1),
-			fraction.slice(decimals - 1, decimals),
-			fraction.slice(decimals)
-		];
-		const rounded = Math.round(Number(`${unit}.${right}`));
-		if (rounded > 9) fraction = `${BigInt(left) + BigInt(1)}0`.padStart(left.length + 1, "0");
-		else fraction = `${left}${rounded}`;
-		if (fraction.length > decimals) {
-			fraction = fraction.slice(1);
-			integer = `${BigInt(integer) + 1n}`;
-		}
-		fraction = fraction.slice(0, decimals);
-	} else fraction = fraction.padEnd(decimals, "0");
-	return BigInt(`${negative ? "-" : ""}${integer}${fraction}`);
-}
-/**
-*  Divides a number by a given exponent of base 10 (10exponent), and formats it into a string representation of the number..
-*
-* - Docs: https://viem.sh/docs/utilities/formatUnits
-*
-* @example
-* import { formatUnits } from 'viem'
-*
-* formatUnits(420000000000n, 9)
-* // '420'
-*/
-function formatUnits(value, decimals) {
-	let display = value.toString();
-	const negative = display.startsWith("-");
-	if (negative) display = display.slice(1);
-	display = display.padStart(decimals, "0");
-	let [integer, fraction] = [display.slice(0, display.length - decimals), display.slice(display.length - decimals)];
-	fraction = fraction.replace(/(0+)$/, "");
-	return `${negative ? "-" : ""}${integer || "0"}${fraction ? `.${fraction}` : ""}`;
-}
-var init_units = __esmMin((() => {}));
-//#endregion
 //#region ../walletkit/dist/esm/streaming/toncenter/guards/account.js
 var isAccountStateNotification;
 var init_account = __esmMin((() => {
@@ -40759,13 +40830,10 @@ var init_map_transaction = __esmMin((() => {
 	init_utils$2();
 	toAccountStatus = (status) => {
 		if (!status) return void 0;
-		if (status === "active") return { type: "active" };
-		if (status === "frozen") return { type: "frozen" };
-		if (status === "uninit") return { type: "uninit" };
-		return {
-			type: "unknown",
-			value: status
-		};
+		if (status === "active") return "active";
+		if (status === "frozen") return "frozen";
+		if (status === "uninit") return "uninitialized";
+		return "non-existing";
 	};
 	toAccountState = (state) => {
 		return {
@@ -45415,7 +45483,7 @@ var init_OmnistonSwapProvider = __esmMin((() => {
 						log$2.debug("Timeout reached");
 						if (!isSettled) {
 							isSettled = true;
-							reject(new SwapError("Quote request timed out", SwapError.NETWORK_ERROR));
+							reject(new SwapError("Quote request timed out", SwapErrorCode.NetworkError));
 						}
 						unsubscribe.unsubscribe();
 					}, this.quoteTimeoutMs);
@@ -45427,7 +45495,7 @@ var init_OmnistonSwapProvider = __esmMin((() => {
 								isSettled = true;
 								clearTimeout(timeoutId);
 								unsubscribe.unsubscribe();
-								reject(new SwapError("No quote available for this swap", SwapError.INSUFFICIENT_LIQUIDITY));
+								reject(new SwapError("No quote available for this swap", SwapErrorCode.InsufficientLiquidity));
 								return;
 							}
 							if (event.type === "quoteUpdated") {
@@ -45447,7 +45515,7 @@ var init_OmnistonSwapProvider = __esmMin((() => {
 						}
 					});
 				});
-				if (quoteEvent.type !== "quoteUpdated") throw new SwapError("Quote data is missing", SwapError.INVALID_QUOTE);
+				if (quoteEvent.type !== "quoteUpdated") throw new SwapError("Quote data is missing", SwapErrorCode.InvalidQuote);
 				const quote = quoteEvent.quote;
 				const swapQuote = this.mapOmnistonQuoteToSwapQuote(quote, params);
 				log$2.debug("Received Omniston quote", {
@@ -45462,17 +45530,17 @@ var init_OmnistonSwapProvider = __esmMin((() => {
 					params
 				});
 				if (error instanceof SwapError) throw error;
-				throw new SwapError(`Omniston quote request failed: ${error instanceof Error ? error.message : "Unknown error"}`, SwapError.NETWORK_ERROR, error);
+				throw new SwapError(`Omniston quote request failed: ${error instanceof Error ? error.message : "Unknown error"}`, SwapErrorCode.NetworkError, error);
 			}
 		}
 		async buildSwapTransaction(params) {
 			log$2.debug("Building Omniston swap transaction", params);
 			const metadata = params.quote.metadata;
-			if (!metadata || !isOmnistonQuoteMetadata(metadata)) throw new SwapError("Invalid quote: missing Omniston quote data", SwapError.INVALID_QUOTE);
+			if (!metadata || !isOmnistonQuoteMetadata(metadata)) throw new SwapError("Invalid quote: missing Omniston quote data", SwapErrorCode.InvalidQuote);
 			try {
 				const omnistonQuote = metadata.omnistonQuote;
 				const now = getUnixtime();
-				if (omnistonQuote.tradeStartDeadline && omnistonQuote.tradeStartDeadline < now) throw new SwapError("Quote has expired, please request a new one", SwapError.QUOTE_EXPIRED);
+				if (omnistonQuote.tradeStartDeadline && omnistonQuote.tradeStartDeadline < now) throw new SwapError("Quote has expired, please request a new one", SwapErrorCode.QuoteExpired);
 				const userAddress = import_dist$3.Address.parse(params.userAddress).toRawString();
 				const omnistonUserAddress = toOmnistonAddress(userAddress, params.quote.network);
 				const transactionRequest = {
@@ -45484,7 +45552,7 @@ var init_OmnistonSwapProvider = __esmMin((() => {
 					useRecommendedSlippage: true
 				};
 				const messages = (await this.omniston.buildTransfer(transactionRequest))?.ton?.messages;
-				if (!messages || messages.length === 0) throw new SwapError("Failed to build transaction: no messages returned", SwapError.BUILD_TX_FAILED);
+				if (!messages || messages.length === 0) throw new SwapError("Failed to build transaction: no messages returned", SwapErrorCode.BuildTxFailed);
 				const transaction = {
 					fromAddress: params.userAddress,
 					messages: messages.map((message) => ({
@@ -45506,7 +45574,7 @@ var init_OmnistonSwapProvider = __esmMin((() => {
 					params
 				});
 				if (error instanceof SwapError) throw error;
-				throw new SwapError(`Failed to build Omniston transaction: ${error instanceof Error ? error.message : "Unknown error"}`, SwapError.NETWORK_ERROR, error);
+				throw new SwapError(`Failed to build Omniston transaction: ${error instanceof Error ? error.message : "Unknown error"}`, SwapErrorCode.NetworkError, error);
 			}
 		}
 		mapOmnistonQuoteToSwapQuote(quote, params) {
@@ -45658,12 +45726,12 @@ var init_DeDustSwapProvider = __esmMin((() => {
 						status: response.status,
 						error: errorText
 					});
-					if (response.status === 400) throw new SwapError(`No route found for swap: ${errorText}`, SwapError.INSUFFICIENT_LIQUIDITY);
-					throw new SwapError(`DeDust API error: ${response.status} ${errorText}`, SwapError.NETWORK_ERROR);
+					if (response.status === 400) throw new SwapError(`No route found for swap: ${errorText}`, SwapErrorCode.InsufficientLiquidity);
+					throw new SwapError(`DeDust API error: ${response.status} ${errorText}`, SwapErrorCode.NetworkError);
 				}
 				const quoteResponse = await response.json();
-				if (!quoteResponse.swap_is_possible) throw new SwapError("Swap is not possible for this pair", SwapError.INSUFFICIENT_LIQUIDITY);
-				if (!quoteResponse.swap_data?.routes || quoteResponse.swap_data.routes.length === 0) throw new SwapError("No routes found for this swap", SwapError.INSUFFICIENT_LIQUIDITY);
+				if (!quoteResponse.swap_is_possible) throw new SwapError("Swap is not possible for this pair", SwapErrorCode.InsufficientLiquidity);
+				if (!quoteResponse.swap_data?.routes || quoteResponse.swap_data.routes.length === 0) throw new SwapError("No routes found for this swap", SwapErrorCode.InsufficientLiquidity);
 				const minReceived = BigInt(quoteResponse.out_amount) * BigInt(1e4 - slippageBps) / BigInt(1e4);
 				const swapQuote = {
 					metadata: {
@@ -45695,13 +45763,13 @@ var init_DeDustSwapProvider = __esmMin((() => {
 					params
 				});
 				if (error instanceof SwapError) throw error;
-				throw new SwapError(`DeDust quote request failed: ${error instanceof Error ? error.message : "Unknown error"}`, SwapError.NETWORK_ERROR, error);
+				throw new SwapError(`DeDust quote request failed: ${error instanceof Error ? error.message : "Unknown error"}`, SwapErrorCode.NetworkError, error);
 			}
 		}
 		async buildSwapTransaction(params) {
 			log$1.debug("Building DeDust swap transaction", params);
 			const metadata = params.quote.metadata;
-			if (!metadata || !isDeDustQuoteMetadata(metadata)) throw new SwapError("Invalid quote: missing DeDust quote data", SwapError.INVALID_QUOTE);
+			if (!metadata || !isDeDustQuoteMetadata(metadata)) throw new SwapError("Invalid quote: missing DeDust quote data", SwapErrorCode.InvalidQuote);
 			try {
 				const userAddress = import_dist$1.Address.parse(params.userAddress).toRawString();
 				const referralAddress = params.providerOptions?.referralAddress ?? this.referralAddress;
@@ -45726,10 +45794,10 @@ var init_DeDustSwapProvider = __esmMin((() => {
 						status: response.status,
 						error: errorText
 					});
-					throw new SwapError(`DeDust swap API error: ${response.status} ${errorText}`, SwapError.BUILD_TX_FAILED);
+					throw new SwapError(`DeDust swap API error: ${response.status} ${errorText}`, SwapErrorCode.BuildTxFailed);
 				}
 				const swapResponse = await response.json();
-				if (!swapResponse.transactions || swapResponse.transactions.length === 0) throw new SwapError("No transactions returned from swap API", SwapError.BUILD_TX_FAILED);
+				if (!swapResponse.transactions || swapResponse.transactions.length === 0) throw new SwapError("No transactions returned from swap API", SwapErrorCode.BuildTxFailed);
 				const transaction = {
 					fromAddress: params.userAddress,
 					messages: swapResponse.transactions.map((tx) => ({
@@ -45748,7 +45816,7 @@ var init_DeDustSwapProvider = __esmMin((() => {
 					params
 				});
 				if (error instanceof SwapError) throw error;
-				throw new SwapError(`Failed to build DeDust transaction: ${error instanceof Error ? error.message : "Unknown error"}`, SwapError.BUILD_TX_FAILED, error);
+				throw new SwapError(`Failed to build DeDust transaction: ${error instanceof Error ? error.message : "Unknown error"}`, SwapErrorCode.BuildTxFailed, error);
 			}
 		}
 	};
@@ -46214,7 +46282,8 @@ var init_TonStakersStakingProvider = __esmMin((() => {
 				const instantLiquidity = await contract.getPoolBalance();
 				const apy = await this.getApyFromTonApi(targetNetwork);
 				const poolData = await contract.getPoolData();
-				const exchangeRate = poolData.supply > 0n ? formatUnits(poolData.totalBalance * 1000000000n / poolData.supply, 9) : "1";
+				const rawAmountIn = parseUnits("1", 9);
+				const exchangeRate = formatUnits(poolData.projectedBalance > 0n ? rawAmountIn * poolData.projectedSupply / poolData.projectedBalance : rawAmountIn, 9);
 				return {
 					apy,
 					rawInstantUnstakeAvailable: instantLiquidity.toString(),
@@ -46373,20 +46442,23 @@ var init_SwiftAPIClientAdapter = __esmMin((() => {
 		async runGetMethod(address, method, stack, seqno) {
 			return this.swiftApiClient.runGetMethod(address, method, stack, seqno);
 		}
-		async nftItemsByAddress(_request) {
-			throw new Error("nftItemsByAddress is not implemented yet");
+		async nftItemsByAddress(request) {
+			return this.swiftApiClient.nftItemsByAddress(request);
 		}
-		async nftItemsByOwner(_request) {
-			throw new Error("nftItemsByOwner is not implemented yet");
+		async nftItemsByOwner(request) {
+			return this.swiftApiClient.nftItemsByOwner(request);
 		}
-		async fetchEmulation(_messageBoc, _ignoreSignature) {
-			throw new Error("fetchEmulation is not implemented yet");
+		async fetchEmulation(messageBoc, ignoreSignature) {
+			return this.swiftApiClient.fetchEmulation(messageBoc, ignoreSignature);
 		}
-		async getAccountState(_address, _seqno) {
-			throw new Error("getAccountState is not implemented yet");
+		async getAccountState(address, seqno) {
+			return this.swiftApiClient.getAccountState(address, seqno);
 		}
-		async getBalance(_address, _seqno) {
-			throw new Error("getBalance is not implemented yet");
+		async getAccountStates(addresses) {
+			return this.swiftApiClient.getAccountStates(addresses);
+		}
+		async getBalance(address, seqno) {
+			return this.swiftApiClient.getBalance(address, seqno);
 		}
 		async getAccountTransactions(_request) {
 			throw new Error("getAccountTransactions is not implemented yet");
@@ -46403,11 +46475,11 @@ var init_SwiftAPIClientAdapter = __esmMin((() => {
 		async getPendingTrace(_request) {
 			throw new Error("getPendingTrace is not implemented yet");
 		}
-		async resolveDnsWallet(_domain) {
-			throw new Error("resolveDnsWallet is not implemented yet");
+		async resolveDnsWallet(domain) {
+			return this.swiftApiClient.resolveDnsWallet(domain);
 		}
-		async backResolveDnsWallet(_address) {
-			throw new Error("backResolveDnsWallet is not implemented yet");
+		async backResolveDnsWallet(address) {
+			return this.swiftApiClient.backResolveDnsWallet(address);
 		}
 		async jettonsByAddress(_request) {
 			throw new Error("jettonsByAddress is not implemented yet");
