@@ -39,4 +39,27 @@ public protocol TONAPIClient: AnyObject {
     ) async throws -> TONGetMethodResult
 
     func masterchainInfo() async throws -> TONMasterchainInfo
+
+    func nftItemsByAddress(request: TONNFTsRequest) async throws -> TONNFTsResponse
+    func nftItemsByOwner(request: TONUserNFTsRequest) async throws -> TONNFTsResponse
+
+    func fetchEmulation(
+        messageBoc: TONBase64,
+        ignoreSignature: Bool?
+    ) async throws -> TONEmulationResult
+
+    func accountState(
+        address: TONUserFriendlyAddress,
+        seqno: UInt?
+    ) async throws -> TONAccountState
+    
+    func accountStates(addresses: [TONUserFriendlyAddress]) async throws -> [TONUserFriendlyAddress: TONAccountState]
+
+    func balance(
+        address: TONUserFriendlyAddress,
+        seqno: UInt?
+    ) async throws -> TONTokenAmount
+
+    func resolveDnsWallet(domain: String) async throws -> String?
+    func backResolveDnsWallet(address: TONUserFriendlyAddress) async throws -> String?
 }
