@@ -160,7 +160,7 @@ class StakingViewModel: ObservableObject {
                 userAddress: wallet.address,
                 network: TONNetwork.mainnet
             )
-            async let infoTask = manager.stakingProviderInfo(
+            async let infoTask = manager.info(
                 network: TONNetwork.mainnet
             )
 

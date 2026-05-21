@@ -27,9 +27,14 @@
 import Foundation
 
 public class TONWalletSendTransactionRequest {
-    let context: any JSDynamicObject
-    
+    private let context: any JSDynamicObject
+
     public let event: TONSendTransactionRequestEvent
+    private let embeddedEvent: TONEmbeddedSendTransactionRequestEvent?
+
+    private var targetEvent: any JSValueEncodable {
+        embeddedEvent ?? event
+    }
     
     init(
         context: any JSDynamicObject,
@@ -37,15 +42,25 @@ public class TONWalletSendTransactionRequest {
     ) {
         self.context = context
         self.event = event
+        self.embeddedEvent = nil
     }
-    
+
+    init(
+        context: any JSDynamicObject,
+        embeddedEvent: TONEmbeddedSendTransactionRequestEvent
+    ) {
+        self.context = context
+        self.embeddedEvent = embeddedEvent
+        self.event = embeddedEvent.requestEvent
+    }
+
     @discardableResult
     public func approve(response: TONSendTransactionApprovalResponse? = nil) async throws -> TONSendTransactionApprovalResponse {
-        return try await context.walletKit.approveTransactionRequest(event, response)
+        try await context.walletKit.approveTransactionRequest(targetEvent, response)
     }
-    
+
     public func reject(reason: String? = nil) async throws {
-        try await context.walletKit.rejectTransactionRequest(event)
+        try await context.walletKit.rejectTransactionRequest(targetEvent, reason)
     }
 }
 

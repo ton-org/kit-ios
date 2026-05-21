@@ -126,11 +126,11 @@ class TONAPIClientJSAdapter: NSObject, JSAPIClient {
                 in: JSContext()
             )
         }
-        
+
         return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
             Task {
                 guard let self else { return }
-                
+
                 do {
                     let result = try await self.apiClient.masterchainInfo()
                     let jsResult = try result.encode(in: context)
@@ -141,6 +141,198 @@ class TONAPIClientJSAdapter: NSObject, JSAPIClient {
             }
         }
     }
+
+    @objc(nftItemsByAddress:) func nftItemsByAddress(request: JSValue) -> JSValue {
+        guard let context else {
+            return JSValue(newPromiseRejectedWithReason: "No context exists to perform \(#function)", in: JSContext())
+        }
+        do {
+            let request: TONNFTsRequest = try request.decode()
+            return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
+                Task {
+                    guard let self, let context = self.context else { return }
+                    do {
+                        let result = try await self.apiClient.nftItemsByAddress(request: request)
+                        resolve?.call(withArguments: [try result.encode(in: context)])
+                    } catch {
+                        reject?.call(withArguments: [error.localizedDescription])
+                    }
+                }
+            }
+        } catch {
+            return JSValue(newPromiseRejectedWithReason: error.localizedDescription, in: context)
+        }
+    }
+
+    @objc(nftItemsByOwner:) func nftItemsByOwner(request: JSValue) -> JSValue {
+        guard let context else {
+            return JSValue(newPromiseRejectedWithReason: "No context exists to perform \(#function)", in: JSContext())
+        }
+        do {
+            let request: TONUserNFTsRequest = try request.decode()
+            return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
+                Task {
+                    guard let self, let context = self.context else { return }
+                    do {
+                        let result = try await self.apiClient.nftItemsByOwner(request: request)
+                        resolve?.call(withArguments: [try result.encode(in: context)])
+                    } catch {
+                        reject?.call(withArguments: [error.localizedDescription])
+                    }
+                }
+            }
+        } catch {
+            return JSValue(newPromiseRejectedWithReason: error.localizedDescription, in: context)
+        }
+    }
+
+    @objc(fetchEmulation::) func fetchEmulation(messageBoc: JSValue, ignoreSignature: JSValue) -> JSValue {
+        guard let context else {
+            return JSValue(newPromiseRejectedWithReason: "No context exists to perform \(#function)", in: JSContext())
+        }
+        do {
+            let boc: TONBase64 = try messageBoc.decode()
+            let ignore: Bool? = try ignoreSignature.decode()
+            return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
+                Task {
+                    guard let self, let context = self.context else { return }
+                    do {
+                        let result = try await self.apiClient.fetchEmulation(messageBoc: boc, ignoreSignature: ignore)
+                        resolve?.call(withArguments: [try result.encode(in: context)])
+                    } catch {
+                        reject?.call(withArguments: [error.localizedDescription])
+                    }
+                }
+            }
+        } catch {
+            return JSValue(newPromiseRejectedWithReason: error.localizedDescription, in: context)
+        }
+    }
+
+    @objc(getAccountState::) func getAccountState(address: JSValue, seqno: JSValue) -> JSValue {
+        guard let context else {
+            return JSValue(newPromiseRejectedWithReason: "No context exists to perform \(#function)", in: JSContext())
+        }
+        do {
+            let address: TONUserFriendlyAddress = try address.decode()
+            let seqno: UInt? = try seqno.decode()
+            return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
+                Task {
+                    guard let self, let context = self.context else { return }
+                    do {
+                        let result = try await self.apiClient.accountState(address: address, seqno: seqno)
+                        resolve?.call(withArguments: [try result.encode(in: context)])
+                    } catch {
+                        reject?.call(withArguments: [error.localizedDescription])
+                    }
+                }
+            }
+        } catch {
+            return JSValue(newPromiseRejectedWithReason: error.localizedDescription, in: context)
+        }
+    }
+
+    @objc(getAccountStates:) func getAccountStates(addresses: JSValue) -> JSValue {
+        guard let context else {
+            return JSValue(newPromiseRejectedWithReason: "No context exists to perform \(#function)", in: JSContext())
+        }
+        do {
+            let addresses: [TONUserFriendlyAddress] = try addresses.decode()
+            
+            return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
+                Task {
+                    guard let self, let context = self.context else { return }
+                    
+                    do {
+                        let result = try await self.apiClient.accountStates(addresses: addresses)
+                        
+                        let stringKeyed = Dictionary(uniqueKeysWithValues: result.map { ($0.key.value, $0.value) })
+                        resolve?.call(withArguments: [try stringKeyed.encode(in: context)])
+                    } catch {
+                        reject?.call(withArguments: [error.localizedDescription])
+                    }
+                }
+            }
+        } catch {
+            return JSValue(newPromiseRejectedWithReason: error.localizedDescription, in: context)
+        }
+    }
+
+    @objc(getBalance::) func getBalance(address: JSValue, seqno: JSValue) -> JSValue {
+        guard let context else {
+            return JSValue(newPromiseRejectedWithReason: "No context exists to perform \(#function)", in: JSContext())
+        }
+        do {
+            let address: TONUserFriendlyAddress = try address.decode()
+            let seqno: UInt? = try seqno.decode()
+            return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
+                Task {
+                    guard let self, let context = self.context else { return }
+                    do {
+                        let result = try await self.apiClient.balance(address: address, seqno: seqno)
+                        resolve?.call(withArguments: [try result.encode(in: context)])
+                    } catch {
+                        reject?.call(withArguments: [error.localizedDescription])
+                    }
+                }
+            }
+        } catch {
+            return JSValue(newPromiseRejectedWithReason: error.localizedDescription, in: context)
+        }
+    }
+
+    @objc(resolveDnsWallet:) func resolveDnsWallet(domain: JSValue) -> JSValue {
+        guard let context else {
+            return JSValue(newPromiseRejectedWithReason: "No context exists to perform \(#function)", in: JSContext())
+        }
+        do {
+            let domain: String = try domain.decode()
+            return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
+                Task {
+                    guard let self, let context = self.context else { return }
+                    do {
+                        let result = try await self.apiClient.resolveDnsWallet(domain: domain)
+                        if let result {
+                            resolve?.call(withArguments: [result])
+                        } else {
+                            resolve?.call(withArguments: [JSValue(undefinedIn: context) as Any])
+                        }
+                    } catch {
+                        reject?.call(withArguments: [error.localizedDescription])
+                    }
+                }
+            }
+        } catch {
+            return JSValue(newPromiseRejectedWithReason: error.localizedDescription, in: context)
+        }
+    }
+
+    @objc(backResolveDnsWallet:) func backResolveDnsWallet(address: JSValue) -> JSValue {
+        guard let context else {
+            return JSValue(newPromiseRejectedWithReason: "No context exists to perform \(#function)", in: JSContext())
+        }
+        do {
+            let address: TONUserFriendlyAddress = try address.decode()
+            return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
+                Task {
+                    guard let self, let context = self.context else { return }
+                    do {
+                        let result = try await self.apiClient.backResolveDnsWallet(address: address)
+                        if let result {
+                            resolve?.call(withArguments: [result])
+                        } else {
+                            resolve?.call(withArguments: [JSValue(undefinedIn: context) as Any])
+                        }
+                    } catch {
+                        reject?.call(withArguments: [error.localizedDescription])
+                    }
+                }
+            }
+        } catch {
+            return JSValue(newPromiseRejectedWithReason: error.localizedDescription, in: context)
+        }
+    }
+
 }
 
 extension TONAPIClientJSAdapter: JSValueEncodable {}

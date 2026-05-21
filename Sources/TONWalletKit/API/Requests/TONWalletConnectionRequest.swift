@@ -39,27 +39,54 @@ public class TONWalletConnectionRequest {
         self.event = event
     }
     
+    @discardableResult
     public func approve(
         walletId: TONWalletID,
         response: TONConnectionApprovalResponse? = nil
-    ) async throws {
+    ) async throws -> TONWalletKitEvent? {
         let wallet: TONWallet = try await context.walletKit.getWallet(walletId)
-        
+
         return try await approve(wallet: wallet, response: response)
     }
-    
+
+    @discardableResult
     public func approve(
         wallet: any TONWalletProtocol,
         response: TONConnectionApprovalResponse? = nil
-    ) async throws {
+    ) async throws -> TONWalletKitEvent? {
         var event = self.event
         event.walletId = wallet.id
         event.walletAddress = wallet.address
-        
-        try await context.walletKit.approveConnectRequest(event, response)
+
+        let embedded: TONEmbeddedRequestEvent? = try await context.walletKit.approveConnectRequest(event, response)
+        guard let embedded else { return nil }
+
+        switch embedded {
+        case .sendTransaction(let event):
+            return .transactionRequest(
+                TONWalletSendTransactionRequest(
+                    context: context,
+                    embeddedEvent: event
+                )
+            )
+        case .signMessage(let event):
+            return .signMessageRequest(
+                TONWalletSignMessageRequest(
+                    context: context,
+                    embeddedEvent: event
+                )
+            )
+        case .signData(let event):
+            return .signDataRequest(
+                TONWalletSignDataRequest(
+                    context: context,
+                    embeddedEvent: event
+                )
+            )
+        }
     }
-    
+
     public func reject(reason: String? = nil) async throws {
-        try await context.walletKit.rejectConnectRequest(event)
+        try await context.walletKit.rejectConnectRequest(event, reason)
     }
 }

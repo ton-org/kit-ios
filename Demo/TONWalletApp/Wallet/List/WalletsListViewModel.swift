@@ -90,15 +90,7 @@ class WalletsListViewModel: ObservableObject {
         TONEventsHandler.shared.events
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
-                switch event {
-                case .transactionRequest(let request):
-                    self?.event.send(Event(transactionRequest: request))
-                case .signDataRequest(let request):
-                    self?.event.send(Event(signDataRequest: request))
-                case .connectRequest(let request):
-                    self?.event.send(Event(connectionRequest: request))
-                default: ()
-                }
+                self?.dispatch(event: event)
             }
             .store(in: &subscribers)
         
@@ -108,6 +100,20 @@ class WalletsListViewModel: ObservableObject {
         }
     }
     
+    func dispatch(event: TONWalletKitEvent) {
+        switch event {
+        case .transactionRequest(let request):
+            self.event.send(Event(transactionRequest: request))
+        case .signMessageRequest(let request):
+            self.event.send(Event(signMessageRequest: request))
+        case .signDataRequest(let request):
+            self.event.send(Event(signDataRequest: request))
+        case .connectRequest(let request):
+            self.event.send(Event(connectionRequest: request))
+        default: ()
+        }
+    }
+
     private func remove(walletID: WalletViewModel.ID) {
         let wasActive = activeWallet?.id == walletID
         self.wallets.removeAll { $0.id == walletID }
@@ -128,15 +134,18 @@ extension WalletsListViewModel {
     struct Event: Identifiable {
         let id = UUID()
         let transactionRequest: TONWalletSendTransactionRequest?
+        let signMessageRequest: TONWalletSignMessageRequest?
         let signDataRequest: TONWalletSignDataRequest?
         let connectionRequest: TONWalletConnectionRequest?
-        
+
         init(
             transactionRequest: TONWalletSendTransactionRequest? = nil,
+            signMessageRequest: TONWalletSignMessageRequest? = nil,
             signDataRequest: TONWalletSignDataRequest? = nil,
             connectionRequest: TONWalletConnectionRequest? = nil
         ) {
             self.transactionRequest = transactionRequest
+            self.signMessageRequest = signMessageRequest
             self.signDataRequest = signDataRequest
             self.connectionRequest = connectionRequest
         }

@@ -31,9 +31,10 @@ import JavaScriptCore
     var type: String { get }
     var providerId: String { get }
 
+    @objc(getStakingProviderMetadata:) func metadata(network: JSValue) -> JSValue
+    @objc(getSupportedNetworks) func supportedNetworks() -> JSValue
     @objc(getQuote:) func quote(params: JSValue) -> JSValue
     @objc(buildStakeTransaction:) func stakeTransaction(params: JSValue) -> JSValue
     @objc(getStakedBalance::) func stakedBalance(userAddress: JSValue, network: JSValue) -> JSValue
-    @objc(getStakingProviderInfo:) func stakingProviderInfo(network: JSValue) -> JSValue
-    @objc(getSupportedUnstakeModes) func supportedUnstakeModes() -> JSValue
+    @objc(getStakingProviderInfo:) func info(network: JSValue) -> JSValue
 }

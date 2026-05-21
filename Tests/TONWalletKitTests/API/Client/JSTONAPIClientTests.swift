@@ -122,4 +122,273 @@ struct JSTONAPIClientTests {
             try await sut.masterchainInfo()
         }
     }
+
+    // MARK: - NFT
+
+    @Test("nftItemsByAddress calls nftItemsByAddress")
+    func nftItemsByAddressCallsNftItemsByAddress() async throws {
+        let (sut, mock) = makeSUT()
+        mock.stubbedAsyncResults["nftItemsByAddress"] = TONNFTsResponse(nfts: [])
+
+        _ = try await sut.nftItemsByAddress(request: TONNFTsRequest())
+
+        #expect(mock.callRecords.first?.path == "nftItemsByAddress")
+    }
+
+    @Test("nftItemsByAddress throws when JSDynamic throws")
+    func nftItemsByAddressThrowsOnError() async {
+        let (sut, mock) = makeSUT()
+        mock.shouldThrowOnCall = true
+
+        await #expect(throws: (any Error).self) {
+            try await sut.nftItemsByAddress(request: TONNFTsRequest())
+        }
+    }
+
+    @Test("nftItemsByOwner calls nftItemsByOwner")
+    func nftItemsByOwnerCallsNftItemsByOwner() async throws {
+        let (sut, mock) = makeSUT()
+        mock.stubbedAsyncResults["nftItemsByOwner"] = TONNFTsResponse(nfts: [])
+
+        _ = try await sut.nftItemsByOwner(request: TONUserNFTsRequest(ownerAddress: testAddress))
+
+        #expect(mock.callRecords.first?.path == "nftItemsByOwner")
+    }
+
+    @Test("nftItemsByOwner throws when JSDynamic throws")
+    func nftItemsByOwnerThrowsOnError() async {
+        let (sut, mock) = makeSUT()
+        mock.shouldThrowOnCall = true
+
+        await #expect(throws: (any Error).self) {
+            try await sut.nftItemsByOwner(request: TONUserNFTsRequest(ownerAddress: testAddress))
+        }
+    }
+
+    // MARK: - Emulation
+
+    @Test("fetchEmulation calls fetchEmulation with messageBoc + ignoreSignature")
+    func fetchEmulationCallsFetchEmulation() async throws {
+        let (sut, mock) = makeSUT()
+        let boc = try TONBase64(base64Encoded: "dGVzdA==")
+        mock.stubbedAsyncResults["fetchEmulation"] = TONEmulationResult.error(emulationError: TONEmulationError(code: 0, message: "stub"))
+
+        _ = try await sut.fetchEmulation(messageBoc: boc, ignoreSignature: true)
+
+        #expect(mock.callRecords.first?.path == "fetchEmulation")
+        #expect(mock.callRecords.first?.args.first as? String == "dGVzdA==")
+    }
+
+    @Test("fetchEmulation throws when JSDynamic throws")
+    func fetchEmulationThrowsOnError() async throws {
+        let (sut, mock) = makeSUT()
+        mock.shouldThrowOnCall = true
+        let boc = try TONBase64(base64Encoded: "dGVzdA==")
+
+        await #expect(throws: (any Error).self) {
+            try await sut.fetchEmulation(messageBoc: boc, ignoreSignature: nil)
+        }
+    }
+
+    // MARK: - Account state / balance
+
+    @Test("accountState calls getAccountState")
+    func accountStateCallsGetAccountState() async throws {
+        let (sut, mock) = makeSUT()
+        mock.stubbedAsyncResults["getAccountState"] = TONAccountState(
+            address: testAddress,
+            status: .nonExisting,
+            rawBalance: TONTokenAmount(nanoUnits: 0),
+            balance: "0",
+            extraCurrencies: [:]
+        )
+
+        _ = try await sut.accountState(address: testAddress, seqno: nil)
+
+        #expect(mock.callRecords.first?.path == "getAccountState")
+    }
+
+    @Test("accountState throws when JSDynamic throws")
+    func accountStateThrowsOnError() async {
+        let (sut, mock) = makeSUT()
+        mock.shouldThrowOnCall = true
+
+        await #expect(throws: (any Error).self) {
+            try await sut.accountState(address: testAddress, seqno: nil)
+        }
+    }
+
+    @Test("accountStates calls getAccountStates and converts string keys back to TONUserFriendlyAddress")
+    func accountStatesCallsGetAccountStates() async throws {
+        let (sut, mock) = makeSUT()
+        let state = TONAccountState(
+            address: testAddress,
+            status: .active,
+            rawBalance: TONTokenAmount(nanoUnits: 7),
+            balance: "0.000000007",
+            extraCurrencies: [:]
+        )
+        mock.stubbedAsyncResults["getAccountStates"] = [testAddress.value: state]
+
+        let result = try await sut.accountStates(addresses: [testAddress])
+
+        #expect(mock.callRecords.first?.path == "getAccountStates")
+        #expect((mock.callRecords.first?.args.first as? [TONUserFriendlyAddress])?.first == testAddress)
+        #expect(result.count == 1)
+        #expect(result[testAddress]?.rawBalance.nanoUnits == 7)
+    }
+
+    @Test("accountStates throws when JSDynamic throws")
+    func accountStatesThrowsOnError() async {
+        let (sut, mock) = makeSUT()
+        mock.shouldThrowOnCall = true
+
+        await #expect(throws: (any Error).self) {
+            try await sut.accountStates(addresses: [testAddress])
+        }
+    }
+
+    @Test("accountStates throws when JS returns a key that is not a valid address")
+    func accountStatesThrowsOnInvalidAddressKey() async {
+        let (sut, mock) = makeSUT()
+        let state = TONAccountState(
+            address: testAddress,
+            status: .nonExisting,
+            rawBalance: TONTokenAmount(nanoUnits: 0),
+            balance: "0",
+            extraCurrencies: [:]
+        )
+        mock.stubbedAsyncResults["getAccountStates"] = ["not-a-valid-address": state]
+
+        await #expect(throws: (any Error).self) {
+            _ = try await sut.accountStates(addresses: [testAddress])
+        }
+    }
+
+    @Test("accountStates decodes a real JS Promise<Record<address, AccountState>> end-to-end")
+    func accountStatesRealJSRoundTrip() async throws {
+        let context = JSContext()!
+        let addressA = try TONUserFriendlyAddress(value: "EQCrq6urq6urq6urq6urq6urq6urq6urq6urq6urq6urq8Uk")
+        let addressB = try TONUserFriendlyAddress(value: "EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c")
+
+        context.evaluateScript(
+            """
+            var jsClient = {
+                getAccountStates: function(addresses) {
+                    return new Promise(function(resolve) {
+                        var result = {};
+                        for (var i = 0; i < addresses.length; i++) {
+                            var addr = addresses[i];
+                            result[addr] = {
+                                address: addr,
+                                status: i === 0 ? 'active' : 'non-existing',
+                                rawBalance: i === 0 ? '500' : '0',
+                                balance: i === 0 ? '0.0000005' : '0',
+                                extraCurrencies: {}
+                            };
+                        }
+                        resolve(result);
+                    });
+                }
+            };
+            """
+        )
+        let jsClient = context.objectForKeyedSubscript("jsClient")!
+        let sut = JSTONAPIClient(jsClient: jsClient)
+
+        let result = try await sut.accountStates(addresses: [addressA, addressB])
+
+        #expect(result.count == 2)
+        #expect(result[addressA]?.status == .active)
+        #expect(result[addressA]?.rawBalance.nanoUnits == 500)
+        #expect(result[addressA]?.address == addressA)
+        #expect(result[addressB]?.status == .nonExisting)
+        #expect(result[addressB]?.rawBalance.nanoUnits == 0)
+    }
+
+    @Test("accountStates surfaces real JS Promise rejections")
+    func accountStatesRealJSRejection() async throws {
+        let context = JSContext()!
+        context.evaluateScript(
+            """
+            var jsClient = {
+                getAccountStates: function(addresses) {
+                    return Promise.reject(new Error('boom'));
+                }
+            };
+            """
+        )
+        let jsClient = context.objectForKeyedSubscript("jsClient")!
+        let sut = JSTONAPIClient(jsClient: jsClient)
+
+        await #expect(throws: (any Error).self) {
+            _ = try await sut.accountStates(addresses: [testAddress])
+        }
+    }
+
+    @Test("balance calls getBalance")
+    func balanceCallsGetBalance() async throws {
+        let (sut, mock) = makeSUT()
+        mock.stubbedAsyncResults["getBalance"] = TONTokenAmount(nanoUnits: 42)
+
+        let result = try await sut.balance(address: testAddress, seqno: nil)
+
+        #expect(mock.callRecords.first?.path == "getBalance")
+        #expect(result.nanoUnits == 42)
+    }
+
+    @Test("balance throws when JSDynamic throws")
+    func balanceThrowsOnError() async {
+        let (sut, mock) = makeSUT()
+        mock.shouldThrowOnCall = true
+
+        await #expect(throws: (any Error).self) {
+            try await sut.balance(address: testAddress, seqno: nil)
+        }
+    }
+
+    // MARK: - DNS
+
+    @Test("resolveDnsWallet calls resolveDnsWallet")
+    func resolveDnsWalletCallsResolveDnsWallet() async throws {
+        let (sut, mock) = makeSUT()
+        mock.stubbedAsyncResults["resolveDnsWallet"] = "wallet-address" as String
+
+        let result = try await sut.resolveDnsWallet(domain: "foo.ton")
+
+        #expect(mock.callRecords.first?.path == "resolveDnsWallet")
+        #expect(result == "wallet-address")
+    }
+
+    @Test("resolveDnsWallet throws when JSDynamic throws")
+    func resolveDnsWalletThrowsOnError() async {
+        let (sut, mock) = makeSUT()
+        mock.shouldThrowOnCall = true
+
+        await #expect(throws: (any Error).self) {
+            try await sut.resolveDnsWallet(domain: "foo.ton")
+        }
+    }
+
+    @Test("backResolveDnsWallet calls backResolveDnsWallet")
+    func backResolveDnsWalletCallsBackResolveDnsWallet() async throws {
+        let (sut, mock) = makeSUT()
+        mock.stubbedAsyncResults["backResolveDnsWallet"] = "foo.ton" as String
+
+        let result = try await sut.backResolveDnsWallet(address: testAddress)
+
+        #expect(mock.callRecords.first?.path == "backResolveDnsWallet")
+        #expect(result == "foo.ton")
+    }
+
+    @Test("backResolveDnsWallet throws when JSDynamic throws")
+    func backResolveDnsWalletThrowsOnError() async {
+        let (sut, mock) = makeSUT()
+        mock.shouldThrowOnCall = true
+
+        await #expect(throws: (any Error).self) {
+            try await sut.backResolveDnsWallet(address: testAddress)
+        }
+    }
+
 }
