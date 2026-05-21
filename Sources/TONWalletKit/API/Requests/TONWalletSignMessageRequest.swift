@@ -1,10 +1,10 @@
 //
-//  TONWalletSignDataRequest.swift
+//  TONWalletSignMessageRequest.swift
 //  TONWalletKit
 //
-//  Created by Nikita Rodionov on 02.10.2025.
+//  Created by Nikita Rodionov on 19.05.2026.
 //
-//  Copyright (c) 2025 TON Connect
+//  Copyright (c) 2026 TON Connect
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -12,10 +12,10 @@
 //  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 //  copies of the Software, and to permit persons to whom the Software is
 //  furnished to do so, subject to the following conditions:
-//  
+//
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-//  
+//
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,11 +26,11 @@
 
 import Foundation
 
-public class TONWalletSignDataRequest {
+public class TONWalletSignMessageRequest {
     private let context: any JSDynamicObject
 
-    public let event: TONSignDataRequestEvent
-    private let embeddedEvent: TONEmbeddedSignDataRequestEvent?
+    public let event: TONSignMessageRequestEvent
+    private let embeddedEvent: TONEmbeddedSignMessageRequestEvent?
 
     private var targetEvent: any JSValueEncodable {
         embeddedEvent ?? event
@@ -38,7 +38,7 @@ public class TONWalletSignDataRequest {
 
     init(
         context: any JSDynamicObject,
-        event: TONSignDataRequestEvent
+        event: TONSignMessageRequestEvent
     ) {
         self.context = context
         self.event = event
@@ -47,7 +47,7 @@ public class TONWalletSignDataRequest {
 
     init(
         context: any JSDynamicObject,
-        embeddedEvent: TONEmbeddedSignDataRequestEvent
+        embeddedEvent: TONEmbeddedSignMessageRequestEvent
     ) {
         self.context = context
         self.embeddedEvent = embeddedEvent
@@ -55,12 +55,11 @@ public class TONWalletSignDataRequest {
     }
 
     @discardableResult
-    public func approve(response: TONSignDataApprovalResponse? = nil) async throws -> TONSignDataApprovalResponse {
-        try await context.walletKit.approveSignDataRequest(targetEvent, response)
+    public func approve(response: TONSignMessageApprovalResponse? = nil) async throws -> TONSignMessageApprovalResponse {
+        try await context.walletKit.approveSignMessageRequest(targetEvent, response)
     }
 
     public func reject(reason: String? = nil) async throws {
-        try await context.walletKit.rejectSignDataRequest(targetEvent, reason)
+        try await context.walletKit.rejectSignMessageRequest(targetEvent, reason)
     }
 }
-

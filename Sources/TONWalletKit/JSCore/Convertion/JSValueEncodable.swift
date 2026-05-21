@@ -103,10 +103,30 @@ extension NSNull: JSValueEncodable {
 }
 
 extension Array: JSValueEncodable where Element: JSValueEncodable {
-    
+
     func encode(in context: JSContext) throws -> Any {
         try self.map { element in
             try element.encode(in: context)
+        }
+    }
+}
+
+extension Dictionary: JSValueEncodable where Key == String, Value: JSValueEncodable & Encodable {
+
+    func encode(in context: JSContext) throws -> Any {
+        do {
+            let encoder = JSONEncoder()
+            let data = try encoder.encode(self)
+            let object = try JSONSerialization.jsonObject(with: data)
+
+            guard let value = JSValue(object: object, in: context) else {
+                throw JSValueConversionError.unknown(message: "Unable to encode dictionary [String: \(Value.self)] to JSValue")
+            }
+            return value
+        } catch let error as DecodingError {
+            throw JSValueConversionError.decodingError(error)
+        } catch {
+            throw JSValueConversionError.unknown(message: error.localizedDescription)
         }
     }
 }

@@ -41,11 +41,15 @@ struct MainView: View {
             case .addWallet:
                 NavigationStack(path: $addWalletPath) {
                     WalletWelcomeView(
-                        onCreateNew: {},
+                        onCreateNew: { addWalletPath.append(AddWalletPath.createNew) },
                         onAddExisting: { addWalletPath.append(AddWalletPath.importExisting) }
                     )
                     .navigationDestination(for: AddWalletPath.self) { path in
                         switch path {
+                        case .createNew:
+                            CreateWalletView {
+                                viewModel.show(wallets: [$0])
+                            }
                         case .importExisting:
                             AddWalletView {
                                 viewModel.show(wallets: [$0])
@@ -66,5 +70,6 @@ struct MainView: View {
 }
 
 enum AddWalletPath: Hashable {
+    case createNew
     case importExisting
 }
