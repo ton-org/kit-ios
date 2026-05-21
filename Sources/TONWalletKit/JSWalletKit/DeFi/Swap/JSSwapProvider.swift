@@ -30,7 +30,9 @@ import JavaScriptCore
 @objc protocol JSSwapProvider: JSExport {
     var type: String { get }
     var providerId: String { get }
-    
+
+    @objc(getMetadata) func metadata() -> JSValue
+    @objc(getSupportedNetworks) func supportedNetworks() -> JSValue
     @objc(getQuote:) func quote(params: JSValue) -> JSValue
     @objc(buildSwapTransaction:) func swapTransaction(params: JSValue) -> JSValue
 }

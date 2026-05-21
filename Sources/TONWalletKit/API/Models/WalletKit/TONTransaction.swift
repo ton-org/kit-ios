@@ -32,8 +32,8 @@ import _BigInt
 public struct TONTransaction: Codable {
 
     public var account: TONUserFriendlyAddress
-    public var accountStateBefore: TONAccountState?
-    public var accountStateAfter: TONAccountState?
+    public var accountStateBefore: TONTransactionAccountState?
+    public var accountStateAfter: TONTransactionAccountState?
     public var description: TONTransactionDescription?
     public var hash: TONHex
     public var logicalTime: String
@@ -59,7 +59,7 @@ public struct TONTransaction: Codable {
     /** Emulated state of the transaction */
     public var isEmulated: Bool
 
-    public init(account: TONUserFriendlyAddress, accountStateBefore: TONAccountState? = nil, accountStateAfter: TONAccountState? = nil, description: TONTransactionDescription? = nil, hash: TONHex, logicalTime: String, now: Double, mcBlockSeqno: Int, traceExternalHash: TONHex, traceId: String? = nil, previousTransactionHash: String? = nil, previousTransactionLogicalTime: String? = nil, origStatus: TONAccountStatus? = nil, endStatus: TONAccountStatus? = nil, totalFees: TONTokenAmount? = nil, totalFeesExtraCurrencies: [String: String]? = nil, blockRef: TONTransactionBlockRef? = nil, inMessage: TONTransactionMessage? = nil, outMessages: [TONTransactionMessage], isEmulated: Bool) {
+    public init(account: TONUserFriendlyAddress, accountStateBefore: TONTransactionAccountState? = nil, accountStateAfter: TONTransactionAccountState? = nil, description: TONTransactionDescription? = nil, hash: TONHex, logicalTime: String, now: Double, mcBlockSeqno: Int, traceExternalHash: TONHex, traceId: String? = nil, previousTransactionHash: String? = nil, previousTransactionLogicalTime: String? = nil, origStatus: TONAccountStatus? = nil, endStatus: TONAccountStatus? = nil, totalFees: TONTokenAmount? = nil, totalFeesExtraCurrencies: [String: String]? = nil, blockRef: TONTransactionBlockRef? = nil, inMessage: TONTransactionMessage? = nil, outMessages: [TONTransactionMessage], isEmulated: Bool) {
         self.account = account
         self.accountStateBefore = accountStateBefore
         self.accountStateAfter = accountStateAfter

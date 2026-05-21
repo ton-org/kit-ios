@@ -35,12 +35,12 @@ public struct TONEmulationAccountState: Codable {
     public var balance: TONTokenAmount
     /** Map of extra currency IDs to their amounts. Extra currencies are additional tokens that can be attached to TON messages. */
     public var extraCurrencies: [String: String]?
-    public var accountStatus: TONEmulationAccountStatus
+    public var accountStatus: TONAccountStatus
     public var frozenHash: TONHex?
     public var dataHash: TONHex?
     public var codeHash: TONHex?
 
-    public init(hash: TONHex? = nil, balance: TONTokenAmount, extraCurrencies: [String: String]? = nil, accountStatus: TONEmulationAccountStatus, frozenHash: TONHex? = nil, dataHash: TONHex? = nil, codeHash: TONHex? = nil) {
+    public init(hash: TONHex? = nil, balance: TONTokenAmount, extraCurrencies: [String: String]? = nil, accountStatus: TONAccountStatus, frozenHash: TONHex? = nil, dataHash: TONHex? = nil, codeHash: TONHex? = nil) {
         self.hash = hash
         self.balance = balance
         self.extraCurrencies = extraCurrencies

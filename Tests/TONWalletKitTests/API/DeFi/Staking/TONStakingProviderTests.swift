@@ -104,42 +104,89 @@ struct TONStakingProviderTests {
         }
     }
 
-    @Test("stakingProviderInfo calls getStakingProviderInfo on jsObject")
-    func stakingProviderInfoCallsGetStakingProviderInfo() async {
+    @Test("info calls getStakingProviderInfo on jsObject")
+    func infoCallsGetStakingProviderInfo() async {
         let (sut, mock) = makeSUT()
 
-        _ = try? await sut.stakingProviderInfo(network: TONNetwork(chainId: "-239"))
+        _ = try? await sut.info(network: TONNetwork(chainId: "-239"))
 
         #expect(mock.callRecords.first?.path == "getStakingProviderInfo")
     }
 
-    @Test("stakingProviderInfo throws when jsObject throws")
-    func stakingProviderInfoThrowsOnError() async {
+    @Test("info throws when jsObject throws")
+    func infoThrowsOnError() async {
         let (sut, mock) = makeSUT()
         mock.shouldThrowOnCall = true
 
         await #expect(throws: (any Error).self) {
-            try await sut.stakingProviderInfo(network: nil)
+            try await sut.info(network: nil)
         }
     }
 
-    @Test("supportedUnstakeModes calls getSupportedUnstakeModes on jsObject")
-    func supportedUnstakeModesCallsGetSupportedUnstakeModes() {
+    @Test("metadata(network:) calls getStakingProviderMetadata on jsObject")
+    func metadataCallsGetStakingProviderMetadata() throws {
         let (sut, mock) = makeSUT()
+        let stub = TONStakingProviderMetadata(
+            name: "Tonstakers",
+            supportedUnstakeModes: [.instant, .roundEnd],
+            supportsReversedQuote: true,
+            stakeToken: TONStakingTokenInfo(ticker: "TON", decimals: 9, address: "ton")
+        )
+        mock.stubbedResults["getStakingProviderMetadata"] = stub
 
-        _ = try? sut.supportedUnstakeModes()
+        let result = try sut.metadata(network: nil)
 
-        #expect(mock.callRecords.first?.path == "getSupportedUnstakeModes")
+        #expect(mock.callRecords.first?.path == "getStakingProviderMetadata")
+        #expect(result.name == "Tonstakers")
+        #expect(result.supportsReversedQuote == true)
     }
 
-    @Test("supportedUnstakeModes throws when jsObject throws")
-    func supportedUnstakeModesThrowsOnError() {
+    @Test("metadata(network:) throws when jsObject throws")
+    func metadataThrowsOnError() {
         let (sut, mock) = makeSUT()
         mock.shouldThrowOnCall = true
 
         #expect(throws: (any Error).self) {
-            try sut.supportedUnstakeModes()
+            try sut.metadata(network: nil)
         }
+    }
+
+    @Test("supportedNetworks calls getSupportedNetworks on jsObject")
+    func supportedNetworksCallsGetSupportedNetworks() throws {
+        let (sut, mock) = makeSUT()
+        mock.stubbedResults["getSupportedNetworks"] = [TONNetwork.mainnet]
+
+        let result = try sut.supportedNetworks()
+
+        #expect(mock.callRecords.first?.path == "getSupportedNetworks")
+        #expect(result == [.mainnet])
+    }
+
+    @Test("supportedNetworks throws when jsObject throws")
+    func supportedNetworksThrowsOnError() {
+        let (sut, mock) = makeSUT()
+        mock.shouldThrowOnCall = true
+
+        #expect(throws: (any Error).self) {
+            try sut.supportedNetworks()
+        }
+    }
+
+    @Test("supportedUnstakeModes reads from metadata.supportedUnstakeModes")
+    func supportedUnstakeModesReadsFromMetadata() throws {
+        let (sut, mock) = makeSUT()
+        let stub = TONStakingProviderMetadata(
+            name: "Tonstakers",
+            supportedUnstakeModes: [.whenAvailable, .roundEnd],
+            supportsReversedQuote: false,
+            stakeToken: TONStakingTokenInfo(ticker: "TON", decimals: 9, address: "ton")
+        )
+        mock.stubbedResults["getStakingProviderMetadata"] = stub
+
+        let result = try sut.supportedUnstakeModes()
+
+        #expect(mock.callRecords.first?.path == "getStakingProviderMetadata")
+        #expect(result == [.whenAvailable, .roundEnd])
     }
 
     @Test("JSValueDecodable.from returns provider when providerId exists")
@@ -163,5 +210,56 @@ struct TONStakingProviderTests {
         let result = try TONStakingProvider<TONTonStakersStakingProviderIdentifier>.from(jsValue)
 
         #expect(result == nil)
+    }
+
+    // MARK: - JS interop end-to-end
+
+    @Test("supportedNetworks() decodes real JS array from getSupportedNetworks")
+    func supportedNetworksDecodesRealJSArray() throws {
+        let context = JSContext()!
+        let providerJS = context.evaluateScript(
+            """
+            ({
+                providerId: 'tonstakers',
+                getSupportedNetworks: function() {
+                    return [{ chainId: '-239' }];
+                }
+            })
+            """
+        )!
+        let identifier = TONTonStakersStakingProviderIdentifier(name: "tonstakers")
+        let sut = TONStakingProvider(jsObject: providerJS, identifier: identifier)
+
+        let result = try sut.supportedNetworks()
+
+        #expect(result == [.mainnet])
+    }
+
+    @Test("metadata() decodes real JS object from getStakingProviderMetadata")
+    func metadataDecodesRealJSObject() throws {
+        let context = JSContext()!
+        let providerJS = context.evaluateScript(
+            """
+            ({
+                providerId: 'tonstakers',
+                getStakingProviderMetadata: function(network) {
+                    return {
+                        name: 'Tonstakers',
+                        supportedUnstakeModes: ['INSTANT', 'WHEN_AVAILABLE', 'ROUND_END'],
+                        supportsReversedQuote: true,
+                        stakeToken: { ticker: 'TON', decimals: 9, address: 'ton' }
+                    };
+                }
+            })
+            """
+        )!
+        let identifier = TONTonStakersStakingProviderIdentifier(name: "tonstakers")
+        let sut = TONStakingProvider(jsObject: providerJS, identifier: identifier)
+
+        let result = try sut.metadata(network: nil)
+
+        #expect(result.name == "Tonstakers")
+        #expect(result.supportsReversedQuote == true)
+        #expect(result.supportedUnstakeModes == [.instant, .whenAvailable, .roundEnd])
     }
 }

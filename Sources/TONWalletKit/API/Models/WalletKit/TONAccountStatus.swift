@@ -27,62 +27,13 @@
 import Foundation
 import _BigInt
 
-public enum TONAccountStatus: Codable {
-
-    case unknown(String)
-    case active
-    case frozen
-    case uninit
-    case nonexist
-
-    public init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let type = try container.decode(String.self, forKey: .type)
-        switch type {
-
-        case "unknown":
-            let value = try container.decode(String.self, forKey: .value)
-            self = .unknown(value)
-        case "active":
-            self = .active
-        case "frozen":
-            self = .frozen
-        case "uninit":
-            self = .uninit
-        case "nonexist":
-            self = .nonexist
-        default:
-            throw DecodingError.dataCorruptedError(
-                forKey: .type,
-                in: container,
-                debugDescription: "Unknown type: \(type)"
-            )
-        }
-    }
-
-    public func encode(to encoder: any Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        switch self {
-
-        case .unknown(let value):
-            try container.encode("unknown", forKey: .type)
-            try container.encode(value, forKey: .value)
-        case .active:
-            try container.encode("active", forKey: .type)
-        case .frozen:
-            try container.encode("frozen", forKey: .type)
-        case .uninit:
-            try container.encode("uninit", forKey: .type)
-        case .nonexist:
-            try container.encode("nonexist", forKey: .type)
-        }
-    }
-    public enum CodingKeys: String, CodingKey, CaseIterable {
-        case type
-        case value
-    }
+/** Copyright (c) TonTech.  This source code is licensed under the MIT license found in the LICENSE file in the root directory of this source tree. */
+public enum TONAccountStatus: String, Codable, CaseIterable {
+    case uninitialized = "uninitialized"
+    case frozen = "frozen"
+    case active = "active"
+    case nonExisting = "non-existing"
 }
-
 
 
 extension TONAccountStatus: JSValueCodable {}
