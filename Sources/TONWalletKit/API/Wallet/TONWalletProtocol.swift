@@ -34,6 +34,7 @@ public protocol TONWalletAdapterProtocol: AnyObject {
     func address(testnet: Bool) throws -> TONUserFriendlyAddress
     func stateInit() async throws -> TONBase64
     func signedSendTransaction(input: TONTransactionRequest, fakeSignature: Bool?) async throws -> TONBase64
+    func signedSignMessage(input: TONTransactionRequest, fakeSignature: Bool?) async throws -> TONBase64
     func signedSignData(input: TONPreparedSignData, fakeSignature: Bool?) async throws -> TONHex
     func signedTonProof(input: TONProofMessage, fakeSignature: Bool?) async throws -> TONHex
     func supportedFeatures() -> [any TONFeature]?
@@ -42,35 +43,40 @@ public protocol TONWalletAdapterProtocol: AnyObject {
 public protocol TONWalletProtocol: TONWalletAdapterProtocol {
     var id: TONWalletID { get }
     var address: TONUserFriendlyAddress { get }
-    
+    var client: any TONAPIClient { get }
+
     func balance() async throws -> TONBalance
-    
+
     func transferTONTransaction(request: TONTransferRequest) async throws -> TONTransactionRequest
     func transferTONTransaction(requests: [TONTransferRequest]) async throws -> TONTransactionRequest
-    
-    func send(transactionRequest: TONTransactionRequest) async throws
-    func preview(transactionRequest: TONTransactionRequest) async throws -> TONTransactionEmulatedPreview
-    
+
+    func send(transactionRequest: TONTransactionRequest) async throws -> TONSendTransactionResponse
+    func preview(transactionRequest: TONTransactionRequest, options: TONTransactionPreviewOptions?) async throws -> TONTransactionEmulatedPreview
+
     func transferNFTTransaction(request: TONNFTTransferRequest) async throws -> TONTransactionRequest
     func transferNFTTransaction(request: TONNFTRawTransferRequest) async throws -> TONTransactionRequest
-    
+
     func nfts(request: TONNFTsRequest) async throws -> TONNFTsResponse
     func nft(address: TONUserFriendlyAddress) async throws -> TONNFT
-    
+
     func jettonBalance(jettonAddress: TONUserFriendlyAddress) async throws -> TONBalance
     func jettonWalletAddress(jettonAddress: TONUserFriendlyAddress) async throws -> TONUserFriendlyAddress
-    
+
     func transferJettonTransaction(request: TONJettonsTransferRequest) async throws -> TONTransactionRequest
     func jettons(request: TONJettonsRequest) async throws -> TONJettonsResponse
 }
 
 public extension TONWalletProtocol {
-    
+
+    func preview(transactionRequest: TONTransactionRequest) async throws -> TONTransactionEmulatedPreview {
+        try await preview(transactionRequest: transactionRequest, options: nil)
+    }
+
     func nfts(limit: Int) async throws -> TONNFTsResponse {
         let request = TONNFTsRequest(pagination: TONPagination(limit: limit))
         return try await nfts(request: request)
     }
-    
+
     func jettons(limit: Int) async throws -> TONJettonsResponse {
         let request = TONJettonsRequest(pagination: TONPagination(limit: limit))
         return try await jettons(request: request)

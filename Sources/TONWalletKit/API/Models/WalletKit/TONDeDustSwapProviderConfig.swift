@@ -49,8 +49,9 @@ public struct TONDeDustSwapProviderConfig: Codable {
     public var maxLength: Int?
     /** Minimum pool TVL in USD */
     public var minPoolUsdTvl: String?
+    public var metadata: TONSwapProviderMetadataOverride?
 
-    public init(referralAddress: String? = nil, referralFeeBps: Int? = nil, providerId: String? = nil, defaultSlippageBps: Int? = nil, apiUrl: URL? = nil, onlyVerifiedPools: Bool? = nil, maxSplits: Int? = nil, maxLength: Int? = nil, minPoolUsdTvl: String? = nil) {
+    public init(referralAddress: String? = nil, referralFeeBps: Int? = nil, providerId: String? = nil, defaultSlippageBps: Int? = nil, apiUrl: URL? = nil, onlyVerifiedPools: Bool? = nil, maxSplits: Int? = nil, maxLength: Int? = nil, minPoolUsdTvl: String? = nil, metadata: TONSwapProviderMetadataOverride? = nil) {
         self.referralAddress = referralAddress
         self.referralFeeBps = referralFeeBps
         self.providerId = providerId
@@ -60,6 +61,7 @@ public struct TONDeDustSwapProviderConfig: Codable {
         self.maxSplits = maxSplits
         self.maxLength = maxLength
         self.minPoolUsdTvl = minPoolUsdTvl
+        self.metadata = metadata
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
@@ -72,6 +74,7 @@ public struct TONDeDustSwapProviderConfig: Codable {
         case maxSplits
         case maxLength
         case minPoolUsdTvl
+        case metadata
     }
 
     // Encodable protocol methods
@@ -87,6 +90,7 @@ public struct TONDeDustSwapProviderConfig: Codable {
         try container.encodeIfPresent(maxSplits, forKey: .maxSplits)
         try container.encodeIfPresent(maxLength, forKey: .maxLength)
         try container.encodeIfPresent(minPoolUsdTvl, forKey: .minPoolUsdTvl)
+        try container.encodeIfPresent(metadata, forKey: .metadata)
     }
 }
 

@@ -54,8 +54,9 @@ public struct TONConnectionRequestEvent: Codable {
     /** Items requested by the dApp (e.g., wallet address, proof) */
     public var requestedItems: [TONConnectionRequestEventRequestedItem]
     public var preview: TONConnectionRequestEventPreview
+    public var embeddedRequest: TONEmbeddedRequest?
 
-    public init(id: String, from: String? = nil, walletAddress: TONUserFriendlyAddress? = nil, walletId: String? = nil, domain: String? = nil, isJsBridge: Bool? = nil, tabId: String? = nil, sessionId: String? = nil, isLocal: Bool? = nil, messageId: String? = nil, traceId: String? = nil, dAppInfo: TONDAppInfo? = nil, returnStrategy: String? = nil, requestedItems: [TONConnectionRequestEventRequestedItem], preview: TONConnectionRequestEventPreview) {
+    public init(id: String, from: String? = nil, walletAddress: TONUserFriendlyAddress? = nil, walletId: String? = nil, domain: String? = nil, isJsBridge: Bool? = nil, tabId: String? = nil, sessionId: String? = nil, isLocal: Bool? = nil, messageId: String? = nil, traceId: String? = nil, dAppInfo: TONDAppInfo? = nil, returnStrategy: String? = nil, requestedItems: [TONConnectionRequestEventRequestedItem], preview: TONConnectionRequestEventPreview, embeddedRequest: TONEmbeddedRequest? = nil) {
         self.id = id
         self.from = from
         self.walletAddress = walletAddress
@@ -71,6 +72,7 @@ public struct TONConnectionRequestEvent: Codable {
         self.returnStrategy = returnStrategy
         self.requestedItems = requestedItems
         self.preview = preview
+        self.embeddedRequest = embeddedRequest
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
@@ -89,6 +91,7 @@ public struct TONConnectionRequestEvent: Codable {
         case returnStrategy
         case requestedItems
         case preview
+        case embeddedRequest
     }
 
     // Encodable protocol methods
@@ -110,6 +113,7 @@ public struct TONConnectionRequestEvent: Codable {
         try container.encodeIfPresent(returnStrategy, forKey: .returnStrategy)
         try container.encode(requestedItems, forKey: .requestedItems)
         try container.encode(preview, forKey: .preview)
+        try container.encodeIfPresent(embeddedRequest, forKey: .embeddedRequest)
     }
 }
 

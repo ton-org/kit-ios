@@ -27,20 +27,23 @@
 import Foundation
 import _BigInt
 
-/** Request to send a transaction on the TON blockchain. */
+/** Request to send a transaction on the TON blockchain. Contains &#x60;messages&#x60; or &#x60;items&#x60;. If items are present, but messages are not — wallet app is responsible for resolving items into messages. */
 
 public struct TONTransactionRequest: Codable {
 
     /** List of messages to include in the transaction */
     public var messages: [TONTransactionRequestMessage]
+    /** List of structured items (ton/jetton/nft) as an alternative to raw messages. When present, the wallet app is responsible for resolving items into messages. */
+    public var items: [TONStructuredItem]?
     public var network: TONNetwork?
     /** Unix timestamp after which the transaction becomes invalid */
     public var validUntil: Double?
     /** Sender wallet address in received format(raw, user friendly) */
     public var fromAddress: String?
 
-    public init(messages: [TONTransactionRequestMessage], network: TONNetwork? = nil, validUntil: Double? = nil, fromAddress: String? = nil) {
+    public init(messages: [TONTransactionRequestMessage], items: [TONStructuredItem]? = nil, network: TONNetwork? = nil, validUntil: Double? = nil, fromAddress: String? = nil) {
         self.messages = messages
+        self.items = items
         self.network = network
         self.validUntil = validUntil
         self.fromAddress = fromAddress
@@ -48,6 +51,7 @@ public struct TONTransactionRequest: Codable {
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case messages
+        case items
         case network
         case validUntil
         case fromAddress
@@ -58,6 +62,7 @@ public struct TONTransactionRequest: Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(messages, forKey: .messages)
+        try container.encodeIfPresent(items, forKey: .items)
         try container.encodeIfPresent(network, forKey: .network)
         try container.encodeIfPresent(validUntil, forKey: .validUntil)
         try container.encodeIfPresent(fromAddress, forKey: .fromAddress)

@@ -63,7 +63,7 @@ class WalletNFTDetailsViewModel: ObservableObject, Identifiable {
                 )
 
                 let transactionRequest = try await wallet.transferNFTTransaction(request: request)
-                try await wallet.send(transactionRequest: transactionRequest)
+                _ = try await wallet.send(transactionRequest: transactionRequest)
             } catch {
                 debugPrint("Failed to transfer NFT: \(error.localizedDescription)")
             }

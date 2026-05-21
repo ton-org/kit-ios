@@ -251,6 +251,22 @@ struct TONWalletAdapterJSAdapterTests {
         }
     }
 
+    @Test("signedSendTransaction rejects for malformed options")
+    func signedSendTransactionRejectsForMalformedOptions() async {
+        let wallet = MockWalletAdapter()
+        let sut = TONWalletAdapterJSAdapter(context: context, walletAdapter: wallet)
+        let input = context.evaluateScript(
+            "JSON.parse('{\"messages\":[{\"address\":\"test-address\",\"amount\":\"1000000000\"}]}')"
+        )!
+        let options = context.evaluateScript("JSON.parse('{\"fakeSignature\":\"not-a-bool\"}')")!
+
+        let result = sut.signedSendTransaction(input: input, options: options)
+
+        await #expect(throws: (any Error).self) {
+            try await result.then()
+        }
+    }
+
     @Test("signedSendTransaction rejects when wallet throws")
     func signedSendTransactionRejectsWhenWalletThrows() async {
         let wallet = MockWalletAdapter()
@@ -262,6 +278,68 @@ struct TONWalletAdapterJSAdapterTests {
         let options = JSValue(undefinedIn: context)!
 
         let result = sut.signedSendTransaction(input: input, options: options)
+
+        await #expect(throws: (any Error).self) {
+            try await result.then()
+        }
+    }
+
+    @Test("signedSignMessage resolves with signed base64")
+    func signedSignMessageResolvesWithValue() async throws {
+        let wallet = MockWalletAdapter()
+        let sut = TONWalletAdapterJSAdapter(context: context, walletAdapter: wallet)
+        let input = context.evaluateScript(
+            "JSON.parse('{\"messages\":[{\"address\":\"test-address\",\"amount\":\"1000000000\"}]}')"
+        )!
+        let options = JSValue(undefinedIn: context)!
+
+        let result = sut.signedSignMessage(input: input, options: options)
+        let resolved = try await result.then()
+
+        #expect(resolved.toString() == TONBase64(string: "signedMessage").value)
+    }
+
+    @Test("signedSignMessage rejects for invalid input")
+    func signedSignMessageRejectsForInvalidInput() async {
+        let wallet = MockWalletAdapter()
+        let sut = TONWalletAdapterJSAdapter(context: context, walletAdapter: wallet)
+        let input = JSValue(undefinedIn: context)!
+        let options = JSValue(undefinedIn: context)!
+
+        let result = sut.signedSignMessage(input: input, options: options)
+
+        await #expect(throws: (any Error).self) {
+            try await result.then()
+        }
+    }
+
+    @Test("signedSignMessage rejects for malformed options")
+    func signedSignMessageRejectsForMalformedOptions() async {
+        let wallet = MockWalletAdapter()
+        let sut = TONWalletAdapterJSAdapter(context: context, walletAdapter: wallet)
+        let input = context.evaluateScript(
+            "JSON.parse('{\"messages\":[{\"address\":\"test-address\",\"amount\":\"1000000000\"}]}')"
+        )!
+        let options = context.evaluateScript("JSON.parse('{\"fakeSignature\":\"not-a-bool\"}')")!
+
+        let result = sut.signedSignMessage(input: input, options: options)
+
+        await #expect(throws: (any Error).self) {
+            try await result.then()
+        }
+    }
+
+    @Test("signedSignMessage rejects when wallet throws")
+    func signedSignMessageRejectsWhenWalletThrows() async {
+        let wallet = MockWalletAdapter()
+        wallet.shouldThrow = true
+        let sut = TONWalletAdapterJSAdapter(context: context, walletAdapter: wallet)
+        let input = context.evaluateScript(
+            "JSON.parse('{\"messages\":[{\"address\":\"test-address\",\"amount\":\"1000000000\"}]}')"
+        )!
+        let options = JSValue(undefinedIn: context)!
+
+        let result = sut.signedSignMessage(input: input, options: options)
 
         await #expect(throws: (any Error).self) {
             try await result.then()
@@ -291,6 +369,24 @@ struct TONWalletAdapterJSAdapterTests {
         let sut = TONWalletAdapterJSAdapter(context: context, walletAdapter: wallet)
         let input = JSValue(undefinedIn: context)!
         let options = JSValue(undefinedIn: context)!
+
+        let result = sut.signedSignData(input: input, options: options)
+
+        await #expect(throws: (any Error).self) {
+            try await result.then()
+        }
+    }
+
+    @Test("signedSignData rejects for malformed options")
+    func signedSignDataRejectsForMalformedOptions() async {
+        let wallet = MockWalletAdapter()
+        let sut = TONWalletAdapterJSAdapter(context: context, walletAdapter: wallet)
+        let addressValue = wallet.mockAddress.value
+        let json = """
+        {"address":"\(addressValue)","timestamp":1704067200,"domain":"example.com","payload":{"data":{"type":"text","value":{"content":"test"}}},"hash":"abcd"}
+        """
+        let input = context.evaluateScript("JSON.parse('\(json)')")!
+        let options = context.evaluateScript("JSON.parse('{\"fakeSignature\":\"not-a-bool\"}')")!
 
         let result = sut.signedSignData(input: input, options: options)
 
@@ -332,6 +428,23 @@ struct TONWalletAdapterJSAdapterTests {
         let resolved = try await result.then()
 
         #expect(resolved.toString() == TONHex(data: Data([0xef, 0x01])).value)
+    }
+
+    @Test("signedTonProof rejects for malformed options")
+    func signedTonProofRejectsForMalformedOptions() async {
+        let wallet = MockWalletAdapter()
+        let sut = TONWalletAdapterJSAdapter(context: context, walletAdapter: wallet)
+        let json = """
+        {"workchain":0,"addressHash":"abcd","timestamp":1704067200,"domain":{"lengthBytes":11,"value":"example.com"},"payload":"test","stateInit":"dGVzdA=="}
+        """
+        let input = context.evaluateScript("JSON.parse('\(json)')")!
+        let options = context.evaluateScript("JSON.parse('{\"fakeSignature\":\"not-a-bool\"}')")!
+
+        let result = sut.signedTonProof(input: input, options: options)
+
+        await #expect(throws: (any Error).self) {
+            try await result.then()
+        }
     }
 
     @Test("signedTonProof rejects for invalid input")

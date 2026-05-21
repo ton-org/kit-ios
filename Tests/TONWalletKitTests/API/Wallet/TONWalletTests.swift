@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import JavaScriptCore
 import _BigInt
 @testable import TONWalletKit
 
@@ -14,7 +15,12 @@ struct TONWalletTests {
 
     private func makeSUT() -> (sut: TONWallet, mock: MockJSDynamicObject) {
         let mock = MockJSDynamicObject()
-        let sut = TONWallet(jsWallet: mock, id: "test-wallet", address: testAddress)
+        let sut = TONWallet(
+            jsWallet: mock,
+            id: "test-wallet",
+            address: testAddress,
+            client: MockAPIClient()
+        )
         return (sut, mock)
     }
 
@@ -66,9 +72,27 @@ struct TONWalletTests {
         let (sut, mock) = makeSUT()
         let request = TONTransactionRequest(messages: [])
 
-        try? await sut.send(transactionRequest: request)
+        _ = try? await sut.send(transactionRequest: request)
 
         #expect(mock.callRecords.first?.path == "sendTransaction")
+    }
+
+    @Test("send() returns decoded TONSendTransactionResponse")
+    func sendReturnsDecodedResponse() async throws {
+        let (sut, mock) = makeSUT()
+        let stub = TONSendTransactionResponse(
+            boc: try TONBase64(base64Encoded: "Ym9j"),
+            normalizedBoc: try TONBase64(base64Encoded: "bm9ybWFsaXplZA=="),
+            normalizedHash: TONHex(data: Data([0xab, 0xcd]))
+        )
+        mock.stubbedAsyncResults["sendTransaction"] = stub
+        let request = TONTransactionRequest(messages: [])
+
+        let result = try await sut.send(transactionRequest: request)
+
+        #expect(result.boc.value == "Ym9j")
+        #expect(result.normalizedBoc.value == "bm9ybWFsaXplZA==")
+        #expect(result.normalizedHash.value == TONHex(data: Data([0xab, 0xcd])).value)
     }
 
     @Test("preview() calls getTransactionPreview")
@@ -79,6 +103,29 @@ struct TONWalletTests {
         _ = try? await sut.preview(transactionRequest: request)
 
         #expect(mock.callRecords.first?.path == "getTransactionPreview")
+    }
+
+    @Test("preview(options:) forwards options to getTransactionPreview")
+    func previewForwardsOptions() async {
+        let (sut, mock) = makeSUT()
+        let request = TONTransactionRequest(messages: [])
+        let options = TONTransactionPreviewOptions(mode: .sign)
+
+        _ = try? await sut.preview(transactionRequest: request, options: options)
+
+        #expect(mock.callRecords.first?.path == "getTransactionPreview")
+        #expect(mock.callRecords.first?.args.count == 2)
+        #expect(mock.callRecords.first?.args[1] is TONTransactionPreviewOptions)
+    }
+
+    @Test("preview() without options forwards only the request")
+    func previewWithoutOptionsForwardsSingleArg() async {
+        let (sut, mock) = makeSUT()
+        let request = TONTransactionRequest(messages: [])
+
+        _ = try? await sut.preview(transactionRequest: request)
+
+        #expect(mock.callRecords.first?.args.count == 1)
     }
 
     @Test("transferNFTTransaction() calls createTransferNftTransaction")
@@ -172,5 +219,47 @@ struct TONWalletTests {
         _ = try? await sut.jettons(request: request)
 
         #expect(mock.callRecords.first?.path == "getJettons")
+    }
+
+    @Test("init stores client")
+    func initStoresClient() throws {
+        let mock = MockJSDynamicObject()
+        let client = MockAPIClient()
+        client.stubbedNetwork = .testnet
+        let sut = TONWallet(
+            jsWallet: mock,
+            id: "test-wallet",
+            address: testAddress,
+            client: client
+        )
+
+        #expect(try sut.client.network() == .testnet)
+    }
+
+    @Test("from(_:) wraps JS getClient() result in JSTONAPIClient")
+    func fromDecodesClientFromJS() throws {
+        let context = JSContext()!
+        let addressValue = testAddress.value
+        context.evaluateScript(
+            """
+            var stubWallet = {
+                getWalletId: function() { return "decoded-wallet-id"; },
+                getAddress: function() { return "\(addressValue)"; },
+                getClient: function() {
+                    return {
+                        getNetwork: function() { return { chainId: "-3" }; }
+                    };
+                }
+            };
+            """
+        )
+        let jsValue = context.objectForKeyedSubscript("stubWallet")!
+
+        let wallet = try #require(try TONWallet.from(jsValue))
+
+        #expect(wallet.id == "decoded-wallet-id")
+        #expect(wallet.address == testAddress)
+        #expect(wallet.client is JSTONAPIClient)
+        #expect(try wallet.client.network() == .testnet)
     }
 }

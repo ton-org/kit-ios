@@ -50,9 +50,9 @@ struct WalletHomeView: View {
                     balanceBlock
 
                     WalletHomeActionsRow(
-                        onDeposit: {},
+                        onDeposit: openStaking,
                         onSend: openSend,
-                        onReceive: {}
+                        onReceive: openSwap
                     )
 
                     assetsSection
@@ -91,6 +91,10 @@ struct WalletHomeView: View {
                 switch path {
                 case .send(let viewModel):
                     SendTokensView(viewModel: viewModel)
+                case .swap(let viewModel):
+                    SwapView(viewModel: viewModel)
+                case .staking(let viewModel):
+                    StakingView(viewModel: viewModel)
                 case .allAssets(let walletViewModel):
                     allAssetsScreen(for: walletViewModel)
                 case .allNFTs(let walletViewModel):
@@ -270,10 +274,23 @@ struct WalletHomeView: View {
         navigationPath.append(HomePath.send(send))
     }
 
+    private func openSwap() {
+        navigationPath.append(HomePath.swap(viewModel.wallet.swapViewModel()))
+    }
+
+    private func openStaking() {
+        navigationPath.append(HomePath.staking(viewModel.wallet.stakingViewModel()))
+    }
+
     private func handleWalletsEvent(_ event: WalletsListViewModel.Event) {
         if let transactionRequest = event.transactionRequest {
             present(
                 WalletTransactionRequestView(viewModel: .init(request: transactionRequest))
+                    .presentationDragIndicator(.visible)
+            )
+        } else if let signMessageRequest = event.signMessageRequest {
+            present(
+                WalletSignMessageRequestView(viewModel: .init(request: signMessageRequest))
                     .presentationDragIndicator(.visible)
             )
         } else if let signDataRequest = event.signDataRequest {
@@ -302,12 +319,16 @@ struct WalletHomeView: View {
 
 private enum HomePath: Hashable {
     case send(SendTokensViewModel)
+    case swap(SwapViewModel)
+    case staking(StakingViewModel)
     case allAssets(WalletViewModel)
     case allNFTs(WalletViewModel)
 
     func hash(into hasher: inout Hasher) {
         switch self {
         case .send(let vm): hasher.combine("send"); hasher.combine(ObjectIdentifier(vm))
+        case .swap(let vm): hasher.combine("swap"); hasher.combine(ObjectIdentifier(vm))
+        case .staking(let vm): hasher.combine("staking"); hasher.combine(ObjectIdentifier(vm))
         case .allAssets(let vm): hasher.combine("allAssets"); hasher.combine(vm.id)
         case .allNFTs(let vm): hasher.combine("allNFTs"); hasher.combine(vm.id)
         }
@@ -316,6 +337,8 @@ private enum HomePath: Hashable {
     static func == (lhs: HomePath, rhs: HomePath) -> Bool {
         switch (lhs, rhs) {
         case (.send(let l), .send(let r)): return l === r
+        case (.swap(let l), .swap(let r)): return l === r
+        case (.staking(let l), .staking(let r)): return l === r
         case (.allAssets(let l), .allAssets(let r)): return l.id == r.id
         case (.allNFTs(let l), .allNFTs(let r)): return l.id == r.id
         default: return false

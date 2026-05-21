@@ -29,30 +29,36 @@ import Foundation
 public protocol TONStakingManagerProtocol {
 
     func register<Provider: TONStakingProviderProtocol>(provider: Provider) throws
+    func remove<Provider: TONStakingProviderProtocol>(provider: Provider) throws
     func set<Identifier: TONStakingProviderIdentifier>(defaultProviderId: Identifier) throws
-    
+
     func provider<Identifier: TONStakingProviderIdentifier>(
         with id: Identifier
     ) throws -> TONStakingProvider<Identifier>?
-    
-    func registeredProviders() throws -> [AnyTONProviderIdentifier]
-    
+
+    func providers() throws -> [TONStakingProvider<AnyTONStakingProviderIdentifier>]
+
     func hasProvider<Identifier: TONStakingProviderIdentifier>(
         with id: Identifier
     ) throws -> Bool
-    
+
+    func metadata(
+        network: TONNetwork?,
+        identifier: (any TONStakingProviderIdentifier)?
+    ) throws -> TONStakingProviderMetadata
+
     func quote<Identifier: TONStakingProviderIdentifier>(
         params: TONStakingQuoteParams<Identifier.QuoteOptions>,
         identifier: Identifier
     ) async throws -> TONStakingQuote
 
     func quote(params: TONStakingQuoteParams<AnyCodable>) async throws -> TONStakingQuote
-    
+
     func stakeTransaction<Identifier: TONStakingProviderIdentifier>(
         params: TONStakeParams<Identifier.StakeOptions>,
         identifier: Identifier
     ) async throws -> TONTransactionRequest
-    
+
     func stakeTransaction(params: TONStakeParams<AnyCodable>) async throws -> TONTransactionRequest
 
     func stakedBalance(
@@ -61,18 +67,14 @@ public protocol TONStakingManagerProtocol {
         identifier: (any TONStakingProviderIdentifier)?
     ) async throws -> TONStakingBalance
 
-    func stakingProviderInfo(
+    func info(
         network: TONNetwork?,
         identifier: (any TONStakingProviderIdentifier)?
     ) async throws -> TONStakingProviderInfo
-
-    func supportedUnstakeModes(
-        identifier: (any TONStakingProviderIdentifier)?
-    ) throws -> [TONUnstakeMode]
 }
 
 public extension TONStakingManagerProtocol {
-    
+
     func stakedBalance(
         userAddress: TONUserFriendlyAddress,
         network: TONNetwork?,
@@ -84,17 +86,24 @@ public extension TONStakingManagerProtocol {
         )
     }
 
-    func stakingProviderInfo(
+    func info(
         network: TONNetwork?
     ) async throws -> TONStakingProviderInfo {
-        try await stakingProviderInfo(
+        try await info(
             network: network,
             identifier: nil
         )
     }
 
-    func supportedUnstakeModes() throws -> [TONUnstakeMode] {
-        try supportedUnstakeModes(identifier: nil)
+    func metadata(network: TONNetwork? = nil) throws -> TONStakingProviderMetadata {
+        try metadata(network: network, identifier: nil)
+    }
+
+    func supportedUnstakeModes(
+        network: TONNetwork? = nil,
+        identifier: (any TONStakingProviderIdentifier)? = nil
+    ) throws -> [TONUnstakeMode] {
+        try metadata(network: network, identifier: identifier).supportedUnstakeModes
     }
 }
 
@@ -110,6 +119,10 @@ class TONStakingManager: TONStakingManagerProtocol {
         try jsObject.registerProvider(TONEncodableStakingProvider(stakingProvider: provider))
     }
 
+    func remove<Provider: TONStakingProviderProtocol>(provider: Provider) throws {
+        try jsObject.removeProvider(TONEncodableStakingProvider(stakingProvider: provider))
+    }
+
     func set<Identifier: TONStakingProviderIdentifier>(defaultProviderId: Identifier) throws {
         try jsObject.setDefaultProvider(defaultProviderId.name)
     }
@@ -121,15 +134,24 @@ class TONStakingManager: TONStakingManagerProtocol {
         return TONStakingProvider<Identifier>(jsObject: jsObject, identifier: id)
     }
 
-    func registeredProviders() throws -> [AnyTONProviderIdentifier] {
-        let names: [String] = try self.jsObject.getRegisteredProviders()
-        return names.map { AnyTONProviderIdentifier(name: $0) }
+    func providers() throws -> [TONStakingProvider<AnyTONStakingProviderIdentifier>] {
+        let value: JSValue = try jsObject.getProviders()
+        return try value.toObjectsArray().compactMap {
+            try TONStakingProvider<AnyTONStakingProviderIdentifier>.from($0)
+        }
     }
 
     func hasProvider<Identifier: TONStakingProviderIdentifier>(
         with id: Identifier
     ) throws -> Bool {
         try jsObject.hasProvider(id.name)
+    }
+
+    func metadata(
+        network: TONNetwork?,
+        identifier: (any TONStakingProviderIdentifier)?
+    ) throws -> TONStakingProviderMetadata {
+        try jsObject.getStakingProviderMetadata(network, identifier?.name)
     }
 
     func quote<Identifier: TONStakingProviderIdentifier>(
@@ -162,18 +184,13 @@ class TONStakingManager: TONStakingManagerProtocol {
         try await jsObject.getStakedBalance(userAddress, network, identifier?.name)
     }
 
-    func stakingProviderInfo(
+    func info(
         network: TONNetwork?,
         identifier: (any TONStakingProviderIdentifier)?
     ) async throws -> TONStakingProviderInfo {
         try await jsObject.getStakingProviderInfo(network, identifier?.name)
     }
 
-    func supportedUnstakeModes(
-        identifier: (any TONStakingProviderIdentifier)?
-    ) throws -> [TONUnstakeMode] {
-        try jsObject.getSupportedUnstakeModes(identifier?.name)
-    }
 }
 
 extension TONStakingManager: JSValueDecodable {

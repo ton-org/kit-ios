@@ -59,7 +59,7 @@ class SendableTONViewModel: SendableTokenViewModel {
             )
         )
         let transactionRequest = try await wallet.transferTONTransaction(request: request)
-        try await wallet.send(transactionRequest: transactionRequest)
+        _ = try await wallet.send(transactionRequest: transactionRequest)
     }
     
     func updateBalance() async throws {

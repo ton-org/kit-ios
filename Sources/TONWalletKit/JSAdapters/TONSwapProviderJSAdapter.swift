@@ -42,6 +42,30 @@ class TONSwapProviderJSAdapter<Provider: TONSwapProviderProtocol>: NSObject, JSS
         self.swapProvider = swapProvider
     }
     
+    @objc(getMetadata) func metadata() -> JSValue {
+        guard let context else {
+            return JSValue(undefinedIn: JSContext())
+        }
+
+        do {
+            return JSValue(object: try swapProvider.metadata().encode(in: context), in: context)
+        } catch {
+            return JSValue(undefinedIn: context)
+        }
+    }
+
+    @objc(getSupportedNetworks) func supportedNetworks() -> JSValue {
+        guard let context else {
+            return JSValue(undefinedIn: JSContext())
+        }
+
+        do {
+            return JSValue(object: try swapProvider.supportedNetworks().encode(in: context), in: context)
+        } catch {
+            return JSValue(undefinedIn: context)
+        }
+    }
+
     @objc(getQuote:) func quote(params: JSValue) -> JSValue {
         guard let context else {
             return JSValue(

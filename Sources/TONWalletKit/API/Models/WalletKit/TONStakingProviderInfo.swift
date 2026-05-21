@@ -27,7 +27,7 @@
 import Foundation
 import _BigInt
 
-/** Staking information for a provider */
+/** Dynamic staking information for a provider */
 
 public struct TONStakingProviderInfo: Codable {
 
@@ -36,21 +36,21 @@ public struct TONStakingProviderInfo: Codable {
     public var rawInstantUnstakeAvailable: TONTokenAmount?
     /** Amount available for instant unstake */
     public var instantUnstakeAvailable: String?
-    /** Identifier of the staking provider */
-    public var providerId: String
+    /** Exchange rate between stakeToken and receiveToken (e.g. 1 TON = 0.95 tsTON). Undefined when there is no receiveToken (direct/custodial staking). */
+    public var exchangeRate: String?
 
-    public init(apy: Double, rawInstantUnstakeAvailable: TONTokenAmount? = nil, instantUnstakeAvailable: String? = nil, providerId: String) {
+    public init(apy: Double, rawInstantUnstakeAvailable: TONTokenAmount? = nil, instantUnstakeAvailable: String? = nil, exchangeRate: String? = nil) {
         self.apy = apy
         self.rawInstantUnstakeAvailable = rawInstantUnstakeAvailable
         self.instantUnstakeAvailable = instantUnstakeAvailable
-        self.providerId = providerId
+        self.exchangeRate = exchangeRate
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case apy
         case rawInstantUnstakeAvailable
         case instantUnstakeAvailable
-        case providerId
+        case exchangeRate
     }
 
     // Encodable protocol methods
@@ -60,7 +60,7 @@ public struct TONStakingProviderInfo: Codable {
         try container.encode(apy, forKey: .apy)
         try container.encodeIfPresent(rawInstantUnstakeAvailable, forKey: .rawInstantUnstakeAvailable)
         try container.encodeIfPresent(instantUnstakeAvailable, forKey: .instantUnstakeAvailable)
-        try container.encode(providerId, forKey: .providerId)
+        try container.encodeIfPresent(exchangeRate, forKey: .exchangeRate)
     }
 }
 

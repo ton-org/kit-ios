@@ -25,44 +25,55 @@
 //  SOFTWARE.
 
 import Foundation
+import JavaScriptCore
 import _BigInt
 
 class TONWallet: TONWalletAdapter, TONWalletProtocol {
     let id: TONWalletID
     let address: TONUserFriendlyAddress
+    let client: any TONAPIClient
 
     let jsWallet: any JSDynamicObject
 
     required init(
         jsWallet: any JSDynamicObject,
         id: TONWalletID,
-        address: TONUserFriendlyAddress
+        address: TONUserFriendlyAddress,
+        client: any TONAPIClient
     ) {
         self.jsWallet = jsWallet
         self.id = id
         self.address = address
-        
+        self.client = client
+
         super.init(jsWalletAdapter: jsWallet)
     }
-    
+
     func balance() async throws -> TONBalance {
         try await jsWallet.getBalance()
     }
-    
+
     func transferTONTransaction(request: TONTransferRequest) async throws -> TONTransactionRequest {
         try await jsWallet.createTransferTonTransaction(request)
     }
-    
+
     public func transferTONTransaction(requests: [TONTransferRequest]) async throws -> TONTransactionRequest {
         try await jsWallet.createTransferMultiTonTransaction(requests)
     }
-    
-    func send(transactionRequest: TONTransactionRequest) async throws {
+
+    func send(transactionRequest: TONTransactionRequest) async throws -> TONSendTransactionResponse {
         try await jsWallet.sendTransaction(transactionRequest)
     }
-    
-    func preview(transactionRequest: TONTransactionRequest) async throws -> TONTransactionEmulatedPreview {
-        try await jsWallet.getTransactionPreview(transactionRequest)
+
+    func preview(
+        transactionRequest: TONTransactionRequest,
+        options: TONTransactionPreviewOptions?
+    ) async throws -> TONTransactionEmulatedPreview {
+        if let options {
+            return try await jsWallet.getTransactionPreview(transactionRequest, options)
+        } else {
+            return try await jsWallet.getTransactionPreview(transactionRequest)
+        }
     }
     
     func transferNFTTransaction(request: TONNFTTransferRequest) async throws -> TONTransactionRequest {
@@ -99,15 +110,17 @@ class TONWallet: TONWalletAdapter, TONWalletProtocol {
 }
 
 extension TONWallet: JSValueDecodable {
-    
+
     static func from(_ value: JSValue) throws -> Self? {
         let id: TONWalletID = try value.getWalletId()
         let address: TONUserFriendlyAddress = try value.getAddress()
-        
+        let jsClient: JSValue = try value.getClient()
+
         return Self(
             jsWallet: value,
             id: id,
-            address: address
+            address: address,
+            client: JSTONAPIClient(jsClient: jsClient)
         )
     }
 }

@@ -45,8 +45,9 @@ public struct TONOmnistonSwapProviderConfig: Codable {
     public var quoteTimeoutMs: Int?
     /** Identifier for the provider */
     public var providerId: String?
+    public var metadata: TONSwapProviderMetadataOverride?
 
-    public init(referrerAddress: String? = nil, referrerFeeBps: Int? = nil, flexibleReferrerFee: Bool? = nil, apiUrl: URL? = nil, defaultSlippageBps: Int? = nil, quoteTimeoutMs: Int? = nil, providerId: String? = nil) {
+    public init(referrerAddress: String? = nil, referrerFeeBps: Int? = nil, flexibleReferrerFee: Bool? = nil, apiUrl: URL? = nil, defaultSlippageBps: Int? = nil, quoteTimeoutMs: Int? = nil, providerId: String? = nil, metadata: TONSwapProviderMetadataOverride? = nil) {
         self.referrerAddress = referrerAddress
         self.referrerFeeBps = referrerFeeBps
         self.flexibleReferrerFee = flexibleReferrerFee
@@ -54,6 +55,7 @@ public struct TONOmnistonSwapProviderConfig: Codable {
         self.defaultSlippageBps = defaultSlippageBps
         self.quoteTimeoutMs = quoteTimeoutMs
         self.providerId = providerId
+        self.metadata = metadata
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
@@ -64,6 +66,7 @@ public struct TONOmnistonSwapProviderConfig: Codable {
         case defaultSlippageBps
         case quoteTimeoutMs
         case providerId
+        case metadata
     }
 
     // Encodable protocol methods
@@ -77,6 +80,7 @@ public struct TONOmnistonSwapProviderConfig: Codable {
         try container.encodeIfPresent(defaultSlippageBps, forKey: .defaultSlippageBps)
         try container.encodeIfPresent(quoteTimeoutMs, forKey: .quoteTimeoutMs)
         try container.encodeIfPresent(providerId, forKey: .providerId)
+        try container.encodeIfPresent(metadata, forKey: .metadata)
     }
 }
 

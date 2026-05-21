@@ -30,25 +30,26 @@ import _BigInt
 
 public struct TONTonStakersChainConfig: Codable {
 
-    public var contractAddress: TONUserFriendlyAddress?
+    /** optional TonAPI key for APY requests only. If not provided, APY will be available, but if you're using TonAPI, it's recommended to provide the key. */
     public var tonApiToken: String?
+    public var metadata: TONStakingProviderMetadataOverride?
 
-    public init(contractAddress: TONUserFriendlyAddress? = nil, tonApiToken: String? = nil) {
-        self.contractAddress = contractAddress
+    public init(tonApiToken: String? = nil, metadata: TONStakingProviderMetadataOverride? = nil) {
         self.tonApiToken = tonApiToken
+        self.metadata = metadata
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
-        case contractAddress
         case tonApiToken
+        case metadata
     }
 
     // Encodable protocol methods
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(contractAddress, forKey: .contractAddress)
         try container.encodeIfPresent(tonApiToken, forKey: .tonApiToken)
+        try container.encodeIfPresent(metadata, forKey: .metadata)
     }
 }
 

@@ -65,8 +65,7 @@ actor TONWalletKitContextProvider: TONWalletKitContextProviderProtocol {
                     case .custom(let client):
                         return TONAPIClientJSAdapter(
                             context: context.jsContext,
-                            apiClient: client,
-                            network: config.network
+                            apiClient: client
                         )
                     default:
                         return nil
