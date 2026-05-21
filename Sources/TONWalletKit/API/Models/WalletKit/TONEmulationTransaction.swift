@@ -41,8 +41,8 @@ public struct TONEmulationTransaction: Codable {
     public var traceExternalHash: TONHex
     public var prevTransHash: TONHex?
     public var prevTransLt: String?
-    public var origStatus: TONEmulationAccountStatus
-    public var endStatus: TONEmulationAccountStatus
+    public var origStatus: TONAccountStatus
+    public var endStatus: TONAccountStatus
     public var totalFees: TONTokenAmount
     /** Map of extra currency IDs to their amounts. Extra currencies are additional tokens that can be attached to TON messages. */
     public var totalFeesExtraCurrencies: [String: String]
@@ -58,7 +58,7 @@ public struct TONEmulationTransaction: Codable {
     /** Trace identifier, if available */
     public var traceId: String?
 
-    public init(account: TONUserFriendlyAddress, hash: TONHex, lt: String, now: Int, mcBlockSeqno: Int, traceExternalHash: TONHex, prevTransHash: TONHex? = nil, prevTransLt: String? = nil, origStatus: TONEmulationAccountStatus, endStatus: TONEmulationAccountStatus, totalFees: TONTokenAmount, totalFeesExtraCurrencies: [String: String], description: TONEmulationTransactionDescription, blockRef: TONEmulationBlockRef, inMsg: TONEmulationMessage? = nil, outMsgs: [TONEmulationMessage], accountStateBefore: TONEmulationAccountState, accountStateAfter: TONEmulationAccountState, isEmulated: Bool, traceId: String? = nil) {
+    public init(account: TONUserFriendlyAddress, hash: TONHex, lt: String, now: Int, mcBlockSeqno: Int, traceExternalHash: TONHex, prevTransHash: TONHex? = nil, prevTransLt: String? = nil, origStatus: TONAccountStatus, endStatus: TONAccountStatus, totalFees: TONTokenAmount, totalFeesExtraCurrencies: [String: String], description: TONEmulationTransactionDescription, blockRef: TONEmulationBlockRef, inMsg: TONEmulationMessage? = nil, outMsgs: [TONEmulationMessage], accountStateBefore: TONEmulationAccountState, accountStateAfter: TONEmulationAccountState, isEmulated: Bool, traceId: String? = nil) {
         self.account = account
         self.hash = hash
         self.lt = lt

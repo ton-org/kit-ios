@@ -27,29 +27,30 @@
 import Foundation
 
 public protocol TONSwapManagerProtocol {
-    
+
     func register<Provider: TONSwapProviderProtocol>(provider: Provider) throws
+    func remove<Provider: TONSwapProviderProtocol>(provider: Provider) throws
     func set<Identifier: TONSwapProviderIdentifier>(defaultProviderId: Identifier) throws
-    
+
     func provider<Identifier: TONSwapProviderIdentifier>(
         with id: Identifier
     ) throws -> TONSwapProvider<Identifier>?
-    
-    func registeredProviders() throws -> [AnyTONProviderIdentifier]
-    
+
+    func providers() throws -> [TONSwapProvider<AnyTONSwapProviderIdentifier>]
+
     func hasProvider<Identifier: TONSwapProviderIdentifier>(
         with id: Identifier
     ) throws -> Bool
-    
+
     func quote<Identifier: TONSwapProviderIdentifier>(
         params: TONSwapQuoteParams<Identifier.QuoteOptions>,
         identifier: Identifier
     ) async throws -> TONSwapQuote
-    
+
     func quote(
         params: TONSwapQuoteParams<AnyCodable>
     ) async throws -> TONSwapQuote
-    
+
     func swapTransaction<QuoteOptions: Codable>(
         params: TONSwapParams<QuoteOptions>
     ) async throws -> TONTransactionRequest
@@ -65,23 +66,29 @@ class TONSwapManager: TONSwapManagerProtocol {
     func register<Provider: TONSwapProviderProtocol>(provider: Provider) throws {
         try jsObject.registerProvider(TONEncodableSwapProvider(swapProvider: provider))
     }
-    
+
+    func remove<Provider: TONSwapProviderProtocol>(provider: Provider) throws {
+        try jsObject.removeProvider(TONEncodableSwapProvider(swapProvider: provider))
+    }
+
     func set<Identifier: TONSwapProviderIdentifier>(defaultProviderId: Identifier) throws {
         try jsObject.setDefaultProvider(defaultProviderId.name)
     }
-    
+
     func provider<Identifier: TONSwapProviderIdentifier>(
         with id: Identifier
     ) throws -> TONSwapProvider<Identifier>? {
         let jsObject: JSValue = try self.jsObject.getProvider(id.name)
         return TONSwapProvider<Identifier>(jsObject: jsObject, identifier: id)
     }
-    
-    func registeredProviders() throws -> [AnyTONProviderIdentifier] {
-        let names: [String] = try self.jsObject.getRegisteredProviders()
-        return names.map { AnyTONProviderIdentifier(name: $0) }
+
+    func providers() throws -> [TONSwapProvider<AnyTONSwapProviderIdentifier>] {
+        let value: JSValue = try jsObject.getProviders()
+        return try value.toObjectsArray().compactMap {
+            try TONSwapProvider<AnyTONSwapProviderIdentifier>.from($0)
+        }
     }
-    
+
     func hasProvider<Identifier: TONSwapProviderIdentifier>(
         with id: Identifier
     ) throws -> Bool {

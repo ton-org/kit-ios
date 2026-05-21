@@ -126,11 +126,19 @@ struct WalletHomeView: View {
         .sheet(isPresented: $isAddWalletPresented) {
             NavigationStack(path: $addWalletPath) {
                 WalletWelcomeView(
-                    onCreateNew: {},
+                    onCreateNew: { addWalletPath.append(AddWalletPath.createNew) },
                     onAddExisting: { addWalletPath.append(AddWalletPath.importExisting) }
                 )
                 .navigationDestination(for: AddWalletPath.self) { path in
                     switch path {
+                    case .createNew:
+                        CreateWalletView { newWallet in
+                            walletsList.add(wallets: [newWallet])
+                            if let added = walletsList.wallets.last {
+                                walletsList.selectActive(wallet: added)
+                            }
+                            isAddWalletPresented = false
+                        }
                     case .importExisting:
                         AddWalletView { newWallet in
                             walletsList.add(wallets: [newWallet])
@@ -266,6 +274,11 @@ struct WalletHomeView: View {
         if let transactionRequest = event.transactionRequest {
             present(
                 WalletTransactionRequestView(viewModel: .init(request: transactionRequest))
+                    .presentationDragIndicator(.visible)
+            )
+        } else if let signMessageRequest = event.signMessageRequest {
+            present(
+                WalletSignMessageRequestView(viewModel: .init(request: signMessageRequest))
                     .presentationDragIndicator(.visible)
             )
         } else if let signDataRequest = event.signDataRequest {

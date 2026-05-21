@@ -62,7 +62,7 @@ final class SendableJettonViewModel: SendableTokenViewModel {
         )
 
         let transactionRequest = try await wallet.transferJettonTransaction(request: request)
-        try await wallet.send(transactionRequest: transactionRequest)
+        _ = try await wallet.send(transactionRequest: transactionRequest)
     }
     
     func updateBalance() async throws {

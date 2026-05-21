@@ -90,6 +90,7 @@ struct JSWalletKitSwiftBridgeEvent {
 enum JSWalletKitSwiftBridgeEventType: String {
     case connectRequest
     case transactionRequest
+    case signMessageRequest
     case signDataRequest
     case disconnect
 }

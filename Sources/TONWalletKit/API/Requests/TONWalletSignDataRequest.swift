@@ -27,25 +27,40 @@
 import Foundation
 
 public class TONWalletSignDataRequest {
-    let context: any JSDynamicObject
-    
+    private let context: any JSDynamicObject
+
     public let event: TONSignDataRequestEvent
-    
+    private let embeddedEvent: TONEmbeddedSignDataRequestEvent?
+
+    private var targetEvent: any JSValueEncodable {
+        embeddedEvent ?? event
+    }
+
     init(
         context: any JSDynamicObject,
         event: TONSignDataRequestEvent
     ) {
         self.context = context
         self.event = event
+        self.embeddedEvent = nil
     }
-    
+
+    init(
+        context: any JSDynamicObject,
+        embeddedEvent: TONEmbeddedSignDataRequestEvent
+    ) {
+        self.context = context
+        self.embeddedEvent = embeddedEvent
+        self.event = embeddedEvent.requestEvent
+    }
+
     @discardableResult
     public func approve(response: TONSignDataApprovalResponse? = nil) async throws -> TONSignDataApprovalResponse {
-        return try await context.walletKit.approveSignDataRequest(event, response)
+        try await context.walletKit.approveSignDataRequest(targetEvent, response)
     }
-    
+
     public func reject(reason: String? = nil) async throws {
-        try await context.walletKit.rejectSignDataRequest(event)
+        try await context.walletKit.rejectSignDataRequest(targetEvent, reason)
     }
 }
 

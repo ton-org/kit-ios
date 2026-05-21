@@ -120,22 +120,21 @@ class TONWalletAdapterJSAdapter: NSObject, JSWalletAdapter {
                 in: JSContext()
             )
         }
-        
-        let options: TONSignedSendTransactionAllOptions? = try? options.decode()
-        
+
         do {
+            let options: TONSignedSendTransactionAllOptions? = try options.decode()
             let input: TONTransactionRequest = try input.decode()
-            
+
             return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
                 Task {
                     guard let self else { return }
-                    
+
                     do {
                         let value = try await self.walletAdapter.signedSendTransaction(
                             input: input,
                             fakeSignature: options?.fakeSignature
                         ).value
-                        
+
                         resolve?.call(withArguments: [value])
                     } catch {
                         reject?.call(withArguments: [error.localizedDescription])
@@ -146,7 +145,40 @@ class TONWalletAdapterJSAdapter: NSObject, JSWalletAdapter {
             return JSValue(newPromiseRejectedWithReason: error.localizedDescription, in: context)
         }
     }
-    
+
+    @objc(getSignedSignMessage::) func signedSignMessage(input: JSValue, options: JSValue) -> JSValue {
+        guard let context else {
+            return JSValue(
+                newPromiseRejectedWithReason: "No context exists to perform \(#function)",
+                in: JSContext()
+            )
+        }
+
+        do {
+            let options: TONSignedSendTransactionAllOptions? = try options.decode()
+            let input: TONTransactionRequest = try input.decode()
+
+            return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
+                Task {
+                    guard let self else { return }
+
+                    do {
+                        let value = try await self.walletAdapter.signedSignMessage(
+                            input: input,
+                            fakeSignature: options?.fakeSignature
+                        ).value
+
+                        resolve?.call(withArguments: [value])
+                    } catch {
+                        reject?.call(withArguments: [error.localizedDescription])
+                    }
+                }
+            }
+        } catch {
+            return JSValue(newPromiseRejectedWithReason: error.localizedDescription, in: context)
+        }
+    }
+
     @objc(getSignedSignData::) func signedSignData(input: JSValue, options: JSValue) -> JSValue {
         guard let context else {
             return JSValue(
@@ -154,22 +186,21 @@ class TONWalletAdapterJSAdapter: NSObject, JSWalletAdapter {
                 in: JSContext()
             )
         }
-        
-        let options: TONSignedSendTransactionAllOptions? = try? options.decode()
-        
+
         do {
+            let options: TONSignedSendTransactionAllOptions? = try options.decode()
             let input: TONPreparedSignData = try input.decode()
-            
+
             return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
                 Task {
                     guard let self else { return }
-                    
+
                     do {
                         let value = try await self.walletAdapter.signedSignData(
                             input: input,
                             fakeSignature: options?.fakeSignature
                         ).value
-                        
+
                         resolve?.call(withArguments: [value])
                     } catch {
                         reject?.call(withArguments: [error.localizedDescription])
@@ -180,7 +211,7 @@ class TONWalletAdapterJSAdapter: NSObject, JSWalletAdapter {
             return JSValue(newPromiseRejectedWithReason: error.localizedDescription, in: context)
         }
     }
-    
+
     @objc(getSignedTonProof::) func signedTonProof(input: JSValue, options: JSValue) -> JSValue {
         guard let context else {
             return JSValue(
@@ -188,22 +219,21 @@ class TONWalletAdapterJSAdapter: NSObject, JSWalletAdapter {
                 in: JSContext()
             )
         }
-        
-        let options: TONSignedSendTransactionAllOptions? = try? options.decode()
-        
+
         do {
+            let options: TONSignedSendTransactionAllOptions? = try options.decode()
             let input: TONProofMessage = try input.decode()
-            
+
             return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
                 Task {
                     guard let self else { return }
-                    
+
                     do {
                         let value = try await self.walletAdapter.signedTonProof(
                             input: input,
                             fakeSignature: options?.fakeSignature
                         ).value
-                        
+
                         resolve?.call(withArguments: [value])
                     } catch {
                         reject?.call(withArguments: [error.localizedDescription])
