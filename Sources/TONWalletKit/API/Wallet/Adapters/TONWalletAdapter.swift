@@ -62,7 +62,16 @@ class TONWalletAdapter: TONWalletAdapterProtocol {
             )
         )
     }
-    
+
+    func signedSignMessage(input: TONTransactionRequest, fakeSignature: Bool?) async throws -> TONBase64 {
+        try TONBase64(
+            base64Encoded: try await jsWalletAdapter.getSignedSignMessage(
+                input,
+                TONSignedSendTransactionAllOptions(fakeSignature: fakeSignature)
+            )
+        )
+    }
+
     func signedSignData(input: TONPreparedSignData, fakeSignature: Bool?) async throws -> TONHex {
         try TONHex(
             hexString: try await jsWalletAdapter.getSignedSignData(

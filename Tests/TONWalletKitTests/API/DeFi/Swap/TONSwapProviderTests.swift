@@ -57,6 +57,51 @@ struct TONSwapProviderTests {
         #expect(sut.type == .swap)
     }
 
+    @Test("metadata() calls getMetadata on jsObject")
+    func metadataCallsGetMetadata() throws {
+        let (sut, mock) = makeSUT()
+        let stub = TONSwapProviderMetadata(name: "Mock", logo: "logo.png", url: "https://example.com")
+        mock.stubbedResults["getMetadata"] = stub
+
+        let result = try sut.metadata()
+
+        #expect(mock.callRecords.first?.path == "getMetadata")
+        #expect(result.name == "Mock")
+        #expect(result.logo == "logo.png")
+        #expect(result.url == "https://example.com")
+    }
+
+    @Test("metadata() throws when jsObject throws")
+    func metadataThrowsOnError() {
+        let (sut, mock) = makeSUT()
+        mock.shouldThrowOnCall = true
+
+        #expect(throws: (any Error).self) {
+            try sut.metadata()
+        }
+    }
+
+    @Test("supportedNetworks() calls getSupportedNetworks on jsObject")
+    func supportedNetworksCallsGetSupportedNetworks() throws {
+        let (sut, mock) = makeSUT()
+        mock.stubbedResults["getSupportedNetworks"] = [TONNetwork.mainnet, TONNetwork.testnet]
+
+        let result = try sut.supportedNetworks()
+
+        #expect(mock.callRecords.first?.path == "getSupportedNetworks")
+        #expect(result == [.mainnet, .testnet])
+    }
+
+    @Test("supportedNetworks() throws when jsObject throws")
+    func supportedNetworksThrowsOnError() {
+        let (sut, mock) = makeSUT()
+        mock.shouldThrowOnCall = true
+
+        #expect(throws: (any Error).self) {
+            try sut.supportedNetworks()
+        }
+    }
+
     @Test("quote(params:) calls getQuote on jsObject")
     func quoteCallsGetQuote() async {
         let (sut, mock) = makeSUT()
@@ -128,5 +173,51 @@ struct TONSwapProviderTests {
         let result = try sut.encode(in: context)
 
         #expect(result is MockJSDynamicObject)
+    }
+
+    // MARK: - JS interop end-to-end
+
+    @Test("supportedNetworks() decodes real JS array from getSupportedNetworks")
+    func supportedNetworksDecodesRealJSArray() throws {
+        let context = JSContext()!
+        let providerJS = context.evaluateScript(
+            """
+            ({
+                providerId: 'omniston',
+                getSupportedNetworks: function() {
+                    return [{ chainId: '-239' }, { chainId: '-3' }];
+                }
+            })
+            """
+        )!
+        let identifier = TONOmnistonSwapProviderIdentifier(name: "omniston")
+        let sut = TONSwapProvider(jsObject: providerJS, identifier: identifier)
+
+        let result = try sut.supportedNetworks()
+
+        #expect(result == [.mainnet, .testnet])
+    }
+
+    @Test("metadata() decodes real JS object from getMetadata")
+    func metadataDecodesRealJSObject() throws {
+        let context = JSContext()!
+        let providerJS = context.evaluateScript(
+            """
+            ({
+                providerId: 'omniston',
+                getMetadata: function() {
+                    return { name: 'Omniston', logo: 'logo.png', url: 'https://omniston.io' };
+                }
+            })
+            """
+        )!
+        let identifier = TONOmnistonSwapProviderIdentifier(name: "omniston")
+        let sut = TONSwapProvider(jsObject: providerJS, identifier: identifier)
+
+        let result = try sut.metadata()
+
+        #expect(result.name == "Omniston")
+        #expect(result.logo == "logo.png")
+        #expect(result.url == "https://omniston.io")
     }
 }

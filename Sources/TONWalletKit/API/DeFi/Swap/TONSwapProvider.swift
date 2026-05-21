@@ -29,7 +29,9 @@ import Foundation
 public protocol TONSwapProviderProtocol: TONProvider {
     associatedtype QuoteOptions: Codable
     associatedtype SwapOptions: Codable
-    
+
+    func metadata() throws -> TONSwapProviderMetadata
+    func supportedNetworks() throws -> [TONNetwork]
     func quote(params: TONSwapQuoteParams<QuoteOptions>) async throws -> TONSwapQuote
     func swapTransaction(params: TONSwapParams<SwapOptions>) async throws -> TONTransactionRequest
 }
@@ -50,6 +52,14 @@ public final class TONSwapProvider<Identifier: TONSwapProviderIdentifier>: TONSw
     init(jsObject: any JSDynamicObject, identifier: Identifier) {
         self.jsObject = jsObject
         self.identifier = identifier
+    }
+
+    public func metadata() throws -> TONSwapProviderMetadata {
+        try jsObject.getMetadata()
+    }
+
+    public func supportedNetworks() throws -> [TONNetwork] {
+        try jsObject.getSupportedNetworks()
     }
 
     public func quote(params: TONSwapQuoteParams<QuoteOptions>) async throws -> TONSwapQuote {

@@ -45,6 +45,12 @@ struct MockJSDynamicObjectMember: JSDynamicObjectMember {
     func dynamicallyCall(withArguments args: [any JSValueEncodable]) async throws -> JSValue {
         root.recordCall(path: path, args: args)
         if root.shouldThrowOnCall { throw "Mock call error" }
+        if let result = root.stubbedAsyncResults[path] as? JSValue {
+            return result
+        }
+        if let result = root.stubbedResults[path] as? JSValue {
+            return result
+        }
         return JSValue(undefinedIn: jsContext)
     }
 
@@ -63,6 +69,9 @@ struct MockJSDynamicObjectMember: JSDynamicObjectMember {
     func dynamicallyCall(withArguments args: [any JSValueEncodable]) throws -> JSValue {
         root.recordCall(path: path, args: args)
         if root.shouldThrowOnCall { throw "Mock call error" }
+        if let result = root.stubbedResults[path] as? JSValue {
+            return result
+        }
         return JSValue(undefinedIn: jsContext)
     }
 

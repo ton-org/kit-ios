@@ -107,24 +107,47 @@ struct TONSwapManagerTests {
         }
     }
 
-    @Test("registeredProviders() calls getRegisteredProviders on jsObject")
-    func registeredProvidersCallsGetRegisteredProviders() throws {
+    @Test("providers() calls getProviders on jsObject and decodes each")
+    func providersCallsGetProviders() throws {
         let (sut, mock) = makeSUT()
-        mock.stubbedResults["getRegisteredProviders"] = ["omniston", "dedust"] as [String]
+        let context = mock.jsContext
+        let arrayValue = context.evaluateScript(
+            "[{ providerId: 'omniston' }, { providerId: 'dedust' }]"
+        )!
+        mock.stubbedResults["getProviders"] = arrayValue
 
-        let result = try sut.registeredProviders()
+        let result = try sut.providers()
 
-        #expect(mock.callRecords.first?.path == "getRegisteredProviders")
-        #expect(result.map { $0.name } == ["omniston", "dedust"])
+        #expect(mock.callRecords.first?.path == "getProviders")
+        #expect(result.map { $0.identifier.name } == ["omniston", "dedust"])
     }
 
-    @Test("registeredProviders() throws when jsObject throws")
-    func registeredProvidersThrowsOnError() {
+    @Test("providers() throws when jsObject throws")
+    func providersThrowsOnError() {
         let (sut, mock) = makeSUT()
         mock.shouldThrowOnCall = true
 
         #expect(throws: (any Error).self) {
-            try sut.registeredProviders()
+            try sut.providers()
+        }
+    }
+
+    @Test("remove(provider:) calls removeProvider on jsObject")
+    func removeCallsRemoveProvider() throws {
+        let (sut, mock) = makeSUT()
+
+        try sut.remove(provider: makeProvider())
+
+        #expect(mock.callRecords.first?.path == "removeProvider")
+    }
+
+    @Test("remove(provider:) throws when jsObject throws")
+    func removeThrowsOnError() {
+        let (sut, mock) = makeSUT()
+        mock.shouldThrowOnCall = true
+
+        #expect(throws: (any Error).self) {
+            try sut.remove(provider: makeProvider())
         }
     }
 
@@ -199,5 +222,51 @@ struct TONSwapManagerTests {
         let result = try TONSwapManager.from(jsValue)
 
         #expect(result != nil)
+    }
+
+    // MARK: - JS interop end-to-end
+
+    @Test("remove(provider:) routes through real JS removeProvider with provider object")
+    func removeRoutesThroughJS() throws {
+        let context = JSContext()!
+        context.evaluateScript(
+            """
+            var lastRemovedProviderId = null;
+            var manager = {
+                removeProvider: function(p) { lastRemovedProviderId = p.providerId; }
+            };
+            """
+        )
+        let managerJS = context.objectForKeyedSubscript("manager")!
+        let sut = TONSwapManager(jsObject: managerJS)
+
+        let providerJS = context.evaluateScript("({ providerId: 'omniston' })")!
+        let identifier = TONOmnistonSwapProviderIdentifier(name: "omniston")
+        let provider = TONSwapProvider(jsObject: providerJS, identifier: identifier)
+
+        try sut.remove(provider: provider)
+
+        let recordedId = context.objectForKeyedSubscript("lastRemovedProviderId")?.toString()
+        #expect(recordedId == "omniston")
+    }
+
+    @Test("providers() decodes real JS array returned by getProviders")
+    func providersDecodesRealJSArray() throws {
+        let context = JSContext()!
+        context.evaluateScript(
+            """
+            var manager = {
+                getProviders: function() {
+                    return [{ providerId: 'omniston' }, { providerId: 'dedust' }];
+                }
+            };
+            """
+        )
+        let managerJS = context.objectForKeyedSubscript("manager")!
+        let sut = TONSwapManager(jsObject: managerJS)
+
+        let result = try sut.providers()
+
+        #expect(result.map { $0.identifier.name } == ["omniston", "dedust"])
     }
 }

@@ -157,4 +157,3 @@ public enum TONUserFriendlyAddressValidationError: Error {
     case invalidCRC16Hashsum
     case invalidAddressTag
 }
-

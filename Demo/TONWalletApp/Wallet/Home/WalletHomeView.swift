@@ -276,6 +276,11 @@ struct WalletHomeView: View {
                 WalletTransactionRequestView(viewModel: .init(request: transactionRequest))
                     .presentationDragIndicator(.visible)
             )
+        } else if let signMessageRequest = event.signMessageRequest {
+            present(
+                WalletSignMessageRequestView(viewModel: .init(request: signMessageRequest))
+                    .presentationDragIndicator(.visible)
+            )
         } else if let signDataRequest = event.signDataRequest {
             present(
                 WalletSignDataRequestView(viewModel: .init(request: signDataRequest))
