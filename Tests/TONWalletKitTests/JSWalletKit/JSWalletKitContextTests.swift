@@ -176,14 +176,15 @@ struct JSWalletKitContextTests {
             configuration: "config",
             storage: "storage",
             sessionManager: "session",
-            apiClients: "api"
+            apiClients: "api",
+            fetchManifest: nil
         )
 
         let initCalls = mock.callRecords.filter { $0.path == "initWalletKit" }
         #expect(initCalls.count == 1)
 
         let args = try #require(initCalls.first?.args)
-        #expect(args.count == 5)
+        #expect(args.count == 6)
         #expect(args[0] as? String == "config")
         #expect(args[1] as? String == "storage")
         #expect(args[2] is AnyJSValueEncodable)
@@ -202,8 +203,177 @@ struct JSWalletKitContextTests {
                 configuration: "config",
                 storage: "storage",
                 sessionManager: "session",
-                apiClients: "api"
+                apiClients: "api",
+                fetchManifest: nil
             )
         }
     }
+
+    // MARK: - fetchManifest
+
+    @Test("InitializeWalletKit with fetchManifest=nil passes a JS-null sixth arg")
+    func initializeForwardsNilFetchManifest() async throws {
+        let (sut, mock) = makeSUT()
+
+        try await sut.initializeWalletKit(
+            configuration: "config",
+            storage: "storage",
+            sessionManager: "session",
+            apiClients: "api",
+            fetchManifest: nil
+        )
+
+        let args = try #require(mock.callRecords.first(where: { $0.path == "initWalletKit" })?.args)
+        let sixth = try #require(args[5] as? (any JSValueEncodable))
+        let encoded = try sixth.encode(in: mock.jsContext)
+        let jsValue = try #require(encoded as? JSValue)
+        #expect(jsValue.isNull, "Expected a JS null for nil fetchManifest, got \(jsValue)")
+    }
+
+    @Test("InitializeWalletKit with fetchManifest closure passes an AnyJSValueEncodable wrapping a callable block")
+    func initializeForwardsFetchManifestBlock() async throws {
+        let (sut, mock) = makeSUT()
+        let closure: TONWalletKitConfiguration.FetchManifest = { _ in
+            TONManifestFetchResult(manifest: AnyCodable([:] as [String: AnyCodable]))
+        }
+
+        try await sut.initializeWalletKit(
+            configuration: "config",
+            storage: "storage",
+            sessionManager: "session",
+            apiClients: "api",
+            fetchManifest: closure
+        )
+
+        let args = try #require(mock.callRecords.first(where: { $0.path == "initWalletKit" })?.args)
+        let wrapper = try #require(args[5] as? AnyJSValueEncodable)
+
+        // The wrapped value must be the Swift block — installable as a JS function.
+        let context = mock.jsContext
+        let encoded = try wrapper.encode(in: context)
+        context.setObject(encoded, forKeyedSubscript: "swiftFetchManifest" as NSString)
+        #expect(context.evaluateScript("typeof swiftFetchManifest")?.toString() == "function")
+    }
+
+    @Test("fetchManifest block forwards URL and resolves JS Promise with the encoded result")
+    func fetchManifestBlockResolves() async throws {
+        let (sut, mock) = makeSUT()
+        // Use a plain [String: Any]-shaped dict so the decoded side (which
+        // unwraps via mapValues { $0.value }) compares equal via the
+        // [String: Any] / NSDictionary branch of AnyCodable.==.
+        let manifestPayload = AnyCodable([
+            "name": "Test App",
+            "url": "https://example.com",
+        ] as [String: String])
+        let urlBox = URLBox()
+        let closure: TONWalletKitConfiguration.FetchManifest = { url in
+            await urlBox.set(url)
+            return TONManifestFetchResult(
+                manifest: manifestPayload,
+                manifestFetchErrorCode: .manifestContentError
+            )
+        }
+
+        try await sut.initializeWalletKit(
+            configuration: "config",
+            storage: "storage",
+            sessionManager: "session",
+            apiClients: "api",
+            fetchManifest: closure
+        )
+
+        let promise = try invokeFetchManifest(
+            from: mock,
+            withURL: "https://example.com/manifest.json"
+        )
+        let resolved = try await promise.then()
+        let decoded: TONManifestFetchResult = try resolved.decode()
+
+        let captured = await urlBox.get()
+        #expect(captured == "https://example.com/manifest.json")
+        #expect(decoded.manifestFetchErrorCode == .manifestContentError)
+
+        // Verify the manifest payload survives the JS round-trip intact.
+        #expect(decoded.manifest == manifestPayload)
+        let decodedDict = try #require(decoded.manifest?.value as? [String: Any])
+        #expect(decodedDict["name"] as? String == "Test App")
+        #expect(decodedDict["url"] as? String == "https://example.com")
+        #expect(decodedDict.count == 2)
+    }
+
+    @Test("fetchManifest block rejects JS Promise when the closure throws")
+    func fetchManifestBlockRejects() async throws {
+        let (sut, mock) = makeSUT()
+        let closure: TONWalletKitConfiguration.FetchManifest = { _ in
+            throw NSError(
+                domain: "test",
+                code: 0,
+                userInfo: [NSLocalizedDescriptionKey: "fetch failed"]
+            )
+        }
+
+        try await sut.initializeWalletKit(
+            configuration: "config",
+            storage: "storage",
+            sessionManager: "session",
+            apiClients: "api",
+            fetchManifest: closure
+        )
+
+        let promise = try invokeFetchManifest(from: mock, withURL: "https://example.com/m.json")
+        await #expect(throws: (any Error).self) {
+            _ = try await promise.then()
+        }
+    }
+
+    @Test("fetchManifest block returns a rejected Promise once the context is deallocated")
+    func fetchManifestBlockRejectsAfterDeallocation() async throws {
+        // Build the SUT, capture the wrapper, then drop the SUT so its weak
+        // reference inside the block becomes nil before invocation.
+        let mock = MockJSDynamicObject()
+        var sutOptional: JSWalletKitContext? = JSWalletKitContext(context: mock)
+        let closure: TONWalletKitConfiguration.FetchManifest = { _ in
+            TONManifestFetchResult(manifest: AnyCodable([:] as [String: AnyCodable]))
+        }
+        try await sutOptional!.initializeWalletKit(
+            configuration: "config",
+            storage: "storage",
+            sessionManager: "session",
+            apiClients: "api",
+            fetchManifest: closure
+        )
+
+        let args = try #require(mock.callRecords.first(where: { $0.path == "initWalletKit" })?.args)
+        let wrapper = try #require(args[5] as? AnyJSValueEncodable)
+        let encoded = try wrapper.encode(in: mock.jsContext)
+
+        sutOptional = nil
+
+        let context = mock.jsContext
+        context.setObject(encoded, forKeyedSubscript: "swiftFetchManifest" as NSString)
+        let promise = try #require(context.evaluateScript("swiftFetchManifest('https://example.com/m.json')"))
+
+        await #expect(throws: (any Error).self) {
+            _ = try await promise.then()
+        }
+    }
+
+    private func invokeFetchManifest(
+        from mock: MockJSDynamicObject,
+        withURL url: String
+    ) throws -> JSValue {
+        let args = try #require(mock.callRecords.first(where: { $0.path == "initWalletKit" })?.args)
+        let wrapper = try #require(args[5] as? AnyJSValueEncodable)
+        let encoded = try wrapper.encode(in: mock.jsContext)
+        mock.jsContext.setObject(encoded, forKeyedSubscript: "swiftFetchManifest" as NSString)
+        return try #require(
+            mock.jsContext.evaluateScript("swiftFetchManifest('\(url)')")
+        )
+    }
+}
+
+private actor URLBox {
+    private var value: String?
+    func set(_ url: String) { value = url }
+    func get() -> String? { value }
 }

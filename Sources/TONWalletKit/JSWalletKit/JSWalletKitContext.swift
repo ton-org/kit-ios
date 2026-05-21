@@ -30,14 +30,15 @@ import JavaScriptCore
 
 protocol JSWalletKitContextProtocol: JSDynamicObject, AnyObject {
     var bridgeTransport: JSBridgeTransport { get }
-    
+
     func initializeWalletKit(
         configuration: any JSValueEncodable,
         storage: any JSValueEncodable,
         sessionManager: any JSValueEncodable,
-        apiClients: any JSValueEncodable
+        apiClients: any JSValueEncodable,
+        fetchManifest: TONWalletKitConfiguration.FetchManifest?
     ) async throws
-    
+
     func add(eventsHandler: any JSBridgeEventsHandler) throws
     func remove(eventsHandler: any JSBridgeEventsHandler) throws
 }
@@ -73,7 +74,8 @@ class JSWalletKitContext: JSWalletKitContextProtocol {
         configuration: any JSValueEncodable,
         storage: any JSValueEncodable,
         sessionManager: any JSValueEncodable,
-        apiClients: any JSValueEncodable
+        apiClients: any JSValueEncodable,
+        fetchManifest: TONWalletKitConfiguration.FetchManifest?
     ) async throws {
         let bridgeTransport: @convention(block) (JSValue) -> Void = { [weak self] response in
             do {
@@ -83,12 +85,40 @@ class JSWalletKitContext: JSWalletKitContextProtocol {
                 debugPrint("Swift Bridge: Failed to decode transport response - \(error)")
             }
         }
+
+        var jsFetchManifest: AnyJSValueEncodable?
+        
+        if let fetchManifest {
+            let fetchManifestBlock: @convention(block) (String) -> JSValue = { [weak self] url in
+                guard let context = self?.context.jsContext else {
+                    return JSValue(
+                        newPromiseRejectedWithReason: "WalletKit context deallocated",
+                        in: JSContext()
+                    )
+                }
+                
+                return JSValue(newPromiseIn: context) { resolve, reject in
+                    Task {
+                        do {
+                            let result = try await fetchManifest(url)
+                            let jsResult = try result.encode(in: context)
+                            resolve?.call(withArguments: [jsResult])
+                        } catch {
+                            reject?.call(withArguments: [error.localizedDescription])
+                        }
+                    }
+                }
+            }
+            jsFetchManifest = AnyJSValueEncodable(fetchManifestBlock)
+        }
+
         try await self.initWalletKit(
             configuration,
             storage,
             AnyJSValueEncodable(bridgeTransport),
             sessionManager,
-            apiClients
+            apiClients,
+            jsFetchManifest
         )
     }
     
