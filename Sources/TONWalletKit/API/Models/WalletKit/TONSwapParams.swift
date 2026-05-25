@@ -32,13 +32,13 @@ public struct TONSwapParams<TProviderOptions: Codable>: Codable {
     public var userAddress: TONUserFriendlyAddress
     public var destinationAddress: TONUserFriendlyAddress?
     /** Slippage tolerance in basis points (1 bp = 0.01%) */
-    public var slippageBps: Double?
+    public var slippageBps: Int?
     /** Transaction deadline in unix timestamp */
-    public var deadline: Double?
+    public var deadline: Int?
     /** Provider-specific options */
     public var providerOptions: TProviderOptions?
 
-    public init(quote: TONSwapQuote, userAddress: TONUserFriendlyAddress, destinationAddress: TONUserFriendlyAddress? = nil, slippageBps: Double? = nil, deadline: Double? = nil, providerOptions: TProviderOptions? = nil) {
+    public init(quote: TONSwapQuote, userAddress: TONUserFriendlyAddress, destinationAddress: TONUserFriendlyAddress? = nil, slippageBps: Int? = nil, deadline: Int? = nil, providerOptions: TProviderOptions? = nil) {
         self.quote = quote
         self.userAddress = userAddress
         self.destinationAddress = destinationAddress

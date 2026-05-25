@@ -49,3 +49,6 @@ Demo/TONWalletApp/Env.swift
 
 # WalletKit from git
 walletkit-git
+
+# Codegen fixtures actual output (regenerated each test run, diffed vs fixtures/)
+Scripts/generate-api/.test-fixtures

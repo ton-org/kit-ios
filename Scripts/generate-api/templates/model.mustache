@@ -36,8 +36,11 @@ extension {{projectName}}API {
 {{#vendorExtensions.x-string-literal-union}}
 {{> modelStringLiteralUnion}}{{/vendorExtensions.x-string-literal-union}}{{^vendorExtensions.x-string-literal-union}}{{#vendorExtensions.x-type-alias}}
 
-{{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} typealias {{{classname}}} = {{modelNamePrefix}}{{{vendorExtensions.x-alias-target}}}
-{{/vendorExtensions.x-type-alias}}{{^vendorExtensions.x-type-alias}}{{#description}}
+{{#vendorExtensions.x-primitive-string}}{{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} typealias {{{classname}}} = String
+{{/vendorExtensions.x-primitive-string}}{{#vendorExtensions.x-primitive-number}}{{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} typealias {{{classname}}} = Double
+{{/vendorExtensions.x-primitive-number}}{{#vendorExtensions.x-primitive-boolean}}{{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} typealias {{{classname}}} = Bool
+{{/vendorExtensions.x-primitive-boolean}}{{#vendorExtensions.x-alias-target}}{{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} typealias {{{classname}}} = {{modelNamePrefix}}{{{vendorExtensions.x-alias-target}}}
+{{/vendorExtensions.x-alias-target}}{{/vendorExtensions.x-type-alias}}{{^vendorExtensions.x-type-alias}}{{#description}}
 /** {{.}} */{{/description}}{{#isDeprecated}}
 @available(*, deprecated, message: "This schema is deprecated."){{/isDeprecated}}{{#vendorExtensions.x-discriminated-union}}
 {{> modelDiscriminatedEnum}}{{/vendorExtensions.x-discriminated-union}}{{^vendorExtensions.x-discriminated-union}}{{#vendorExtensions.x-is-generic}}
