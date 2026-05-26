@@ -21,12 +21,12 @@
     public var {{{name}}}: {{{vendorExtensions.x-generic-type-ref}}}{{^required}}?{{/required}}
 {{/vendorExtensions.x-generic-type-ref}}
 {{^vendorExtensions.x-generic-type-ref}}
-    public var {{{name}}}: {{{dataType}}}{{^required}}?{{/required}}
+    public var {{{name}}}: {{> _swiftIntegerType}}{{^required}}?{{/required}}
 {{/vendorExtensions.x-generic-type-ref}}
 {{/vendorExtensions.x-frozen}}
 {{/vars}}
 
-    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} init({{#vars}}{{{name}}}: {{#vendorExtensions.x-frozen}}AnyCodable{{/vendorExtensions.x-frozen}}{{^vendorExtensions.x-frozen}}{{#vendorExtensions.x-generic-type-ref}}{{{vendorExtensions.x-generic-type-ref}}}{{/vendorExtensions.x-generic-type-ref}}{{^vendorExtensions.x-generic-type-ref}}{{{dataType}}}{{/vendorExtensions.x-generic-type-ref}}{{/vendorExtensions.x-frozen}}{{^required}}? = nil{{/required}}{{^-last}}, {{/-last}}{{/vars}}) {
+    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} init({{#vars}}{{{name}}}: {{#vendorExtensions.x-frozen}}AnyCodable{{/vendorExtensions.x-frozen}}{{^vendorExtensions.x-frozen}}{{#vendorExtensions.x-generic-type-ref}}{{{vendorExtensions.x-generic-type-ref}}}{{/vendorExtensions.x-generic-type-ref}}{{^vendorExtensions.x-generic-type-ref}}{{> _swiftIntegerType}}{{/vendorExtensions.x-generic-type-ref}}{{/vendorExtensions.x-frozen}}{{^required}}? = nil{{/required}}{{^-last}}, {{/-last}}{{/vars}}) {
 {{#vars}}
         self.{{{name}}} = {{{name}}}
 {{/vars}}

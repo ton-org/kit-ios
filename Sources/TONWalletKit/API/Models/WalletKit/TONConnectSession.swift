@@ -31,8 +31,7 @@ import _BigInt
 public struct TONConnectSession: Codable {
 
     public var sessionId: String
-    /** Wallet ID - unique identifier for a wallet, should be different for similar wallets on different networks */
-    public var walletId: String
+    public var walletId: TONWalletId
     public var walletAddress: TONUserFriendlyAddress
     public var createdAt: String
     public var lastActivityAt: String
@@ -50,7 +49,7 @@ public struct TONConnectSession: Codable {
     public var isJsBridge: Bool?
     public var schemaVersion: Double
 
-    public init(sessionId: String, walletId: String, walletAddress: TONUserFriendlyAddress, createdAt: String, lastActivityAt: String, privateKey: String, publicKey: String, domain: String, dAppName: String? = nil, dAppDescription: String? = nil, dAppUrl: URL? = nil, dAppIconUrl: URL? = nil, isJsBridge: Bool? = nil, schemaVersion: Double) {
+    public init(sessionId: String, walletId: TONWalletId, walletAddress: TONUserFriendlyAddress, createdAt: String, lastActivityAt: String, privateKey: String, publicKey: String, domain: String, dAppName: String? = nil, dAppDescription: String? = nil, dAppUrl: URL? = nil, dAppIconUrl: URL? = nil, isJsBridge: Bool? = nil, schemaVersion: Double) {
         self.sessionId = sessionId
         self.walletId = walletId
         self.walletAddress = walletAddress

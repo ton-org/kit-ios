@@ -77,6 +77,7 @@ actor TONWalletKitContextProvider: TONWalletKitContextProviderProtocol {
                     storage: AnyJSValueEncodable(storage),
                     sessionManager: sessionManager,
                     apiClients: apiClients,
+                    fetchManifest: configuration.fetchManifest
                 )
                 
                 self.result = .success(context)

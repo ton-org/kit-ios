@@ -2,7 +2,7 @@
   Custom enum template for top-level string/integer enums.
   Consistent with modelInlineEnumDeclaration.mustache style.
 --}}
-{{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} enum {{{classname}}}: {{dataType}}, Codable, CaseIterable {
+{{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} enum {{{classname}}}: {{> _swiftIntegerType}}, Codable, CaseIterable {
     {{#allowableValues}}
     {{#enumVars}}
     case {{{name}}} = {{{value}}}

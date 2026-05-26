@@ -28053,24 +28053,24 @@ function createStorageAdapter(config = {}) {
 	if (typeof localStorage !== "undefined") try {
 		return new LocalStorageAdapter(config);
 	} catch (error) {
-		log$37.warn("Failed to create LocalStorageAdapter, falling back to memory", { error });
+		log$38.warn("Failed to create LocalStorageAdapter, falling back to memory", { error });
 	}
 	if (config.allowMemory) return new MemoryStorageAdapter(config);
 	else throw new Error("No storage adapter available");
 }
-var log$37;
+var log$38;
 var init_adapters = __esmMin((() => {
 	init_Logger();
 	init_local();
 	init_memory();
-	log$37 = globalLogger.createChild("StorageAdapter");
+	log$38 = globalLogger.createChild("StorageAdapter");
 }));
 //#endregion
 //#region ../walletkit/dist/esm/storage/Storage.js
-var log$36, Storage;
+var log$37, Storage;
 var init_Storage = __esmMin((() => {
 	init_Logger();
-	log$36 = globalLogger.createChild("Storage");
+	log$37 = globalLogger.createChild("Storage");
 	Storage = class {
 		adapter;
 		constructor(adapter) {
@@ -28087,7 +28087,7 @@ var init_Storage = __esmMin((() => {
 				if (value === null) return null;
 				return JSON.parse(value);
 			} catch (error) {
-				log$36.warn("Failed to parse stored value", {
+				log$37.warn("Failed to parse stored value", {
 					key,
 					error
 				});
@@ -28104,7 +28104,7 @@ var init_Storage = __esmMin((() => {
 				const serialized = JSON.stringify(value);
 				await this.adapter.set(key, serialized);
 			} catch (error) {
-				log$36.error("Failed to serialize value for storage", {
+				log$37.error("Failed to serialize value for storage", {
 					key,
 					error
 				});
@@ -28487,11 +28487,11 @@ var init_WalletManager = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/core/TONConnectStoredSessionManager.js
-var log$35, TONConnectStoredSessionManager;
+var log$36, TONConnectStoredSessionManager;
 var init_TONConnectStoredSessionManager = __esmMin((() => {
 	init_esm$1();
 	init_Logger();
-	log$35 = globalLogger.createChild("TONConnectStoredSessionManager");
+	log$36 = globalLogger.createChild("TONConnectStoredSessionManager");
 	TONConnectStoredSessionManager = class {
 		sessions = /* @__PURE__ */ new Map();
 		storage;
@@ -28624,16 +28624,16 @@ var init_TONConnectStoredSessionManager = __esmMin((() => {
 							const wallet = this.walletManager.getWallet(session.walletId);
 							if (wallet) session.walletAddress = wallet.getAddress();
 							else {
-								log$35.warn("Session Wallet not found for session", { sessionId: session.sessionId });
+								log$36.warn("Session Wallet not found for session", { sessionId: session.sessionId });
 								continue;
 							}
 						}
 						this.sessions.set(session.sessionId, session);
 					}
-					log$35.debug("Loaded session metadata", { count: storedSessions.length });
+					log$36.debug("Loaded session metadata", { count: storedSessions.length });
 				}
 			} catch (error) {
-				log$35.warn("Failed to load sessions from storage", { error });
+				log$36.warn("Failed to load sessions from storage", { error });
 			}
 		}
 		/**
@@ -28644,7 +28644,7 @@ var init_TONConnectStoredSessionManager = __esmMin((() => {
 				const sessionsToStore = Array.from(this.sessions.values());
 				await this.storage.set(this.storageKey, sessionsToStore);
 			} catch (error) {
-				log$35.warn("Failed to persist sessions to storage", { error });
+				log$36.warn("Failed to persist sessions to storage", { error });
 			}
 		}
 		async migrateSessions() {
@@ -30117,7 +30117,7 @@ var init_JSBridgeInjector = __esmMin((() => {
 }));
 //#endregion
 //#region ../walletkit/dist/esm/core/BridgeManager.js
-var log$33, BridgeManager;
+var log$34, BridgeManager;
 var init_BridgeManager = __esmMin((() => {
 	init_esm$1();
 	init_dist$2();
@@ -30125,7 +30125,7 @@ var init_BridgeManager = __esmMin((() => {
 	init_uuid();
 	init_errors$3();
 	init_JSBridgeInjector();
-	log$33 = globalLogger.createChild("BridgeManager");
+	log$34 = globalLogger.createChild("BridgeManager");
 	BridgeManager = class {
 		config;
 		bridgeProvider;
@@ -30164,7 +30164,7 @@ var init_BridgeManager = __esmMin((() => {
 			this.walletKitConfig = walletKitConfig;
 			this.jsBridgeTransport = config?.jsBridgeTransport;
 			if (this.config.bridgeUrl && !this.config.disableHttpConnection) this.bridgeProvider = new C$1(this.config.bridgeUrl, this.queueBridgeEvent.bind(this), (error) => {
-				log$33.error("Bridge listener error", { error: error.toString() });
+				log$34.error("Bridge listener error", { error: error.toString() });
 				this.analytics?.emitBridgeClientConnectError({
 					error_message: `${error?.toString() || "Unknown error"}${error?.errorCode ? ` (Code: ${error?.errorCode})` : ""}`,
 					trace_id: error?.traceId,
@@ -30178,12 +30178,12 @@ var init_BridgeManager = __esmMin((() => {
 		*/
 		async start() {
 			if (this.isActive === true) {
-				log$33.warn("Bridge already started");
+				log$34.warn("Bridge already started");
 				return;
 			}
 			this.isActive = true;
 			if (this.isConnected === true) {
-				log$33.warn("Bridge already connected");
+				log$34.warn("Bridge already connected");
 				return;
 			}
 			try {
@@ -30195,7 +30195,7 @@ var init_BridgeManager = __esmMin((() => {
 				}
 			} catch (error) {
 				this.isActive = false;
-				log$33.error("Failed to start bridge", { error });
+				log$34.error("Failed to start bridge", { error });
 				throw error;
 			}
 			const requestProcessing = () => {
@@ -30208,10 +30208,10 @@ var init_BridgeManager = __esmMin((() => {
 		* Create new session for a dApp connection
 		*/
 		async createSession(appSessionId) {
-			log$33.info("[BRIDGE] Creating session", { appSessionId });
+			log$34.info("[BRIDGE] Creating session", { appSessionId });
 			if (!await this.sessionManager.getSession(appSessionId)) throw new WalletKitError(ERROR_CODES.SESSION_NOT_FOUND, `Session not found`, void 0, { appSessionId });
 			if (this.bridgeProvider && this.isConnected) {
-				log$33.info("[BRIDGE] Updating clients");
+				log$34.info("[BRIDGE] Updating clients");
 				await this.updateClients();
 			}
 		}
@@ -30220,7 +30220,7 @@ var init_BridgeManager = __esmMin((() => {
 		*/
 		async removeSession(appSessionId) {
 			if (this.bridgeProvider && this.isConnected) await this.updateClients();
-			log$33.debug("Session removed", { appSessionId });
+			log$34.debug("Session removed", { appSessionId });
 		}
 		/**
 		* Send response to dApp
@@ -30245,12 +30245,12 @@ var init_BridgeManager = __esmMin((() => {
 			}
 			try {
 				await this.bridgeProvider.send(response, sessionCrypto, sessionId, { traceId: event?.traceId });
-				log$33.debug("Response sent successfully", {
+				log$34.debug("Response sent successfully", {
 					sessionId,
 					requestId: event.id
 				});
 			} catch (error) {
-				log$33.error("Failed to send response through bridge", {
+				log$34.error("Failed to send response through bridge", {
 					sessionId,
 					requestId: event.id,
 					error
@@ -30332,7 +30332,7 @@ var init_BridgeManager = __esmMin((() => {
 				await this.bridgeProvider?.restoreConnection(clients, { lastEventId: this.lastEventId });
 				this.isConnected = true;
 				this.reconnectAttempts = 0;
-				log$33.info("Bridge connected successfully");
+				log$34.info("Bridge connected successfully");
 				if (this.analytics) {
 					const client = clients[0];
 					this.analytics.emitBridgeClientConnectEstablished({
@@ -30341,7 +30341,7 @@ var init_BridgeManager = __esmMin((() => {
 					});
 				}
 			} catch (error) {
-				log$33.error("Bridge connection failed", { error: error?.toString() });
+				log$34.error("Bridge connection failed", { error: error?.toString() });
 				this.analytics?.emitBridgeClientConnectError({
 					error_message: `${error?.toString() || "Unknown error"}${error?.errorCode ? ` (Code: ${error?.errorCode})` : ""}`,
 					trace_id: error?.traceId ?? connectTraceId,
@@ -30350,9 +30350,9 @@ var init_BridgeManager = __esmMin((() => {
 				if (!this.config.disableHttpConnection) {
 					if (this.reconnectAttempts < (this.config.maxReconnectAttempts || 5)) {
 						this.reconnectAttempts++;
-						log$33.info("Bridge reconnection attempt", { attempt: this.reconnectAttempts });
+						log$34.info("Bridge reconnection attempt", { attempt: this.reconnectAttempts });
 						setTimeout(() => {
-							this.connectToSSEBridge().catch((error) => log$33.error("Bridge reconnection failed", { error }));
+							this.connectToSSEBridge().catch((error) => log$34.error("Bridge reconnection failed", { error }));
 						}, this.config.reconnectInterval);
 					}
 				}
@@ -30373,10 +30373,10 @@ var init_BridgeManager = __esmMin((() => {
 		* Add client to existing bridge connection
 		*/
 		async updateClients() {
-			log$33.debug("Updating clients");
+			log$34.debug("Updating clients");
 			if (this.bridgeProvider) {
 				const clients = await this.getClients();
-				log$33.info("[BRIDGE] Restoring connection", { clients: clients.length });
+				log$34.info("[BRIDGE] Restoring connection", { clients: clients.length });
 				await this.bridgeProvider.restoreConnection(clients, { lastEventId: this.lastEventId });
 			}
 		}
@@ -30384,17 +30384,17 @@ var init_BridgeManager = __esmMin((() => {
 		* Queue incoming bridge events for processing
 		*/
 		queueBridgeEvent(event) {
-			log$33.debug("Bridge event queued", {
+			log$34.debug("Bridge event queued", {
 				eventId: event?.id,
 				event
 			});
 			this.eventQueue.push(event);
 			this.processBridgeEvents().catch((error) => {
-				log$33.error("Error in background event processing", { error });
+				log$34.error("Error in background event processing", { error });
 			});
 		}
 		queueJsBridgeEvent(messageInfo, event) {
-			log$33.debug("JS Bridge event queued", { eventId: messageInfo?.messageId });
+			log$34.debug("JS Bridge event queued", { eventId: messageInfo?.messageId });
 			if (!event) return;
 			if (!event.traceId) event.traceId = v7();
 			if (event.method == "connect") this.eventQueue.push({
@@ -30423,7 +30423,7 @@ var init_BridgeManager = __esmMin((() => {
 				walletId: messageInfo.walletId
 			});
 			this.processBridgeEvents().catch((error) => {
-				log$33.error("Error in background event processing", { error });
+				log$34.error("Error in background event processing", { error });
 			});
 		}
 		/**
@@ -30435,7 +30435,7 @@ var init_BridgeManager = __esmMin((() => {
 		*/
 		async processBridgeEvents() {
 			if (this.isProcessing) {
-				log$33.debug("Event processing already in progress, skipping");
+				log$34.debug("Event processing already in progress, skipping");
 				return;
 			}
 			this.isProcessing = true;
@@ -30448,7 +30448,7 @@ var init_BridgeManager = __esmMin((() => {
 					}
 				}
 			} catch (error) {
-				log$33.error("Error during event processing", { error });
+				log$34.error("Error during event processing", { error });
 				this.isProcessing = false;
 				this.restartConnection();
 				return;
@@ -30461,7 +30461,7 @@ var init_BridgeManager = __esmMin((() => {
 		*/
 		async handleBridgeEvent(event) {
 			try {
-				log$33.info("Bridge event received", { event });
+				log$34.info("Bridge event received", { event });
 				const rawEvent = {
 					id: event.id || crypto.randomUUID(),
 					method: event.method || "unknown",
@@ -30515,12 +30515,12 @@ var init_BridgeManager = __esmMin((() => {
 				try {
 					await this.eventStore.storeEvent(rawEvent);
 					if (this.eventEmitter) this.eventEmitter.emit("bridgeStorageUpdated", {}, "bridge-manager");
-					log$33.info("Event stored durably", {
+					log$34.info("Event stored durably", {
 						eventId: rawEvent.id,
 						method: rawEvent.method
 					});
 				} catch (error) {
-					log$33.error("Failed to store event durably", {
+					log$34.error("Failed to store event durably", {
 						eventId: rawEvent.id,
 						error: error.message
 					});
@@ -30529,13 +30529,13 @@ var init_BridgeManager = __esmMin((() => {
 						method: rawEvent.method
 					});
 				}
-				log$33.info("Bridge event processed", { rawEvent });
+				log$34.info("Bridge event processed", { rawEvent });
 				if (event?.lastEventId && event.lastEventId !== this.lastEventId) {
 					this.lastEventId = event.lastEventId;
 					await this.saveLastEventId();
 				}
 			} catch (error) {
-				log$33.error("Error handling bridge event", { error });
+				log$34.error("Error handling bridge event", { error });
 			}
 		}
 		/**
@@ -30546,11 +30546,11 @@ var init_BridgeManager = __esmMin((() => {
 				const savedEventId = await this.storage.get(this.storageKey);
 				if (savedEventId) {
 					this.lastEventId = savedEventId;
-					log$33.debug("Loaded last event ID from storage", { lastEventId: this.lastEventId });
+					log$34.debug("Loaded last event ID from storage", { lastEventId: this.lastEventId });
 				}
 			} catch (error) {
 				const storageError = WalletKitError.fromError(ERROR_CODES.STORAGE_READ_FAILED, "Failed to load last event ID from storage", error);
-				log$33.warn("Failed to load last event ID from storage", { error: storageError });
+				log$34.warn("Failed to load last event ID from storage", { error: storageError });
 			}
 		}
 		/**
@@ -30560,11 +30560,11 @@ var init_BridgeManager = __esmMin((() => {
 			try {
 				if (this.lastEventId) {
 					await this.storage.set(this.storageKey, this.lastEventId);
-					log$33.debug("Saved last event ID to storage", { lastEventId: this.lastEventId });
+					log$34.debug("Saved last event ID to storage", { lastEventId: this.lastEventId });
 				}
 			} catch (error) {
 				const storageError = WalletKitError.fromError(ERROR_CODES.STORAGE_WRITE_FAILED, "Failed to save last event ID to storage", error);
-				log$33.warn("Failed to save last event ID to storage", { error: storageError });
+				log$34.warn("Failed to save last event ID to storage", { error: storageError });
 			}
 		}
 	};
@@ -30609,6 +30609,64 @@ function isValidHost(host) {
 }
 var init_url = __esmMin((() => {}));
 //#endregion
+//#region ../walletkit/dist/esm/utils/manifest.js
+async function fetchManifest(manifestUrl, proxyUrl) {
+	try {
+		if (!isValidHost(new URL(manifestUrl).host)) return {
+			manifest: null,
+			manifestFetchErrorCode: CONNECT_EVENT_ERROR_CODES.MANIFEST_NOT_FOUND_ERROR
+		};
+	} catch (_) {
+		return {
+			manifest: null,
+			manifestFetchErrorCode: CONNECT_EVENT_ERROR_CODES.MANIFEST_NOT_FOUND_ERROR
+		};
+	}
+	const directResult = await tryFetchManifest(manifestUrl);
+	if (directResult.manifest) return directResult;
+	if (!proxyUrl) return {
+		manifest: null,
+		manifestFetchErrorCode: CONNECT_EVENT_ERROR_CODES.MANIFEST_CONTENT_ERROR
+	};
+	log$33.info("Direct manifest fetch failed, trying proxy", { manifestUrl });
+	return tryFetchManifest(`${proxyUrl}${manifestUrl}`);
+}
+async function tryFetchManifest(url) {
+	try {
+		const response = await fetch(url);
+		if (!response.ok) {
+			log$33.error("Failed to fetch manifest not ok", {
+				url,
+				status: response.status
+			});
+			return {
+				manifest: null,
+				manifestFetchErrorCode: CONNECT_EVENT_ERROR_CODES.MANIFEST_CONTENT_ERROR
+			};
+		}
+		return {
+			manifest: await response.json(),
+			manifestFetchErrorCode: void 0
+		};
+	} catch (e) {
+		log$33.error("Failed to fetch manifest catched", {
+			url,
+			error: e
+		});
+		return {
+			manifest: null,
+			manifestFetchErrorCode: CONNECT_EVENT_ERROR_CODES.MANIFEST_CONTENT_ERROR
+		};
+	}
+}
+var log$33;
+var init_manifest = __esmMin((() => {
+	init_esm$1();
+	init_url();
+	init_Logger();
+	log$33 = globalLogger.createChild("ManifestUtils");
+}));
+//#endregion
 //#region ../walletkit/dist/esm/handlers/ConnectHandler.js
 var log$32, ConnectHandler;
 var init_ConnectHandler = __esmMin((() => {
@@ -30616,6 +30674,7 @@ var init_ConnectHandler = __esmMin((() => {
 	init_Logger();
 	init_BasicHandler();
 	init_url();
+	init_manifest();
 	log$32 = globalLogger.createChild("ConnectHandler");
 	ConnectHandler = class extends BasicHandler {
 		config;
@@ -30744,51 +30803,8 @@ var init_ConnectHandler = __esmMin((() => {
 		* Fetch manifest from URL
 		*/
 		async fetchManifest(manifestUrl) {
-			try {
-				if (!isValidHost(new URL(manifestUrl).host)) return {
-					manifest: null,
-					manifestFetchErrorCode: CONNECT_EVENT_ERROR_CODES.MANIFEST_NOT_FOUND_ERROR
-				};
-			} catch (_) {
-				return {
-					manifest: null,
-					manifestFetchErrorCode: CONNECT_EVENT_ERROR_CODES.MANIFEST_NOT_FOUND_ERROR
-				};
-			}
-			const directResult = await this.tryFetchManifest(manifestUrl);
-			if (directResult.manifest) return directResult;
-			return {
-				manifest: null,
-				manifestFetchErrorCode: CONNECT_EVENT_ERROR_CODES.MANIFEST_CONTENT_ERROR
-			};
-		}
-		async tryFetchManifest(url) {
-			try {
-				const response = await fetch(url);
-				if (!response.ok) {
-					log$32.error("Failed to fetch manifest not ok", {
-						url,
-						status: response.status
-					});
-					return {
-						manifest: null,
-						manifestFetchErrorCode: CONNECT_EVENT_ERROR_CODES.MANIFEST_CONTENT_ERROR
-					};
-				}
-				return {
-					manifest: await response.json(),
-					manifestFetchErrorCode: void 0
-				};
-			} catch (e) {
-				log$32.error("Failed to fetch manifest catched", {
-					url,
-					error: e
-				});
-				return {
-					manifest: null,
-					manifestFetchErrorCode: CONNECT_EVENT_ERROR_CODES.MANIFEST_CONTENT_ERROR
-				};
-			}
+			if (this.config.fetchManifest && typeof this.config.fetchManifest === "function") return this.config.fetchManifest(manifestUrl);
+			return fetchManifest(manifestUrl);
 		}
 	};
 }));
@@ -33815,6 +33831,7 @@ var init_utils$4 = __esmMin((() => {
 	init_assetHelpers();
 	init_toncenter$2();
 	init_getNormalizedExtMessageHash();
+	init_manifest();
 }));
 //#endregion
 //#region ../walletkit/dist/esm/handlers/TransactionHandler.js
@@ -41557,6 +41574,7 @@ var init_esm = __esmMin((() => {
 	init_getNormalizedExtMessageHash();
 	init_assetHelpers();
 	init_units();
+	init_manifest();
 	init_models();
 	init_toncenter();
 	init_tonapi();
@@ -46549,7 +46567,7 @@ var init_main = __esmMin((() => {
 	init_SwiftWalletAdapter();
 	init_SwiftAPIClientAdapter();
 	init_SwiftTONConnectSessionsManager();
-	window.initWalletKit = async (configuration, storage, bridgeTransport, sessionManager, apiClients) => {
+	window.initWalletKit = async (configuration, storage, bridgeTransport, sessionManager, apiClients, fetchManifest) => {
 		console.log("🚀 WalletKit iOS Bridge starting...");
 		console.log("Creating WalletKit instance with configuration", configuration);
 		console.log("Storage", storage);
@@ -46598,7 +46616,8 @@ var init_main = __esmMin((() => {
 			eventProcessor: configuration.eventsConfiguration,
 			storage: storage ? new SwiftStorageAdapter(storage) : new MemoryStorageAdapter({}),
 			dev: configuration.dev,
-			analytics: configuration.analytics
+			analytics: configuration.analytics,
+			fetchManifest
 		});
 		console.log("🚀 WalletKit iOS Bridge starting...");
 		let initialized = false;
