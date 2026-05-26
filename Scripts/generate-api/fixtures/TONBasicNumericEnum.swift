@@ -25,6 +25,7 @@
 //  SOFTWARE.
 import Foundation
 import _BigInt
+/** Case 1 — basic numeric enum without */
 public enum TONBasicNumericEnum: Double, Codable, CaseIterable {
     case foo = 0
     case bar = 1
