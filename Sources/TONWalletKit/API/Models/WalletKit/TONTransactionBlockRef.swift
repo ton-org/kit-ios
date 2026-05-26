@@ -36,9 +36,9 @@ public struct TONTransactionBlockRef: Codable {
     /** The shard identifier of the block */
     public var shard: String
     /** The sequence number of the block */
-    public var seqno: Int
+    public var seqno: UInt
 
-    public init(workchain: Int, shard: String, seqno: Int) {
+    public init(workchain: Int, shard: String, seqno: UInt) {
         self.workchain = workchain
         self.shard = shard
         self.seqno = seqno

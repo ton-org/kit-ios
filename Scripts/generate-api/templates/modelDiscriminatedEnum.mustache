@@ -22,8 +22,8 @@
 {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} enum {{{classname}}}: Codable {
 {{#vars}}{{#vendorExtensions.x-enum-case-name}}
 {{#vendorExtensions.x-empty-variant}}    case {{{vendorExtensions.x-enum-case-name}}}
-{{/vendorExtensions.x-empty-variant}}{{#vendorExtensions.x-single-field-variant}}    case {{{vendorExtensions.x-enum-case-name}}}({{{vendorExtensions.x-single-field-name}}}: {{{dataType}}}{{#vendorExtensions.x-single-field-optional}}?{{/vendorExtensions.x-single-field-optional}})
-{{/vendorExtensions.x-single-field-variant}}{{^vendorExtensions.x-empty-variant}}{{^vendorExtensions.x-single-field-variant}}    case {{{vendorExtensions.x-enum-case-name}}}({{{dataType}}})
+{{/vendorExtensions.x-empty-variant}}{{#vendorExtensions.x-single-field-variant}}    {{#vendorExtensions.x-indirect}}indirect {{/vendorExtensions.x-indirect}}case {{{vendorExtensions.x-enum-case-name}}}({{{vendorExtensions.x-single-field-name}}}: {{> _swiftIntegerType}}{{#vendorExtensions.x-single-field-optional}}?{{/vendorExtensions.x-single-field-optional}})
+{{/vendorExtensions.x-single-field-variant}}{{^vendorExtensions.x-empty-variant}}{{^vendorExtensions.x-single-field-variant}}    {{#vendorExtensions.x-indirect}}indirect {{/vendorExtensions.x-indirect}}case {{{vendorExtensions.x-enum-case-name}}}({{> _swiftIntegerType}})
 {{/vendorExtensions.x-single-field-variant}}{{/vendorExtensions.x-empty-variant}}{{/vendorExtensions.x-enum-case-name}}{{/vars}}
 
     {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} init(from decoder: any Decoder) throws {
@@ -33,9 +33,9 @@
 {{#vars}}{{#vendorExtensions.x-enum-case-name}}
         case "{{{vendorExtensions.x-enum-case-raw-value}}}":
 {{#vendorExtensions.x-empty-variant}}            self = .{{{vendorExtensions.x-enum-case-name}}}
-{{/vendorExtensions.x-empty-variant}}{{#vendorExtensions.x-single-field-variant}}            let {{{vendorExtensions.x-single-field-name}}} = try container.decode{{#vendorExtensions.x-single-field-optional}}IfPresent{{/vendorExtensions.x-single-field-optional}}({{{dataType}}}.self, forKey: .{{{vendorExtensions.x-single-field-name}}})
+{{/vendorExtensions.x-empty-variant}}{{#vendorExtensions.x-single-field-variant}}            let {{{vendorExtensions.x-single-field-name}}} = try container.decode{{#vendorExtensions.x-single-field-optional}}IfPresent{{/vendorExtensions.x-single-field-optional}}({{> _swiftIntegerType}}.self, forKey: .{{{vendorExtensions.x-single-field-name}}})
             self = .{{{vendorExtensions.x-enum-case-name}}}({{{vendorExtensions.x-single-field-name}}}: {{{vendorExtensions.x-single-field-name}}})
-{{/vendorExtensions.x-single-field-variant}}{{^vendorExtensions.x-empty-variant}}{{^vendorExtensions.x-single-field-variant}}            self = .{{{vendorExtensions.x-enum-case-name}}}(try {{{dataType}}}(from: decoder))
+{{/vendorExtensions.x-single-field-variant}}{{^vendorExtensions.x-empty-variant}}{{^vendorExtensions.x-single-field-variant}}            self = .{{{vendorExtensions.x-enum-case-name}}}(try {{> _swiftIntegerType}}(from: decoder))
 {{/vendorExtensions.x-single-field-variant}}{{/vendorExtensions.x-empty-variant}}{{/vendorExtensions.x-enum-case-name}}{{/vars}}
         default:
             throw DecodingError.dataCorruptedError(
