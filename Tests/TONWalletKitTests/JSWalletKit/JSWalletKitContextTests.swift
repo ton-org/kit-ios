@@ -25,6 +25,7 @@
 //  SOFTWARE.
 
 import Testing
+import Combine
 import JavaScriptCore
 @_private(sourceFile: "JSWalletKitContext.swift")
 @testable import TONWalletKit
@@ -186,7 +187,7 @@ struct JSWalletKitContextTests {
         #expect(args.count == 5)
         #expect(args[0] as? String == "config")
         #expect(args[1] as? String == "storage")
-        #expect(args[2] is AnyJSValueEncodable)
+        #expect(args[2] is JSValue)
         #expect(args[3] as? String == "session")
         #expect(args[4] as? String == "api")
     }
@@ -205,5 +206,74 @@ struct JSWalletKitContextTests {
                 apiClients: "api"
             )
         }
+    }
+
+    @Test("bridgeTransport argument is callable from JS during initializeWalletKit")
+    func bridgeTransportCallableFromJS() async throws {
+        let context = JSContext()!
+        context.evaluateScript("""
+            globalThis.__bridgeTransportType = null;
+            globalThis.__bridgeTransportCallCount = 0;
+            function initWalletKit(configuration, storage, bridgeTransport, sessionManager, apiClients) {
+                globalThis.__bridgeTransportType = typeof bridgeTransport;
+                bridgeTransport({
+                    sessionID: "session-1",
+                    messageID: "msg-1",
+                    message: { foo: "bar" }
+                });
+                globalThis.__bridgeTransportCallCount += 1;
+            }
+        """)
+        let sut = JSWalletKitContext(context: context)
+
+        var received: JSBridgeTransportResponse?
+        let cancellable = sut.bridgeTransport.waitForResponse().sink(
+            receiveCompletion: { _ in },
+            receiveValue: { received = $0 }
+        )
+        defer { cancellable.cancel() }
+
+        try await sut.initializeWalletKit(
+            configuration: "config",
+            storage: "storage",
+            sessionManager: "session",
+            apiClients: "api"
+        )
+
+        let typeofResult = context.evaluateScript("globalThis.__bridgeTransportType")?.toString()
+        let callCount = context.evaluateScript("globalThis.__bridgeTransportCallCount")?.toInt32()
+
+        #expect(typeofResult == "function", "JS must see bridgeTransport as a callable function, got: \(typeofResult ?? "nil")")
+        #expect(callCount == 1, "JS should have invoked bridgeTransport exactly once")
+        #expect(received?.sessionID == "session-1")
+        #expect(received?.messageID == "msg-1")
+    }
+
+    @Test("events callback argument is callable from JS during add(eventsHandler:)")
+    func eventsCallbackCallableFromJS() throws {
+        let context = JSContext()!
+        context.evaluateScript("""
+            globalThis.__eventsCallbackType = null;
+            globalThis.__eventsCallbackCallCount = 0;
+            var walletKit = {
+                setEventsListeners: function(callback) {
+                    globalThis.__eventsCallbackType = typeof callback;
+                    callback("connectRequest", { foo: "bar" });
+                    globalThis.__eventsCallbackCallCount += 1;
+                }
+            };
+        """)
+        let sut = JSWalletKitContext(context: context)
+        let handler = MockJSBridgeEventsHandler()
+
+        try sut.add(eventsHandler: handler)
+
+        let typeofResult = context.evaluateScript("globalThis.__eventsCallbackType")?.toString()
+        let callCount = context.evaluateScript("globalThis.__eventsCallbackCallCount")?.toInt32()
+
+        #expect(typeofResult == "function", "JS must see events callback as a callable function, got: \(typeofResult ?? "nil")")
+        #expect(callCount == 1, "JS should have invoked the events callback exactly once")
+        #expect(handler.handledEvents.count == 1)
+        #expect(handler.handledEvents.first?.type == .connectRequest)
     }
 }
