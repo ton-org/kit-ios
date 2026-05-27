@@ -64,7 +64,7 @@ struct JSTimerPolyfillTests {
         #expect(timerPolyfill.timers.contains { $0.key == id })
         
         // Wait for execution (significantly increased for CI reliability)
-        try await Task.sleep(for: .milliseconds(500))
+        try await Task.sleep(nanoseconds: 500 * 1_000_000)
         
         // Verify callback was executed
         let callbackExecuted = context!.objectForKeyedSubscript("callbackExecuted").toBool()
@@ -79,7 +79,7 @@ struct JSTimerPolyfillTests {
         
         context = nil
         
-        try await Task.sleep(for: .seconds(0.1))
+        try await Task.sleep(nanoseconds: 100_000_000)
         
         #expect(weakContext == nil)
     }
@@ -106,7 +106,7 @@ struct JSTimerPolyfillTests {
         try await context.setTimeoutWithParams()
         
         // Wait for execution (increased for CI reliability)
-        try await Task.sleep(for: .milliseconds(200))
+        try await Task.sleep(nanoseconds: 200 * 1_000_000)
         
         // Verify parameters were passed correctly
         guard let receivedParams = context.objectForKeyedSubscript("receivedParams").toArray() else {
@@ -144,7 +144,7 @@ struct JSTimerPolyfillTests {
         let id = try await context.clearTimeout()
         
         // Wait longer than the original delay (increased for CI reliability)
-        try await Task.sleep(for: .milliseconds(300))
+        try await Task.sleep(nanoseconds: 300 * 1_000_000)
         
         // Verify callback was not executed
         let callbackExecuted = context.objectForKeyedSubscript("callbackExecuted").toBool()
@@ -183,7 +183,7 @@ struct JSTimerPolyfillTests {
         #expect(timerPolyfill.timers.contains { $0.key == id })
         
         // Wait for multiple executions (significantly increased for CI reliability)
-        try await Task.sleep(for: .milliseconds(600))
+        try await Task.sleep(nanoseconds: 600 * 1_000_000)
         
         // Stop the interval
         context.evaluateScript("clearInterval('\(id)')")
@@ -236,13 +236,13 @@ struct JSTimerPolyfillTests {
         let id = try await context.clearInterval()
         
         // Wait for the interval to be cleared and a bit more (increased for CI reliability)
-        try await Task.sleep(for: .milliseconds(400))
+        try await Task.sleep(nanoseconds: 400 * 1_000_000)
         
         let executionCount = context.objectForKeyedSubscript("executionCount").toInt32()
         let finalCount = executionCount
         
         // Wait a bit more to ensure no more executions happen (increased for CI reliability)
-        try await Task.sleep(for: .milliseconds(200))
+        try await Task.sleep(nanoseconds: 200 * 1_000_000)
         
         let newExecutionCount = context.objectForKeyedSubscript("executionCount").toInt32()
         
@@ -282,7 +282,7 @@ struct JSTimerPolyfillTests {
         #expect(synchronousCheck == false)
         
         // Wait for asynchronous execution (increased for CI reliability)
-        try await Task.sleep(for: .milliseconds(50))
+        try await Task.sleep(nanoseconds: 50 * 1_000_000)
         
         // Verify callback was executed asynchronously
         let callbackExecuted = context.objectForKeyedSubscript("callbackExecuted").toBool()
@@ -314,7 +314,7 @@ struct JSTimerPolyfillTests {
         try await context.negativeDelay()
         
         // Wait briefly (increased for CI reliability)
-        try await Task.sleep(for: .milliseconds(100))
+        try await Task.sleep(nanoseconds: 100 * 1_000_000)
         
         // Verify callback was executed quickly (negative delay should be treated as 0)
         let callbackExecuted = context.objectForKeyedSubscript("callbackExecuted").toBool()
@@ -365,7 +365,7 @@ struct JSTimerPolyfillTests {
         }
         
         // Wait for all timeouts and some interval executions (significantly increased for CI reliability)
-        try await Task.sleep(for: .milliseconds(800))
+        try await Task.sleep(nanoseconds: 800 * 1_000_000)
         
         let results = context.objectForKeyedSubscript("results").toDictionary()
         
@@ -450,7 +450,7 @@ struct JSTimerPolyfillTests {
         
         context = nil
         
-        try await Task.sleep(for: .seconds(0.1))
+        try await Task.sleep(nanoseconds: 100_000_000)
         
         #expect(weakContext == nil)
     }
@@ -479,7 +479,7 @@ struct JSTimerPolyfillTests {
         timerPolyfill = nil
         
         // Give some time for cleanup
-        try await Task.sleep(for: .milliseconds(100))
+        try await Task.sleep(nanoseconds: 100 * 1_000_000)
         
         // Test passes if no crashes occur during cleanup
         #expect(true)

@@ -126,7 +126,13 @@ extension JSValue {
         let onRejectedWrapper: @convention(block) (JSValue) -> Void = { value in
             onRejected(value)
         }
-        self.invokeMethod("then", withArguments: [onResolvedWrapper, onRejectedWrapper])
+        self.invokeMethod(
+            "then",
+            withArguments: [
+                unsafeBitCast(onResolvedWrapper, to: JSValue.self),
+                unsafeBitCast(onRejectedWrapper, to: JSValue.self)
+            ]
+        )
     }
     
     func then() async throws -> JSValue {
