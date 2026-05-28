@@ -392,4 +392,98 @@ struct TONStreamingProviderJSAdapterTests {
         let result: Bool? = context.connResult
         #expect(result == true)
     }
+
+    // MARK: - JS-bridge tests for the unwatch JSValue
+    //
+    // The adapter's watch* methods return a JSValue produced from a Swift block via
+    // `JSValue(object: unwatch, in: context)`. These tests assert that, from JS's
+    // perspective, that returned value is `typeof === 'function'` and that invoking
+    // it from JS reaches the Swift block and cancels the subscription.
+
+    @Test("balance unwatch is callable from JS")
+    func balanceUnwatchCallableFromJS() {
+        let (sut, provider) = makeSUT()
+        let address = JSValue(object: "test-address", in: context)!
+        var callCount = 0
+        let handler: @convention(block) (JSValue) -> Void = { _ in callCount += 1 }
+        let jsHandler = JSValue(object: handler, in: context)!
+
+        let unwatch = sut.balance(address: address, handler: jsHandler)
+        context.setObject(unwatch, forKeyedSubscript: "__unwatch" as NSString)
+        let typeofResult = context.evaluateScript("typeof __unwatch")?.toString()
+
+        provider.balanceSubject.send(MockStreamingData.balanceUpdate())
+        #expect(callCount == 1)
+
+        context.evaluateScript("__unwatch()")
+        provider.balanceSubject.send(MockStreamingData.balanceUpdate())
+
+        #expect(typeofResult == "function", "JS must see unwatch as a callable function, got: \(typeofResult ?? "nil")")
+        #expect(callCount == 1)
+    }
+
+    @Test("transactions unwatch is callable from JS")
+    func transactionsUnwatchCallableFromJS() {
+        let (sut, provider) = makeSUT()
+        let address = JSValue(object: "test-address", in: context)!
+        var callCount = 0
+        let handler: @convention(block) (JSValue) -> Void = { _ in callCount += 1 }
+        let jsHandler = JSValue(object: handler, in: context)!
+
+        let unwatch = sut.transactions(address: address, handler: jsHandler)
+        context.setObject(unwatch, forKeyedSubscript: "__unwatch" as NSString)
+        let typeofResult = context.evaluateScript("typeof __unwatch")?.toString()
+
+        provider.transactionsSubject.send(MockStreamingData.transactionsUpdate())
+        #expect(callCount == 1)
+
+        context.evaluateScript("__unwatch()")
+        provider.transactionsSubject.send(MockStreamingData.transactionsUpdate())
+
+        #expect(typeofResult == "function")
+        #expect(callCount == 1)
+    }
+
+    @Test("jettons unwatch is callable from JS")
+    func jettonsUnwatchCallableFromJS() {
+        let (sut, provider) = makeSUT()
+        let address = JSValue(object: "test-address", in: context)!
+        var callCount = 0
+        let handler: @convention(block) (JSValue) -> Void = { _ in callCount += 1 }
+        let jsHandler = JSValue(object: handler, in: context)!
+
+        let unwatch = sut.jettons(address: address, handler: jsHandler)
+        context.setObject(unwatch, forKeyedSubscript: "__unwatch" as NSString)
+        let typeofResult = context.evaluateScript("typeof __unwatch")?.toString()
+
+        provider.jettonsSubject.send(MockStreamingData.jettonUpdate())
+        #expect(callCount == 1)
+
+        context.evaluateScript("__unwatch()")
+        provider.jettonsSubject.send(MockStreamingData.jettonUpdate())
+
+        #expect(typeofResult == "function")
+        #expect(callCount == 1)
+    }
+
+    @Test("connectionChange unwatch is callable from JS")
+    func connectionChangeUnwatchCallableFromJS() {
+        let (sut, provider) = makeSUT()
+        var callCount = 0
+        let handler: @convention(block) (JSValue) -> Void = { _ in callCount += 1 }
+        let jsHandler = JSValue(object: handler, in: context)!
+
+        let unwatch = sut.connectionChange(handler: jsHandler)
+        context.setObject(unwatch, forKeyedSubscript: "__unwatch" as NSString)
+        let typeofResult = context.evaluateScript("typeof __unwatch")?.toString()
+
+        provider.connectionChangeSubject.send(true)
+        #expect(callCount == 1)
+
+        context.evaluateScript("__unwatch()")
+        provider.connectionChangeSubject.send(false)
+
+        #expect(typeofResult == "function")
+        #expect(callCount == 1)
+    }
 }

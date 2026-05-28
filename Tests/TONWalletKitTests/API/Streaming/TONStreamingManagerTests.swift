@@ -470,4 +470,163 @@ struct TONStreamingManagerTests {
         handler.call(withArguments: [false])
         #expect(receivedCount == 1)
     }
+
+    // MARK: - JS-bridge tests
+    //
+    // Each test drives `TONStreamingManager` against a real `JSContext` and asserts:
+    //  - the handler the manager passed into JS shows up as `typeof === 'function'`
+    //  - the JS-side invocation actually crossed the bridge back into Swift
+    //  - the unwatch JSValue returned to JS is itself `typeof === 'function'`
+    //    and runs when called from JS.
+
+    @Test("balance: handler and unwatch are callable from JS")
+    func balanceHandlerCallableFromJS() throws {
+        let context = JSContext()!
+        let update = MockStreamingData.balanceUpdate(status: .confirmed, balance: "5.0")
+        context.setObject(try update.encode(in: context), forKeyedSubscript: "__update" as NSString)
+        context.evaluateScript("""
+            globalThis.__handlerType = null;
+            globalThis.__unwatchCallCount = 0;
+            function watchBalance(network, address, handler) {
+                globalThis.__handlerType = typeof handler;
+                handler(globalThis.__update);
+                return function unwatch() { globalThis.__unwatchCallCount += 1; };
+            }
+        """)
+        let sut = TONStreamingManager(jsObject: context)
+
+        var received: TONBalanceUpdate?
+        let cancellable = sut.balance(network: network, address: "addr").sink(
+            receiveCompletion: { _ in },
+            receiveValue: { received = $0 }
+        )
+
+        #expect(context.evaluateScript("globalThis.__handlerType")?.toString() == "function")
+        #expect(received?.balance == "5.0")
+
+        cancellable.cancel()
+        #expect(context.evaluateScript("globalThis.__unwatchCallCount")?.toInt32() == 1)
+    }
+
+    @Test("transactions: handler and unwatch are callable from JS")
+    func transactionsHandlerCallableFromJS() throws {
+        let context = JSContext()!
+        let update = MockStreamingData.transactionsUpdate(status: .finalized)
+        context.setObject(try update.encode(in: context), forKeyedSubscript: "__update" as NSString)
+        context.evaluateScript("""
+            globalThis.__handlerType = null;
+            globalThis.__unwatchCallCount = 0;
+            function watchTransactions(network, address, handler) {
+                globalThis.__handlerType = typeof handler;
+                handler(globalThis.__update);
+                return function unwatch() { globalThis.__unwatchCallCount += 1; };
+            }
+        """)
+        let sut = TONStreamingManager(jsObject: context)
+
+        var received: TONTransactionsUpdate?
+        let cancellable = sut.transactions(network: network, address: "addr").sink(
+            receiveCompletion: { _ in },
+            receiveValue: { received = $0 }
+        )
+
+        #expect(context.evaluateScript("globalThis.__handlerType")?.toString() == "function")
+        #expect(received?.status == .finalized)
+
+        cancellable.cancel()
+        #expect(context.evaluateScript("globalThis.__unwatchCallCount")?.toInt32() == 1)
+    }
+
+    @Test("jettons: handler and unwatch are callable from JS")
+    func jettonsHandlerCallableFromJS() throws {
+        let context = JSContext()!
+        let update = MockStreamingData.jettonUpdate(balance: "42.0")
+        context.setObject(try update.encode(in: context), forKeyedSubscript: "__update" as NSString)
+        context.evaluateScript("""
+            globalThis.__handlerType = null;
+            globalThis.__unwatchCallCount = 0;
+            function watchJettons(network, address, handler) {
+                globalThis.__handlerType = typeof handler;
+                handler(globalThis.__update);
+                return function unwatch() { globalThis.__unwatchCallCount += 1; };
+            }
+        """)
+        let sut = TONStreamingManager(jsObject: context)
+
+        var received: TONJettonUpdate?
+        let cancellable = sut.jettons(network: network, address: "addr").sink(
+            receiveCompletion: { _ in },
+            receiveValue: { received = $0 }
+        )
+
+        #expect(context.evaluateScript("globalThis.__handlerType")?.toString() == "function")
+        #expect(received?.balance == "42.0")
+
+        cancellable.cancel()
+        #expect(context.evaluateScript("globalThis.__unwatchCallCount")?.toInt32() == 1)
+    }
+
+    @Test("updates: handler and unwatch are callable from JS")
+    func updatesHandlerCallableFromJS() throws {
+        let context = JSContext()!
+        let update = TONStreamingUpdate.balance(MockStreamingData.balanceUpdate(balance: "3.0"))
+        context.setObject(try update.encode(in: context), forKeyedSubscript: "__update" as NSString)
+        context.evaluateScript("""
+            globalThis.__handlerType = null;
+            globalThis.__unwatchCallCount = 0;
+            function watch(network, address, types, handler) {
+                globalThis.__handlerType = typeof handler;
+                handler('balance', globalThis.__update);
+                return function unwatch() { globalThis.__unwatchCallCount += 1; };
+            }
+        """)
+        let sut = TONStreamingManager(jsObject: context)
+
+        var received: TONStreamingUpdate?
+        let cancellable = sut.updates(
+            network: network,
+            address: "addr",
+            types: [.balance]
+        ).sink(
+            receiveCompletion: { _ in },
+            receiveValue: { received = $0 }
+        )
+
+        #expect(context.evaluateScript("globalThis.__handlerType")?.toString() == "function")
+        if case .balance(let balance) = received {
+            #expect(balance.balance == "3.0")
+        } else {
+            #expect(Bool(false), "expected .balance update")
+        }
+
+        cancellable.cancel()
+        #expect(context.evaluateScript("globalThis.__unwatchCallCount")?.toInt32() == 1)
+    }
+
+    @Test("connectionChange: handler and unwatch are callable from JS")
+    func connectionChangeHandlerCallableFromJS() {
+        let context = JSContext()!
+        context.evaluateScript("""
+            globalThis.__handlerType = null;
+            globalThis.__unwatchCallCount = 0;
+            function onConnectionChange(network, handler) {
+                globalThis.__handlerType = typeof handler;
+                handler(true);
+                return function unwatch() { globalThis.__unwatchCallCount += 1; };
+            }
+        """)
+        let sut = TONStreamingManager(jsObject: context)
+
+        var received: Bool?
+        let cancellable = sut.connectionChange(network: network).sink(
+            receiveCompletion: { _ in },
+            receiveValue: { received = $0 }
+        )
+
+        #expect(context.evaluateScript("globalThis.__handlerType")?.toString() == "function")
+        #expect(received == true)
+
+        cancellable.cancel()
+        #expect(context.evaluateScript("globalThis.__unwatchCallCount")?.toInt32() == 1)
+    }
 }

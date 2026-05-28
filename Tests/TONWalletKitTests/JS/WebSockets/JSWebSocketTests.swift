@@ -632,7 +632,7 @@ struct JSWebSocketTests {
 
         ws.send(JSValue(object: "test", in: context))
 
-        try? await Task.sleep(for: .milliseconds(50))
+        try? await Task.sleep(nanoseconds: 50 * 1_000_000)
 
         let messages = await mockTask.sentMessages
         #expect(messages.isEmpty)

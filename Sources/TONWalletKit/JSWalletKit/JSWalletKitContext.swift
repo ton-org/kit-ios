@@ -115,7 +115,7 @@ class JSWalletKitContext: JSWalletKitContextProtocol {
         try await self.initWalletKit(
             configuration,
             storage,
-            AnyJSValueEncodable(bridgeTransport),
+            JSValue(object: bridgeTransport, in: context.jsContext),
             sessionManager,
             apiClients,
             jsFetchManifest
@@ -150,7 +150,12 @@ class JSWalletKitContext: JSWalletKitContextProtocol {
             }
         }
         
-        try self.walletKit.setEventsListeners(AnyJSValueEncodable(callback))
+        try self.walletKit.setEventsListeners(
+            JSValue(
+                object: callback,
+                in: context.jsContext
+            )
+        )
     }
     
     func remove(eventsHandler: any JSBridgeEventsHandler) throws {
