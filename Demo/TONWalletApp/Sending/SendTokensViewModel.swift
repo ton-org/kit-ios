@@ -25,32 +25,44 @@
 //  SOFTWARE.
 
 import Foundation
+import Combine
 
 @MainActor
 class SendTokensViewModel: ObservableObject {
     @Published private(set) var selectedToken: any SendableTokenViewModel
     @Published private(set) var isSending = false
-    
+
     private let tokens: [any SendableTokenViewModel]
-    
+
+    private var balanceSubscribers = Set<AnyCancellable>()
+
     var availableTokens: [any SendableTokenViewModel] {
         return tokens
     }
-    
+
     init?(tokens: [any SendableTokenViewModel]) {
         if tokens.isEmpty {
             return nil
         }
-        
+
         self.tokens = tokens
         self.selectedToken = tokens[0]
+
+        for token in tokens {
+            token.balanceChanges
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] in
+                    self?.objectWillChange.send()
+                }
+                .store(in: &balanceSubscribers)
+        }
     }
-    
+
     func send(amount: String, address: String) {
         if isSending { return }
-        
+
         isSending = true
-        
+
         Task {
             do {
                 try await selectedToken.send(amount: amount, address: address)
@@ -62,7 +74,7 @@ class SendTokensViewModel: ObservableObject {
             isSending = false
         }
     }
-    
+
     func select(token: any SendableTokenViewModel) {
         selectedToken = token
     }

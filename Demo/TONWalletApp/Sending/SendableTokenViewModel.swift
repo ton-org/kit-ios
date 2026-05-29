@@ -25,14 +25,16 @@
 //  SOFTWARE.
 
 import Foundation
+import Combine
 
-protocol SendableTokenViewModel {
+protocol SendableTokenViewModel: AnyObject {
     var name: String { get }
     var symbol: String { get }
     var balance: String { get }
     var decimals: Int { get }
     var requiredAmountInfo: String { get }
-    
+    var balanceChanges: AnyPublisher<Void, Never> { get }
+
     func send(amount: String, address: String) async throws
     func updateBalance() async throws
 }

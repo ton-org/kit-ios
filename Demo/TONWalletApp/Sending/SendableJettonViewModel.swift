@@ -25,6 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
+import Combine
 import TONWalletKit
 
 final class SendableJettonViewModel: SendableTokenViewModel {
@@ -32,29 +33,39 @@ final class SendableJettonViewModel: SendableTokenViewModel {
     var symbol: String {  jetton.info.symbol ?? "UNKNOWN" }
     var decimals: Int { jetton.decimalsNumber ?? 9 }
     var requiredAmountInfo: String { "Enter amount in \(symbol) units" }
-    var balance: String { jettonBalance.flatMap { formatter.string(from: $0) } ?? "Unknown Balance" }
-    
+    var balance: String {
+        if let streamed = streamedBalance { return streamed }
+        return jettonBalance.flatMap { formatter.string(from: $0) } ?? "Unknown Balance"
+    }
+
     private lazy var formatter: TONBalanceFormatter = {
         let formatter = TONBalanceFormatter()
         formatter.nanoUnitDecimalsNumber = decimals
         return formatter
     }()
-    
+
     let jetton: TONJetton
     let wallet: any TONWalletProtocol
     private(set) var jettonBalance: TONBalance?
-    
+    private var streamedBalance: String?
+
+    private let balanceSubject = PassthroughSubject<Void, Never>()
+    var balanceChanges: AnyPublisher<Void, Never> { balanceSubject.eraseToAnyPublisher() }
+
+    private var subscribers = Set<AnyCancellable>()
+
     init(jetton: TONJetton, wallet: any TONWalletProtocol) {
         self.jetton = jetton
         self.jettonBalance = jetton.balance
         self.wallet = wallet
+        subscribeToBalanceChanges()
     }
-    
+
     func send(amount: String, address: String) async throws {
         guard let amount = formatter.amount(from: amount) else {
             return
         }
-        
+
         let request = TONJettonsTransferRequest(
             jettonAddress: jetton.address,
             transferAmount: amount,
@@ -64,9 +75,38 @@ final class SendableJettonViewModel: SendableTokenViewModel {
         let transactionRequest = try await wallet.transferJettonTransaction(request: request)
         _ = try await wallet.send(transactionRequest: transactionRequest)
     }
-    
+
     func updateBalance() async throws {
-        self.jettonBalance = try await wallet.jettonBalance(jettonAddress: jetton.address)
+        let fresh = try await wallet.jettonBalance(jettonAddress: jetton.address)
+        self.jettonBalance = fresh
+        self.streamedBalance = nil
+        balanceSubject.send()
     }
-    
+
+    private func subscribeToBalanceChanges() {
+        let ownerAddress = wallet.address.value
+        let masterAddress = jetton.address.value
+        Task { [weak self] in
+            do {
+                let publisher = try await TONWalletKit.shared().streaming()
+                    .jettons(network: .mainnet, address: ownerAddress)
+                guard let self else { return }
+                publisher
+                    .receive(on: DispatchQueue.main)
+                    .sink(
+                        receiveCompletion: { _ in },
+                        receiveValue: { [weak self] update in
+                            guard update.status == .finalized else { return }
+                            guard update.masterAddress.value == masterAddress else { return }
+                            guard let formatted = update.balance else { return }
+                            self?.streamedBalance = formatted
+                            self?.balanceSubject.send()
+                        }
+                    )
+                    .store(in: &self.subscribers)
+            } catch {
+                debugPrint("Failed to subscribe to jetton balance stream: \(error)")
+            }
+        }
+    }
 }
