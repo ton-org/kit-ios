@@ -29,16 +29,19 @@ import Foundation
 enum TONFeatureName: String, Codable {
     case sendTransaction = "SendTransaction"
     case signData = "SignData"
+    case signMessage = "SignMessage"
+    case embeddedRequest = "EmbeddedRequest"
 }
 
 public struct TONRawFeature: Codable, Hashable {
     let name: TONFeatureName
-    
+
     private(set) var types: [TONSignDataType]?
-    
+
     private(set) var maxMessages: Int?
     private(set) var extraCurrencySupported: Bool?
-    
+    private(set) var itemTypes: [TONStructuredItemType]?
+
     var typed: (any TONFeature)? {
         switch name {
         case .sendTransaction:
@@ -51,6 +54,17 @@ public struct TONRawFeature: Codable, Hashable {
                 return nil
             }
             return TONSignDataFeature(types: types)
+        case .signMessage:
+            guard let maxMessages else {
+                return nil
+            }
+            return TONSignMessageFeature(
+                maxMessages: maxMessages,
+                extraCurrencySupported: extraCurrencySupported,
+                itemTypes: itemTypes
+            )
+        case .embeddedRequest:
+            return TONEmbeddedRequestFeature()
         }
     }
 }
@@ -62,6 +76,7 @@ public protocol TONFeature {
 public struct TONSendTransactionFeature: TONFeature {
     let maxMessages: Int
     let extraCurrencySupported: Bool?
+    let itemTypes: [TONStructuredItemType]?
     
     public var raw: TONRawFeature {
         TONRawFeature(
@@ -73,24 +88,59 @@ public struct TONSendTransactionFeature: TONFeature {
     
     public init(
         maxMessages: Int,
-        extraCurrencySupported: Bool? = nil
+        extraCurrencySupported: Bool? = nil,
+        itemTypes: [TONStructuredItemType]? = nil
     ) {
         self.maxMessages = maxMessages
         self.extraCurrencySupported = extraCurrencySupported
+        self.itemTypes = itemTypes
     }
 }
 
 public struct TONSignDataFeature: TONFeature {
     let types: [TONSignDataType]
-    
+
     public var raw: TONRawFeature {
         TONRawFeature(
             name: .signData,
             types: types
         )
     }
-    
+
     public init(types: [TONSignDataType]) {
         self.types = types
     }
+}
+
+public struct TONSignMessageFeature: TONFeature {
+    let maxMessages: Int
+    let extraCurrencySupported: Bool?
+    let itemTypes: [TONStructuredItemType]?
+
+    public var raw: TONRawFeature {
+        TONRawFeature(
+            name: .signMessage,
+            maxMessages: maxMessages,
+            extraCurrencySupported: extraCurrencySupported,
+            itemTypes: itemTypes
+        )
+    }
+
+    public init(
+        maxMessages: Int,
+        extraCurrencySupported: Bool? = nil,
+        itemTypes: [TONStructuredItemType]? = nil
+    ) {
+        self.maxMessages = maxMessages
+        self.extraCurrencySupported = extraCurrencySupported
+        self.itemTypes = itemTypes
+    }
+}
+
+public struct TONEmbeddedRequestFeature: TONFeature {
+    public var raw: TONRawFeature {
+        TONRawFeature(name: .embeddedRequest)
+    }
+
+    public init() {}
 }

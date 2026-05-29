@@ -33,6 +33,15 @@ class WalletSignMessageRequestViewModel: ObservableObject {
     private let request: TONWalletSignMessageRequest
 
     var dAppInfo: TONDAppInfo? { request.event.dAppInfo }
+    var walletAddress: String? { request.event.walletAddress?.value }
+    var transactionRequest: TONTransactionRequest { request.event.request }
+    var emulatedPreview: TONTransactionEmulatedPreview? { request.event.preview.data }
+    var moneyFlow: TONTransactionTraceMoneyFlow? { emulatedPreview?.moneyFlow }
+    var previewErrorMessage: String? {
+        guard let preview = emulatedPreview,
+              preview.result == .failure || preview.error != nil else { return nil }
+        return preview.error?.message
+    }
 
     let dismiss = PassthroughSubject<Void, Never>()
 

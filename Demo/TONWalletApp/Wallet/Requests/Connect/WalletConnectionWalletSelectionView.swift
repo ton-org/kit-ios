@@ -1,8 +1,8 @@
 //
-//  WalletsBottomSheetView.swift
+//  WalletConnectionWalletSelectionView.swift
 //  TONWalletApp
 //
-//  Created by Nikita Rodionov on 27.04.2026.
+//  Created by Nikita Rodionov on 29.05.2026.
 //
 //  Copyright (c) 2026 TON Connect
 //
@@ -26,14 +26,11 @@
 
 import SwiftUI
 
-struct WalletsBottomSheetView: View {
-    @ObservedObject var viewModel: WalletsListViewModel
-
+struct WalletConnectionWalletSelectionView: View {
+    let wallets: [WalletConnectionRequestViewModel.SelectableWallet]
+    let selectedId: UUID?
+    let onSelect: (WalletConnectionRequestViewModel.SelectableWallet) -> Void
     let onClose: () -> Void
-    let onAddWallet: () -> Void
-    let onDelete: (WalletViewModel) -> Void
-
-    @State private var actionSheetWallet: WalletViewModel?
 
     var body: some View {
         VStack(alignment: .center, spacing: 24) {
@@ -58,72 +55,77 @@ struct WalletsBottomSheetView: View {
             }
 
             VStack(spacing: 16) {
-                ForEach(viewModel.wallets) { wallet in
-                    WalletsBottomSheetRowView(
-                        title: walletTitle(for: wallet),
+                ForEach(Array(wallets.enumerated()), id: \.element.id) { index, wallet in
+                    walletRow(
+                        title: "Wallet \(index + 1)",
                         truncatedAddress: shortAddress(wallet.address),
                         fullAddress: wallet.address,
-                        isActive: viewModel.activeWallet?.id == wallet.id,
-                        onSelect: {
-                            viewModel.selectActive(wallet: wallet)
-                            onClose()
-                        },
-                        onMore: {
-                            actionSheetWallet = wallet
-                        }
+                        isSelected: wallet.id == selectedId,
+                        onTap: { onSelect(wallet) }
                     )
                 }
             }
-
-            Button(action: onAddWallet) {
-                HStack(spacing: 4) {
-                    TONIcon.plusLarge.image
-                        .resizable()
-                        .scaledToFit()
-                        .size(24)
-                        .foregroundStyle(Color.tonTextOnBrand)
-                    Text("Add wallet")
-                        .textStyle(.bodySemibold)
-                        .foregroundStyle(Color.tonTextOnBrand)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(
-                    Capsule().fill(Color.tonBgBrand)
-                )
-            }
-            .buttonStyle(.plain)
         }
         .padding(.horizontal, 16)
         .padding(.top, 24)
         .padding(.bottom, 24)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.tonBgPrimary)
-        .confirmationDialog(
-            actionSheetWallet.map { walletTitle(for: $0) } ?? "",
-            isPresented: Binding(
-                get: { actionSheetWallet != nil },
-                set: { if !$0 { actionSheetWallet = nil } }
-            ),
-            titleVisibility: .visible
-        ) {
-            Button("Delete wallet", role: .destructive) {
-                if let wallet = actionSheetWallet {
-                    onDelete(wallet)
-                }
-                actionSheetWallet = nil
-            }
-            Button("Cancel", role: .cancel) {
-                actionSheetWallet = nil
-            }
-        }
     }
 
-    private func walletTitle(for wallet: WalletViewModel) -> String {
-        if let index = viewModel.wallets.firstIndex(where: { $0.id == wallet.id }) {
-            return "Wallet \(index + 1)"
+    private func walletRow(
+        title: String,
+        truncatedAddress: String,
+        fullAddress: String,
+        isSelected: Bool,
+        onTap: @escaping () -> Void
+    ) -> some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle().fill(Color.tonBgFillTertiary)
+                    TONIcon.wallet.image
+                        .resizable()
+                        .scaledToFit()
+                        .size(24)
+                        .foregroundStyle(Color.tonTextSecondary)
+                }
+                .frame(width: 48, height: 48)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .textStyle(.bodySemibold)
+                        .foregroundStyle(Color.tonTextPrimary)
+                    HStack(spacing: 4) {
+                        Text(truncatedAddress)
+                            .textStyle(.subheadline2)
+                            .foregroundStyle(Color.tonTextSecondary)
+                        Button {
+                            UIPasteboard.general.string = fullAddress
+                        } label: {
+                            TONIcon.copy.image
+                                .resizable()
+                                .scaledToFit()
+                                .size(16)
+                                .foregroundStyle(Color.tonTextSecondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+
+                Spacer(minLength: 0)
+
+                if isSelected {
+                    TONIcon.tick.image
+                        .resizable()
+                        .scaledToFit()
+                        .size(20)
+                        .foregroundStyle(Color.tonTextBrand)
+                }
+            }
+            .contentShape(.rect)
         }
-        return "Wallet"
+        .buttonStyle(.plain)
     }
 
     private func shortAddress(_ address: String) -> String {

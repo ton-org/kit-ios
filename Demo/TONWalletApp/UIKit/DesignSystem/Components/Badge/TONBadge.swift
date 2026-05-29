@@ -23,15 +23,17 @@ struct TONBadge: View {
 
     let title: String
     let style: Style
+    let uppercase: Bool
 
-    init(_ title: String, style: Style = .filled) {
+    init(_ title: String, style: Style = .filled, uppercase: Bool = true) {
         self.title = title
         self.style = style
+        self.uppercase = uppercase
     }
 
     var body: some View {
         Text(title)
-            .textStyle(.footnoteCaps)
+            .textStyle(uppercase ? .footnoteCaps : .footnote)
             .foregroundStyle(style.foreground)
             .padding(.horizontal, 4)
             .padding(.top, 2)

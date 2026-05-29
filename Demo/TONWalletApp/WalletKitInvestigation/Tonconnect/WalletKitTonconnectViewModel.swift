@@ -1,10 +1,10 @@
 //
-//  WalletSignDataRequestViewModel.swift
+//  WalletKitTonconnectViewModel.swift
 //  TONWalletApp
 //
-//  Created by Nikita Rodionov on 10.10.2025.
+//  Created by Nikita Rodionov on 29.05.2026.
 //
-//  Copyright (c) 2025 TON Connect
+//  Copyright (c) 2026 TON Connect
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -12,10 +12,10 @@
 //  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 //  copies of the Software, and to permit persons to whom the Software is
 //  furnished to do so, subject to the following conditions:
-//  
+//
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-//  
+//
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,41 +25,22 @@
 //  SOFTWARE.
 
 import Foundation
-import Combine
 import TONWalletKit
 
 @MainActor
-class WalletSignDataRequestViewModel: ObservableObject {
-    private let request: TONWalletSignDataRequest
-    
-    var dAppInfo: TONDAppInfo? { request.event.preview.dAppInfo }
-    var walletAddress: String? { request.event.walletAddress?.value }
-    var signData: TONSignData { request.event.payload.data }
-    
-    let dismiss = PassthroughSubject<Void, Never>()
-    
-    init(request: TONWalletSignDataRequest) {
-        self.request = request
+class WalletKitTonconnectViewModel: ObservableObject {
+    let wallet: WalletViewModel
+
+    init(wallet: WalletViewModel) {
+        self.wallet = wallet
     }
-    
-    func approve() {
+
+    func connect(url: String) {
         Task {
             do {
-                _ = try await request.approve()
-                dismiss.send()
+                try await TONWalletKit.shared().connect(url: url)
             } catch {
-                debugPrint("Error approving sign data request: \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    func reject() {
-        Task {
-            do {
-                try await request.reject(reason: "User rejected sign data request")
-                dismiss.send()
-            } catch {
-                debugPrint("Error rejecting sign data request: \(error.localizedDescription)")
+                debugPrint(error.localizedDescription)
             }
         }
     }

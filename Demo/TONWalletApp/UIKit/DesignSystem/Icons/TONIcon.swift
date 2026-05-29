@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // All cases below are backed by SVG imagesets in
 // Demo/TONWalletApp/Assets.xcassets/DesignSystem/<Category>/<Name>.imageset/.
@@ -60,6 +61,7 @@ enum TONIcon: String, CaseIterable, Hashable {
     case clear = "Clear"
     case close = "Close"
     case copy = "Copy"
+    case fingerprint = "Fingerprint"
     case doc = "Doc"
     case done = "Done"
     case failed = "Failed"
@@ -111,7 +113,22 @@ enum TONIcon: String, CaseIterable, Hashable {
     case telegramWallet40 = "TelegramWallet40"
     case toncoin40 = "Toncoin40"
 
-    var image: Image { Image(rawValue) }
+    var image: Image {
+        if UIImage(named: rawValue) != nil {
+            return Image(rawValue)
+        }
+        if let sfSymbol = sfSymbolFallback {
+            return Image(systemName: sfSymbol)
+        }
+        return Image(rawValue)
+    }
+
+    private var sfSymbolFallback: String? {
+        switch self {
+        case .fingerprint: return "touchid"
+        default: return nil
+        }
+    }
 
     enum Category: String, CaseIterable, Hashable {
         case tabbar = "Tabbar"
@@ -133,8 +150,8 @@ enum TONIcon: String, CaseIterable, Hashable {
              .trend, .volume, .volume2, .volume3, .wallet, .wallet4:
             return .icons24
         case .changeValue, .chevronBackSmall, .chevronDownSmall, .chevronForwardSmall, .chevronTopSmall,
-             .clear, .close, .copy, .doc, .done, .failed, .github, .globe, .inProgress, .link20, .openLink,
-             .`switch`, .telegram:
+             .clear, .close, .copy, .fingerprint, .doc, .done, .failed, .github, .globe, .inProgress,
+             .link20, .openLink, .`switch`, .telegram:
             return .icons20
         case .activeCheck, .activeDot, .headerShare, .hot, .info, .loading, .new, .newSparkle, .padlock,
              .padlockOpen, .present, .settings, .star, .starFilled, .switch16, .tick, .trending, .upArrow,
