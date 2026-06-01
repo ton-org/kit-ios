@@ -1,10 +1,10 @@
 //
-//  SendableTokenViewModel.swift
+//  WalletKitTonconnectViewModel.swift
 //  TONWalletApp
 //
-//  Created by Nikita Rodionov on 01.11.2025.
-//  
-//  Copyright (c) 2025 TON Connect
+//  Created by Nikita Rodionov on 29.05.2026.
+//
+//  Copyright (c) 2026 TON Connect
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -12,10 +12,10 @@
 //  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 //  copies of the Software, and to permit persons to whom the Software is
 //  furnished to do so, subject to the following conditions:
-//  
+//
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-//  
+//
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,25 +25,23 @@
 //  SOFTWARE.
 
 import Foundation
-import Combine
+import TONWalletKit
 
-protocol SendableTokenViewModel: AnyObject {
-    var name: String { get }
-    var symbol: String { get }
-    var balance: String { get }
-    var decimals: Int { get }
-    var requiredAmountInfo: String { get }
-    var balanceChanges: AnyPublisher<Void, Never> { get }
+@MainActor
+class WalletKitTonconnectViewModel: ObservableObject {
+    let wallet: WalletViewModel
 
-    func send(amount: String, address: String) async throws
-    func updateBalance() async throws
-}
+    init(wallet: WalletViewModel) {
+        self.wallet = wallet
+    }
 
-extension SendableTokenViewModel {
-    
-    var initials: String {
-        let components = name.components(separatedBy: " ")
-        let initials = components.compactMap { $0.first }.prefix(2)
-        return String(initials).uppercased()
+    func connect(url: String) {
+        Task {
+            do {
+                try await TONWalletKit.shared().connect(url: url)
+            } catch {
+                debugPrint(error.localizedDescription)
+            }
+        }
     }
 }

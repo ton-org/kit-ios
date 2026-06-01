@@ -184,12 +184,13 @@ struct JSWalletKitContextTests {
         #expect(initCalls.count == 1)
 
         let args = try #require(initCalls.first?.args)
-        #expect(args.count == 5)
+        #expect(args.count == 6)
         #expect(args[0] as? String == "config")
         #expect(args[1] as? String == "storage")
         #expect(args[2] is JSValue)
         #expect(args[3] as? String == "session")
         #expect(args[4] as? String == "api")
+        #expect((args[5] as? JSValue) == nil)
     }
 
     @Test("InitializeWalletKit throws when JS call fails")
@@ -276,4 +277,227 @@ struct JSWalletKitContextTests {
         #expect(handler.handledEvents.count == 1)
         #expect(handler.handledEvents.first?.type == .connectRequest)
     }
+
+    // MARK: - fetchManifest
+
+    @Test("InitializeWalletKit forwards fetchManifest as the 6th initWalletKit arg")
+    func initializeWalletKitForwardsFetchManifest() async throws {
+        let (sut, mock) = makeSUT()
+        let fetchManifest: TONWalletKitConfiguration.FetchManifest = { _ in
+            TONManifestFetchResult(manifest: nil)
+        }
+
+        try await sut.initializeWalletKit(
+            configuration: "config",
+            storage: "storage",
+            sessionManager: "session",
+            apiClients: "api",
+            fetchManifest: fetchManifest
+        )
+
+        let initCalls = mock.callRecords.filter { $0.path == "initWalletKit" }
+        #expect(initCalls.count == 1)
+
+        let args = try #require(initCalls.first?.args)
+        #expect(args.count == 6)
+        let fetchManifestArg = try #require(args[5] as? JSValue)
+        #expect(fetchManifestArg.isObject)
+    }
+
+    @Test("InitializeWalletKit passes nil 6th arg when fetchManifest not provided")
+    func initializeWalletKitOmitsFetchManifest() async throws {
+        let (sut, mock) = makeSUT()
+
+        try await sut.initializeWalletKit(
+            configuration: "config",
+            storage: "storage",
+            sessionManager: "session",
+            apiClients: "api"
+        )
+
+        let initCalls = mock.callRecords.filter { $0.path == "initWalletKit" }
+        let args = try #require(initCalls.first?.args)
+        #expect(args.count == 6)
+        #expect((args[5] as? JSValue) == nil)
+    }
+
+    @Test("fetchManifest argument is a function from JS during initializeWalletKit")
+    func fetchManifestCallableTypeofFromJS() async throws {
+        let context = JSContext()!
+        context.evaluateScript("""
+            globalThis.__fetchManifestType = null;
+            function initWalletKit(configuration, storage, bridgeTransport, sessionManager, apiClients, fetchManifest) {
+                globalThis.__fetchManifestType = typeof fetchManifest;
+            }
+        """)
+        let sut = JSWalletKitContext(context: context)
+        let fetchManifest: TONWalletKitConfiguration.FetchManifest = { _ in
+            TONManifestFetchResult(manifest: nil)
+        }
+
+        try await sut.initializeWalletKit(
+            configuration: "config",
+            storage: "storage",
+            sessionManager: "session",
+            apiClients: "api",
+            fetchManifest: fetchManifest
+        )
+
+        let typeofResult = context.evaluateScript("globalThis.__fetchManifestType")?.toString()
+        #expect(typeofResult == "function", "JS must see fetchManifest as a callable function, got: \(typeofResult ?? "nil")")
+    }
+
+    @Test("fetchManifest invoked from JS receives URL and resolves Promise with encoded manifest")
+    func fetchManifestResolvesPromiseWithManifest() async throws {
+        let context = JSContext()!
+        context.evaluateScript("""
+            function initWalletKit(configuration, storage, bridgeTransport, sessionManager, apiClients, fetchManifest) {
+                fetchManifest("https://example.com/tonconnect-manifest.json").then(
+                    function(value) { globalThis.__notifyResolved(JSON.stringify(value)); },
+                    function(error) { globalThis.__notifyRejected(String(error)); }
+                );
+            }
+        """)
+        let sut = JSWalletKitContext(context: context)
+
+        let receivedURLBox = Box<String?>(nil)
+        let expectedManifest = TONManifestFetchResult(
+            manifest: AnyCodable(["url": "https://example.com", "name": "Test dApp"])
+        )
+
+        let resolved: String = await withCheckedContinuation { continuation in
+            let resumed = Box<Bool>(false)
+            let onResolved: @convention(block) (JSValue) -> Void = { value in
+                guard !resumed.value else { return }
+                resumed.value = true
+                continuation.resume(returning: value.toString() ?? "")
+            }
+            let onRejected: @convention(block) (JSValue) -> Void = { _ in
+                guard !resumed.value else { return }
+                resumed.value = true
+                continuation.resume(returning: "<rejected>")
+            }
+            context.setObject(onResolved, forKeyedSubscript: "__notifyResolved" as NSString)
+            context.setObject(onRejected, forKeyedSubscript: "__notifyRejected" as NSString)
+
+            Task {
+                let fetchManifest: TONWalletKitConfiguration.FetchManifest = { url in
+                    receivedURLBox.value = url
+                    return expectedManifest
+                }
+                try? await sut.initializeWalletKit(
+                    configuration: "config",
+                    storage: "storage",
+                    sessionManager: "session",
+                    apiClients: "api",
+                    fetchManifest: fetchManifest
+                )
+            }
+        }
+
+        #expect(receivedURLBox.value == "https://example.com/tonconnect-manifest.json")
+        #expect(resolved.contains("\"url\""))
+        #expect(resolved.contains("\"https://example.com\""))
+        #expect(resolved.contains("\"name\""))
+        #expect(resolved.contains("\"Test dApp\""))
+    }
+
+    @Test("fetchManifest invoked from JS rejects Promise when Swift closure throws")
+    func fetchManifestRejectsPromiseOnSwiftThrow() async throws {
+        let context = JSContext()!
+        context.evaluateScript("""
+            function initWalletKit(configuration, storage, bridgeTransport, sessionManager, apiClients, fetchManifest) {
+                fetchManifest("https://broken.example/manifest.json").then(
+                    function(value) { globalThis.__notifyResolved(JSON.stringify(value)); },
+                    function(error) { globalThis.__notifyRejected(String(error)); }
+                );
+            }
+        """)
+        let sut = JSWalletKitContext(context: context)
+
+        let rejection: String = await withCheckedContinuation { continuation in
+            let resumed = Box<Bool>(false)
+            let onResolved: @convention(block) (JSValue) -> Void = { _ in
+                guard !resumed.value else { return }
+                resumed.value = true
+                continuation.resume(returning: "<resolved>")
+            }
+            let onRejected: @convention(block) (JSValue) -> Void = { value in
+                guard !resumed.value else { return }
+                resumed.value = true
+                continuation.resume(returning: value.toString() ?? "")
+            }
+            context.setObject(onResolved, forKeyedSubscript: "__notifyResolved" as NSString)
+            context.setObject(onRejected, forKeyedSubscript: "__notifyRejected" as NSString)
+
+            Task {
+                let fetchManifest: TONWalletKitConfiguration.FetchManifest = { _ in
+                    throw "manifest fetch failed"
+                }
+                try? await sut.initializeWalletKit(
+                    configuration: "config",
+                    storage: "storage",
+                    sessionManager: "session",
+                    apiClients: "api",
+                    fetchManifest: fetchManifest
+                )
+            }
+        }
+
+        #expect(rejection.contains("manifest fetch failed"))
+    }
+
+    @Test("fetchManifest Promise resolves with empty manifest when result has nil fields")
+    func fetchManifestResolvesEmptyResult() async throws {
+        let context = JSContext()!
+        context.evaluateScript("""
+            function initWalletKit(configuration, storage, bridgeTransport, sessionManager, apiClients, fetchManifest) {
+                fetchManifest("https://example.com/empty.json").then(
+                    function(value) { globalThis.__notifyResolved(JSON.stringify(value)); },
+                    function(error) { globalThis.__notifyRejected(String(error)); }
+                );
+            }
+        """)
+        let sut = JSWalletKitContext(context: context)
+
+        let resolved: String = await withCheckedContinuation { continuation in
+            let resumed = Box<Bool>(false)
+            let onResolved: @convention(block) (JSValue) -> Void = { value in
+                guard !resumed.value else { return }
+                resumed.value = true
+                continuation.resume(returning: value.toString() ?? "")
+            }
+            let onRejected: @convention(block) (JSValue) -> Void = { _ in
+                guard !resumed.value else { return }
+                resumed.value = true
+                continuation.resume(returning: "<rejected>")
+            }
+            context.setObject(onResolved, forKeyedSubscript: "__notifyResolved" as NSString)
+            context.setObject(onRejected, forKeyedSubscript: "__notifyRejected" as NSString)
+
+            Task {
+                let fetchManifest: TONWalletKitConfiguration.FetchManifest = { _ in
+                    TONManifestFetchResult(
+                        manifest: nil,
+                        manifestFetchErrorCode: .manifestNotFoundError
+                    )
+                }
+                try? await sut.initializeWalletKit(
+                    configuration: "config",
+                    storage: "storage",
+                    sessionManager: "session",
+                    apiClients: "api",
+                    fetchManifest: fetchManifest
+                )
+            }
+        }
+
+        #expect(resolved != "<rejected>")
+        #expect(resolved.contains("manifestFetchErrorCode"))
+    }
+}
+
+private final class Box<Value>: @unchecked Sendable {
+    var value: Value
+    init(_ value: Value) { self.value = value }
 }

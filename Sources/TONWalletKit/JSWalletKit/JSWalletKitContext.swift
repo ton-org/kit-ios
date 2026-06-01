@@ -75,7 +75,7 @@ class JSWalletKitContext: JSWalletKitContextProtocol {
         storage: any JSValueEncodable,
         sessionManager: any JSValueEncodable,
         apiClients: any JSValueEncodable,
-        fetchManifest: TONWalletKitConfiguration.FetchManifest?
+        fetchManifest: TONWalletKitConfiguration.FetchManifest? = nil
     ) async throws {
         let bridgeTransport: @convention(block) (JSValue) -> Void = { [weak self] response in
             do {
@@ -86,7 +86,7 @@ class JSWalletKitContext: JSWalletKitContextProtocol {
             }
         }
 
-        var jsFetchManifest: AnyJSValueEncodable?
+        var jsFetchManifest: JSValue?
         
         if let fetchManifest {
             let fetchManifestBlock: @convention(block) (String) -> JSValue = { [weak self] url in
@@ -109,7 +109,7 @@ class JSWalletKitContext: JSWalletKitContextProtocol {
                     }
                 }
             }
-            jsFetchManifest = AnyJSValueEncodable(fetchManifestBlock)
+            jsFetchManifest = JSValue(object: fetchManifestBlock, in: context.jsContext)
         }
 
         try await self.initWalletKit(

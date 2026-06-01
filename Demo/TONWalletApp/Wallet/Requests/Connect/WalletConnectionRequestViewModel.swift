@@ -38,7 +38,7 @@ class WalletConnectionRequestViewModel: ObservableObject {
     var dAppInfo: TONDAppInfo? { request.event.preview.dAppInfo }
     var permissions: [TONConnectionRequestEventPreviewPermission] { request.event.preview.permissions }
     
-    let dismiss = PassthroughSubject<Void, Never>()
+    let dismiss = PassthroughSubject<TONWalletKitEvent?, Never>()
 
     init(request: TONWalletConnectionRequest, wallets: [any TONWalletProtocol]) {
         self.request = request
@@ -55,21 +55,18 @@ class WalletConnectionRequestViewModel: ObservableObject {
         Task {
             do {
                 let followUp = try await request.approve(wallet: selectedWallet.wallet)
-                dismiss.send()
-                if let followUp {
-                    TONEventsHandler.shared.events.send(followUp)
-                }
+                dismiss.send(followUp)
             } catch {
                 debugPrint(error.localizedDescription)
             }
         }
     }
-    
+
     func reject() {
         Task {
             do {
                 try await request.reject()
-                dismiss.send()
+                dismiss.send(nil)
             } catch {
                 debugPrint(error.localizedDescription)
             }

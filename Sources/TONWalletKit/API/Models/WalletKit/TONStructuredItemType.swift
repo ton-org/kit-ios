@@ -33,6 +33,5 @@ public enum TONStructuredItemType: String, Codable, CaseIterable {
     case nft = "nft"
 }
 
-
 extension TONStructuredItemType: JSValueCodable {}
 
