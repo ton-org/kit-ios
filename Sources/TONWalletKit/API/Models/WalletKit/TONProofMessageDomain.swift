@@ -32,11 +32,11 @@ import _BigInt
 public struct TONProofMessageDomain: Codable {
 
     /** Length of the domain value in bytes */
-    public var lengthBytes: Int
+    public var lengthBytes: UInt32
     /** Domain name string (e.g., \"example.com\") */
     public var value: String
 
-    public init(lengthBytes: Int, value: String) {
+    public init(lengthBytes: UInt32, value: String) {
         self.lengthBytes = lengthBytes
         self.value = value
     }

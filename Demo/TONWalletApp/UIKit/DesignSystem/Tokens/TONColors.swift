@@ -19,5 +19,7 @@ extension Color {
     static let tonBgSuperLightGray     = Color(hex: "#F7F8FA")
     static let tonBgLightBlue          = Color(hex: "#ECF1FF")
     static let tonBgLightBlueSecondary = Color(hex: "#D4E5FF")
+    static let tonBgLightGreen         = Color(hex: "#E5F6E8")
     static let tonBgBrandFillSubtle    = Color(hex: "#007AFF1A") // 10% accent blue (action button secondary)
+    static let tonBgScrimDark          = Color(hex: "#00000026") // 15% black — hold/press scrim overlay
 }

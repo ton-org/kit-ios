@@ -48,15 +48,10 @@ struct WalletsBottomSheetView: View {
                 HStack {
                     Spacer()
                     Button(action: onClose) {
-                        ZStack {
-                            Circle().fill(Color.tonBgFillTertiary)
-                            TONIcon.close.image
-                                .resizable()
-                                .scaledToFit()
-                                .size(16)
-                                .foregroundStyle(Color.tonTextSecondary)
-                        }
-                        .frame(width: 28, height: 28)
+                        TONIcon.close.image
+                            .resizable()
+                            .scaledToFit()
+                            .size(28)
                     }
                     .buttonStyle(.plain)
                 }

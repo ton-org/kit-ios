@@ -10,6 +10,25 @@ struct MockStakingProvider: TONStakingProviderProtocol {
     var identifier: TONTonStakersStakingProviderIdentifier
 
     var shouldThrow = false
+    var mockMetadata = TONStakingProviderMetadata(
+        name: "Mock",
+        supportedUnstakeModes: [.instant, .whenAvailable, .roundEnd],
+        supportsReversedQuote: false,
+        stakeToken: TONStakingTokenInfo(ticker: "TON", decimals: 9, address: "ton"),
+        receiveToken: nil,
+        contractAddress: nil
+    )
+    var mockSupportedNetworks: [TONNetwork] = [.mainnet]
+
+    func metadata(network: TONNetwork?) throws -> TONStakingProviderMetadata {
+        if shouldThrow { throw "Mock metadata error" }
+        return mockMetadata
+    }
+
+    func supportedNetworks() throws -> [TONNetwork] {
+        if shouldThrow { throw "Mock supportedNetworks error" }
+        return mockSupportedNetworks
+    }
 
     func quote(params: TONStakingQuoteParams<AnyCodable>) async throws -> TONStakingQuote {
         if shouldThrow { throw "Mock quote error" }
@@ -26,14 +45,9 @@ struct MockStakingProvider: TONStakingProviderProtocol {
         return makeStubBalance()
     }
 
-    func stakingProviderInfo(network: TONNetwork?) async throws -> TONStakingProviderInfo {
+    func info(network: TONNetwork?) async throws -> TONStakingProviderInfo {
         if shouldThrow { throw "Mock info error" }
         return makeStubProviderInfo()
-    }
-
-    func supportedUnstakeModes() throws -> [TONUnstakeMode] {
-        if shouldThrow { throw "Mock modes error" }
-        return [.instant, .whenAvailable, .roundEnd]
     }
 
     private func makeStubQuote() -> TONStakingQuote {
@@ -44,8 +58,7 @@ struct MockStakingProvider: TONStakingProviderProtocol {
             amountIn: "1",
             amountOut: "0.95",
             network: TONNetwork(chainId: "-239"),
-            providerId: "tonstakers",
-            apy: 500
+            providerId: "tonstakers"
         )
     }
 
@@ -61,8 +74,7 @@ struct MockStakingProvider: TONStakingProviderProtocol {
 
     private func makeStubProviderInfo() -> TONStakingProviderInfo {
         TONStakingProviderInfo(
-            apy: 500,
-            providerId: "tonstakers"
+            apy: 500
         )
     }
 }

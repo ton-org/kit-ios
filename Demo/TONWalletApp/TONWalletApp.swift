@@ -69,7 +69,7 @@ extension TONWalletKit {
         if Env.toncenterAPIKey.isEmpty || Env.toncenterStreamingAPIKey.isEmpty {
             fatalError("API keys not configured. Fill in your keys in Demo/TONWalletApp/Env.swift")
         }
-        let bridgeURL = "https://bridge.tonapi.io/bridge"
+        let bridgeURL = "https://connect.ton.org/bridge"
         let apiClientConfig = TONWalletKitConfiguration.APIClientConfiguration(key: Env.toncenterAPIKey)
         let testNetworkConfiguration = TONWalletKitConfiguration.NetworkConfiguration(
             network: .testnet,
@@ -98,6 +98,7 @@ extension TONWalletKit {
             features: [
                 TONSendTransactionFeature(maxMessages: 255),
                 TONSignDataFeature(types: [.text, .binary, .cell]),
+                TONEmbeddedRequestFeature()
             ]
         )
         let kit = TONWalletKit(configuration: configuration)

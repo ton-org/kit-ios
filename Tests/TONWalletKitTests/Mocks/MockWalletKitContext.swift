@@ -33,7 +33,8 @@ class MockWalletKitContext: MockJSDynamicObject, JSWalletKitContextProtocol {
         configuration: any JSValueEncodable,
         storage: any JSValueEncodable,
         sessionManager: any JSValueEncodable,
-        apiClients: any JSValueEncodable
+        apiClients: any JSValueEncodable,
+        fetchManifest: TONWalletKitConfiguration.FetchManifest?
     ) async throws {}
 
     func add(eventsHandler: any JSBridgeEventsHandler) throws {}

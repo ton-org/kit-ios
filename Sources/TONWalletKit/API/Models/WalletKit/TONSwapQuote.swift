@@ -45,8 +45,6 @@ public struct TONSwapQuote: Codable {
     public var network: TONNetwork
     /** Price impact of the swap in basis points (100 = 1%) */
     public var priceImpact: Int?
-    /** Fees associated with the swap */
-    public var fee: [TONSwapFee]?
     /** Identifier of the swap provider */
     public var providerId: String
     /** Unix timestamp in seconds when the quote expires */
@@ -54,7 +52,7 @@ public struct TONSwapQuote: Codable {
     /** Provider-specific metadata for the quote */
     public var metadata: AnyCodable?
 
-    public init(fromToken: TONSwapToken, toToken: TONSwapToken, rawFromAmount: TONTokenAmount, rawToAmount: TONTokenAmount, fromAmount: String, toAmount: String, rawMinReceived: TONTokenAmount, minReceived: String, network: TONNetwork, priceImpact: Int? = nil, fee: [TONSwapFee]? = nil, providerId: String, expiresAt: Int? = nil, metadata: AnyCodable? = nil) {
+    public init(fromToken: TONSwapToken, toToken: TONSwapToken, rawFromAmount: TONTokenAmount, rawToAmount: TONTokenAmount, fromAmount: String, toAmount: String, rawMinReceived: TONTokenAmount, minReceived: String, network: TONNetwork, priceImpact: Int? = nil, providerId: String, expiresAt: Int? = nil, metadata: AnyCodable? = nil) {
         self.fromToken = fromToken
         self.toToken = toToken
         self.rawFromAmount = rawFromAmount
@@ -65,7 +63,6 @@ public struct TONSwapQuote: Codable {
         self.minReceived = minReceived
         self.network = network
         self.priceImpact = priceImpact
-        self.fee = fee
         self.providerId = providerId
         self.expiresAt = expiresAt
         self.metadata = metadata
@@ -82,7 +79,6 @@ public struct TONSwapQuote: Codable {
         case minReceived
         case network
         case priceImpact
-        case fee
         case providerId
         case expiresAt
         case metadata
@@ -102,7 +98,6 @@ public struct TONSwapQuote: Codable {
         try container.encode(minReceived, forKey: .minReceived)
         try container.encode(network, forKey: .network)
         try container.encodeIfPresent(priceImpact, forKey: .priceImpact)
-        try container.encodeIfPresent(fee, forKey: .fee)
         try container.encode(providerId, forKey: .providerId)
         try container.encodeIfPresent(expiresAt, forKey: .expiresAt)
         try container.encodeIfPresent(metadata, forKey: .metadata)

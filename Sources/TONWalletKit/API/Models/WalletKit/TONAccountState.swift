@@ -27,54 +27,61 @@
 import Foundation
 import _BigInt
 
-/** State of an account at a specific point in time. */
+/** Blockchain state of an account at a given point in time.  The &#x60;status&#x60; field distinguishes four cases: - &#x60;active&#x60; — contract deployed, &#x60;code&#x60; and &#x60;data&#x60; present - &#x60;uninitialized&#x60; — has balance/history but no contract deployed; &#x60;code&#x60;/&#x60;data&#x60; omitted - &#x60;frozen&#x60; — frozen due to storage debt; &#x60;frozenHash&#x60; points at the pre-freeze state - &#x60;non-existing&#x60; — no on-chain record at all; balance is &#x60;&#39;0&#39;&#x60; and other fields omitted */
 
 public struct TONAccountState: Codable {
 
-    /** The state hash of the account */
-    public var hash: String?
-    public var balance: TONTokenAmount
+    public var address: TONUserFriendlyAddress
+    public var status: TONAccountStatus
+    public var rawBalance: TONTokenAmount
+    /** Balance formatted in TON (10^9 nanotons = 1 TON). */
+    public var balance: String
     /** Map of extra currency IDs to their amounts. Extra currencies are additional tokens that can be attached to TON messages. */
-    public var extraCurrencies: [String: String]?
-    public var accountStatus: TONAccountStatus?
-    /** The hash of the frozen account state, if the account is frozen */
-    public var frozenHash: String?
-    /** The hash of the contract's data section */
-    public var dataHash: String?
-    /** The hash of the smart contract code */
-    public var codeHash: String?
+    public var extraCurrencies: [String: String]
+    /** Base64-encoded contract code BOC. Omitted if the contract is not deployed. */
+    public var code: String?
+    /** Base64-encoded contract data BOC. Omitted if the contract is not deployed. */
+    public var data: String?
+    public var lastTransaction: TONTransactionId?
+    public var frozenHash: TONHex?
 
-    public init(hash: String? = nil, balance: TONTokenAmount, extraCurrencies: [String: String]? = nil, accountStatus: TONAccountStatus? = nil, frozenHash: String? = nil, dataHash: String? = nil, codeHash: String? = nil) {
-        self.hash = hash
+    public init(address: TONUserFriendlyAddress, status: TONAccountStatus, rawBalance: TONTokenAmount, balance: String, extraCurrencies: [String: String], code: String? = nil, data: String? = nil, lastTransaction: TONTransactionId? = nil, frozenHash: TONHex? = nil) {
+        self.address = address
+        self.status = status
+        self.rawBalance = rawBalance
         self.balance = balance
         self.extraCurrencies = extraCurrencies
-        self.accountStatus = accountStatus
+        self.code = code
+        self.data = data
+        self.lastTransaction = lastTransaction
         self.frozenHash = frozenHash
-        self.dataHash = dataHash
-        self.codeHash = codeHash
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
-        case hash
+        case address
+        case status
+        case rawBalance
         case balance
         case extraCurrencies
-        case accountStatus
+        case code
+        case data
+        case lastTransaction
         case frozenHash
-        case dataHash
-        case codeHash
     }
 
     // Encodable protocol methods
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(hash, forKey: .hash)
+        try container.encode(address, forKey: .address)
+        try container.encode(status, forKey: .status)
+        try container.encode(rawBalance, forKey: .rawBalance)
         try container.encode(balance, forKey: .balance)
-        try container.encodeIfPresent(extraCurrencies, forKey: .extraCurrencies)
-        try container.encodeIfPresent(accountStatus, forKey: .accountStatus)
+        try container.encode(extraCurrencies, forKey: .extraCurrencies)
+        try container.encodeIfPresent(code, forKey: .code)
+        try container.encodeIfPresent(data, forKey: .data)
+        try container.encodeIfPresent(lastTransaction, forKey: .lastTransaction)
         try container.encodeIfPresent(frozenHash, forKey: .frozenHash)
-        try container.encodeIfPresent(dataHash, forKey: .dataHash)
-        try container.encodeIfPresent(codeHash, forKey: .codeHash)
     }
 }
 

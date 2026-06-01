@@ -34,15 +34,18 @@ public struct TONStakingQuoteParams<TProviderOptions: Codable>: Codable {
     public var userAddress: TONUserFriendlyAddress?
     public var network: TONNetwork?
     public var unstakeMode: TONUnstakeMode?
+    /** If true, for unstake requests the amount is specified in the staking coin (e.g. TON) instead of the Liquid Staking Token (e.g. tsTON). */
+    public var isReversed: Bool?
     /** Provider-specific options */
     public var providerOptions: TProviderOptions?
 
-    public init(direction: TONStakingQuoteDirection, amount: String, userAddress: TONUserFriendlyAddress? = nil, network: TONNetwork? = nil, unstakeMode: TONUnstakeMode? = nil, providerOptions: TProviderOptions? = nil) {
+    public init(direction: TONStakingQuoteDirection, amount: String, userAddress: TONUserFriendlyAddress? = nil, network: TONNetwork? = nil, unstakeMode: TONUnstakeMode? = nil, isReversed: Bool? = nil, providerOptions: TProviderOptions? = nil) {
         self.direction = direction
         self.amount = amount
         self.userAddress = userAddress
         self.network = network
         self.unstakeMode = unstakeMode
+        self.isReversed = isReversed
         self.providerOptions = providerOptions
     }
 
@@ -52,6 +55,7 @@ public struct TONStakingQuoteParams<TProviderOptions: Codable>: Codable {
         case userAddress
         case network
         case unstakeMode
+        case isReversed
         case providerOptions
     }
 
@@ -64,6 +68,7 @@ public struct TONStakingQuoteParams<TProviderOptions: Codable>: Codable {
         try container.encodeIfPresent(userAddress, forKey: .userAddress)
         try container.encodeIfPresent(network, forKey: .network)
         try container.encodeIfPresent(unstakeMode, forKey: .unstakeMode)
+        try container.encodeIfPresent(isReversed, forKey: .isReversed)
         try container.encodeIfPresent(providerOptions, forKey: .providerOptions)
     }
 }

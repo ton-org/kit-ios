@@ -20,4 +20,6 @@ extension Color {
     static var tonBgOverlay:     Color { Color(light: .tonBgTertiaryFill,       dark: .tonBgTertiaryFill) }
     static var tonBgFillTertiary:   Color { Color(light: .tonBgTertiaryFill,    dark: .tonBgTertiaryFill) }
     static var tonBgFillQuaternary: Color { Color(light: .tonBgQuaternaryFill,  dark: .tonBgQuaternaryFill) }
+    static var tonBgSuccessSubtle:  Color { Color(light: .tonBgLightGreen,      dark: .tonBgLightGreen) }
+    static var tonBgScrim:          Color { Color(light: .tonBgScrimDark,      dark: .tonBgScrimDark) }
 }

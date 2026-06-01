@@ -25,6 +25,7 @@
 //  SOFTWARE.
 
 import Foundation
+import JavaScriptCore
 
 public class TONWalletKit {
     let configuration: TONWalletKitConfiguration
@@ -126,10 +127,27 @@ public class TONWalletKit {
     public func signer(privateKey: Data) async throws -> any TONWalletSignerProtocol {
         let data = [UInt8](privateKey)
         let signer = try await jsWalletKit().createSignerFromPrivateKey(data)
-        
+
         return TONWalletSigner(jsWalletSigner: signer)
     }
-    
+
+    public func generateMnemonic() async throws -> TONMnemonic {
+        let value: JSValue = try await jsWalletKit().createMnemonic()
+        let words = value.toArray()?.compactMap { $0 as? String } ?? []
+
+        return TONMnemonic(value: words)
+    }
+
+    public func createWallet(
+        parameters: TONV5R1WalletParameters
+    ) async throws -> TONWalletCreationResult {
+        let mnemonic = try await generateMnemonic()
+        let signer = try await signer(mnemonic: mnemonic)
+        let adapter = try await walletV5R1Adapter(signer: signer, parameters: parameters)
+
+        return TONWalletCreationResult(mnemonic: mnemonic, walletAdapter: adapter)
+    }
+
     public func walletV4R2Adapter(
         signer: any TONWalletSignerProtocol,
         parameters: TONV4R2WalletParameters
@@ -156,17 +174,17 @@ public class TONWalletKit {
 
         return wallet
     }
-    
+
     public func wallet(id: TONWalletID) async throws -> any TONWalletProtocol {
         let wallet: TONWallet = try await jsWalletKit().getWallet(id)
-        
+
         return wallet
     }
-    
+
     public func wallets() async throws -> [any TONWalletProtocol] {
         let value: JSValue = try await jsWalletKit().getWallets()
         let jsWallets = value.toObjectsArray()
-        
+
         return try jsWallets.map {
             let wallet: TONWallet = try $0.decode()
             return wallet

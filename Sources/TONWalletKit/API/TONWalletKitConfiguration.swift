@@ -31,6 +31,8 @@ import UIKit
 #endif
 
 public struct TONWalletKitConfiguration: Encodable, Hashable {
+    public typealias FetchManifest = (_ manifestUrl: String) async throws -> TONManifestFetchResult
+
     let networkConfigurations: [NetworkConfiguration]
     let deviceInfo: DeviceInfo
     let walletManifest: Manifest
@@ -40,7 +42,8 @@ public struct TONWalletKitConfiguration: Encodable, Hashable {
     let eventsConfiguration: EventsConfiguration?
     let devConfiguration: DevConfiguration?
     let analyticsConfiguration: AnalyticsConfiguration?
-    
+    public var fetchManifest: FetchManifest?
+
     public init(
         networkConfigurations: Set<NetworkConfiguration>,
         walletManifest: Manifest,
@@ -53,17 +56,17 @@ public struct TONWalletKitConfiguration: Encodable, Hashable {
         analyticsConfiguration: AnalyticsConfiguration? = nil
     ) {
         self.networkConfigurations = Array(networkConfigurations)
-        
+
         let rawFeatures = features.compactMap(\.raw)
-        
+
         self.deviceInfo = DeviceInfo(
             appName: walletManifest.appName,
             features: rawFeatures
         )
-        
+
         var manifest = walletManifest
         manifest.features = rawFeatures
-        
+
         self.walletManifest = manifest
         self.storage = storage
         self.sessionManager = sessionManager

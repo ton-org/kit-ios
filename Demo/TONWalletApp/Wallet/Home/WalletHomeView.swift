@@ -25,6 +25,7 @@
 //  SOFTWARE.
 
 import SwiftUI
+import TONWalletKit
 
 struct WalletHomeView: View {
     @ObservedObject var walletsList: WalletsListViewModel
@@ -50,9 +51,9 @@ struct WalletHomeView: View {
                     balanceBlock
 
                     WalletHomeActionsRow(
-                        onDeposit: {},
+                        onDeposit: openStaking,
                         onSend: openSend,
-                        onReceive: {}
+                        onReceive: openSwap
                     )
 
                     assetsSection
@@ -77,7 +78,7 @@ struct WalletHomeView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        isWalletsSheetPresented = true
+                        navigationPath.append(HomePath.investigation(viewModel.wallet))
                     } label: {
                         TONIcon.settings24.image
                             .resizable()
@@ -91,10 +92,16 @@ struct WalletHomeView: View {
                 switch path {
                 case .send(let viewModel):
                     SendTokensView(viewModel: viewModel)
+                case .swap(let viewModel):
+                    SwapView(viewModel: viewModel)
+                case .staking(let viewModel):
+                    StakingView(viewModel: viewModel)
                 case .allAssets(let walletViewModel):
                     allAssetsScreen(for: walletViewModel)
                 case .allNFTs(let walletViewModel):
                     allNFTsScreen(for: walletViewModel)
+                case .investigation(let walletViewModel):
+                    WalletKitInvestigationView(wallet: walletViewModel)
                 }
             }
         }
@@ -126,11 +133,19 @@ struct WalletHomeView: View {
         .sheet(isPresented: $isAddWalletPresented) {
             NavigationStack(path: $addWalletPath) {
                 WalletWelcomeView(
-                    onCreateNew: {},
+                    onCreateNew: { addWalletPath.append(AddWalletPath.createNew) },
                     onAddExisting: { addWalletPath.append(AddWalletPath.importExisting) }
                 )
                 .navigationDestination(for: AddWalletPath.self) { path in
                     switch path {
+                    case .createNew:
+                        CreateWalletView { newWallet in
+                            walletsList.add(wallets: [newWallet])
+                            if let added = walletsList.wallets.last {
+                                walletsList.selectActive(wallet: added)
+                            }
+                            isAddWalletPresented = false
+                        }
                     case .importExisting:
                         AddWalletView { newWallet in
                             walletsList.add(wallets: [newWallet])
@@ -262,54 +277,113 @@ struct WalletHomeView: View {
         navigationPath.append(HomePath.send(send))
     }
 
+    private func openSwap() {
+        navigationPath.append(HomePath.swap(viewModel.wallet.swapViewModel()))
+    }
+
+    private func openStaking() {
+        navigationPath.append(HomePath.staking(viewModel.wallet.stakingViewModel()))
+    }
+
     private func handleWalletsEvent(_ event: WalletsListViewModel.Event) {
         if let transactionRequest = event.transactionRequest {
-            present(
-                WalletTransactionRequestView(viewModel: .init(request: transactionRequest))
-                    .presentationDragIndicator(.visible)
-            )
+            presentEvent(.transactionRequest(transactionRequest))
+        } else if let signMessageRequest = event.signMessageRequest {
+            presentEvent(.signMessageRequest(signMessageRequest))
         } else if let signDataRequest = event.signDataRequest {
+            presentEvent(.signDataRequest(signDataRequest))
+        } else if let connectRequest = event.connectionRequest {
+            presentEvent(.connectRequest(connectRequest))
+        }
+    }
+
+    private func presentEvent(_ event: TONWalletKitEvent) {
+        switch event {
+        case .transactionRequest(let request):
             present(
-                WalletSignDataRequestView(viewModel: .init(request: signDataRequest))
+                WalletTransactionRequestView(viewModel: .init(request: request))
                     .presentationDragIndicator(.visible)
             )
-        } else if let connectRequest = event.connectionRequest {
+        case .signMessageRequest(let request):
+            present(
+                WalletSignMessageRequestView(viewModel: .init(request: request))
+                    .presentationDragIndicator(.visible)
+            )
+        case .signDataRequest(let request):
+            present(
+                WalletSignDataRequestView(viewModel: .init(request: request))
+                    .presentationDragIndicator(.visible)
+            )
+        case .connectRequest(let request):
             present(
                 WalletConnectionRequestView(
                     viewModel: .init(
-                        request: connectRequest,
+                        request: request,
                         wallets: walletsList.wallets.map { $0.tonWallet }
-                    )
+                    ),
+                    onNextEvent: { followUp in presentEvent(followUp) }
                 )
                 .presentationDragIndicator(.visible)
             )
+        default: ()
         }
     }
 
     private func present<Content: View>(_ view: Content) {
         let controller = UIHostingController(rootView: view)
-        UIApplication.shared.topViewController()?.present(controller, animated: true)
+        Self.presentDeferringDismissal(controller)
+    }
+
+    private static func presentDeferringDismissal(_ controller: UIViewController) {
+        guard let presenter = UIApplication.shared.topViewController() else { return }
+
+        // If another sheet (e.g. the connection request that just produced a
+        // follow-up event) is mid-dismissal, wait for that transition to
+        // finish before presenting — UIKit refuses simultaneous transitions.
+        if let dismissing = presenter.presentedViewController, dismissing.isBeingDismissed {
+            if let coordinator = dismissing.transitionCoordinator {
+                coordinator.animate(alongsideTransition: nil) { _ in
+                    presentDeferringDismissal(controller)
+                }
+            } else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    presentDeferringDismissal(controller)
+                }
+            }
+            return
+        }
+
+        presenter.present(controller, animated: true)
     }
 }
 
 private enum HomePath: Hashable {
     case send(SendTokensViewModel)
+    case swap(SwapViewModel)
+    case staking(StakingViewModel)
     case allAssets(WalletViewModel)
     case allNFTs(WalletViewModel)
+    case investigation(WalletViewModel)
 
     func hash(into hasher: inout Hasher) {
         switch self {
         case .send(let vm): hasher.combine("send"); hasher.combine(ObjectIdentifier(vm))
+        case .swap(let vm): hasher.combine("swap"); hasher.combine(ObjectIdentifier(vm))
+        case .staking(let vm): hasher.combine("staking"); hasher.combine(ObjectIdentifier(vm))
         case .allAssets(let vm): hasher.combine("allAssets"); hasher.combine(vm.id)
         case .allNFTs(let vm): hasher.combine("allNFTs"); hasher.combine(vm.id)
+        case .investigation(let vm): hasher.combine("investigation"); hasher.combine(vm.id)
         }
     }
 
     static func == (lhs: HomePath, rhs: HomePath) -> Bool {
         switch (lhs, rhs) {
         case (.send(let l), .send(let r)): return l === r
+        case (.swap(let l), .swap(let r)): return l === r
+        case (.staking(let l), .staking(let r)): return l === r
         case (.allAssets(let l), .allAssets(let r)): return l.id == r.id
         case (.allNFTs(let l), .allNFTs(let r)): return l.id == r.id
+        case (.investigation(let l), .investigation(let r)): return l.id == r.id
         default: return false
         }
     }

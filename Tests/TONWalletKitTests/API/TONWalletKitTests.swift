@@ -230,7 +230,7 @@ struct TONWalletKitTests {
         let (sut, _, mockContext) = makeSUT()
         try await sut.initialize()
         let walletMock = MockJSDynamicObject()
-        let wallet = TONWallet(jsWallet: walletMock, id: "w1", address: testAddress)
+        let wallet = TONWallet(jsWallet: walletMock, id: "w1", address: testAddress, client: MockAPIClient())
         let transaction = TONTransactionRequest(messages: [])
 
         try? await sut.send(transaction: transaction, from: wallet)

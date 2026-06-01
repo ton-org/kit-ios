@@ -32,11 +32,11 @@ import _BigInt
 public struct TONTransactionActionMessageSize: Codable {
 
     /** The total number of cells used */
-    public var cells: String?
+    public var cells: Int?
     /** The total number of bits used */
-    public var bits: String?
+    public var bits: Int?
 
-    public init(cells: String? = nil, bits: String? = nil) {
+    public init(cells: Int? = nil, bits: Int? = nil) {
         self.cells = cells
         self.bits = bits
     }

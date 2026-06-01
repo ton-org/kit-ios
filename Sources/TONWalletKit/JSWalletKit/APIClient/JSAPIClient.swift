@@ -45,4 +45,28 @@ import JavaScriptCore
     
     @objc(getMasterchainInfo)
     func masterchainInfo() -> JSValue
+
+    @objc(nftItemsByAddress:)
+    func nftItemsByAddress(request: JSValue) -> JSValue
+
+    @objc(nftItemsByOwner:)
+    func nftItemsByOwner(request: JSValue) -> JSValue
+
+    @objc(fetchEmulation::)
+    func fetchEmulation(messageBoc: JSValue, ignoreSignature: JSValue) -> JSValue
+
+    @objc(getAccountState::)
+    func getAccountState(address: JSValue, seqno: JSValue) -> JSValue
+
+    @objc(getAccountStates:)
+    func getAccountStates(addresses: JSValue) -> JSValue
+
+    @objc(getBalance::)
+    func getBalance(address: JSValue, seqno: JSValue) -> JSValue
+
+    @objc(resolveDnsWallet:)
+    func resolveDnsWallet(domain: JSValue) -> JSValue
+
+    @objc(backResolveDnsWallet:)
+    func backResolveDnsWallet(address: JSValue) -> JSValue
 }

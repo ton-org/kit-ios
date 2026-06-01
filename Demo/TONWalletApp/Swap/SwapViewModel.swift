@@ -124,7 +124,7 @@ class SwapViewModel: ObservableObject {
                     from: fromToken,
                     to: toToken,
                     network: TONNetwork.mainnet,
-                    slippageBps: Double(slippageBps),
+                    slippageBps: slippageBps,
                     maxOutgoingMessages: 4,
                     isReverseSwap: isReverseSwap
                 ))

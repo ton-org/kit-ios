@@ -36,6 +36,7 @@ import JavaScriptCore
     @objc(getStateInit) func stateInit() -> JSValue
     
     @objc(getSignedSendTransaction::) func signedSendTransaction(input: JSValue, options: JSValue) -> JSValue
+    @objc(getSignedSignMessage::) func signedSignMessage(input: JSValue, options: JSValue) -> JSValue
     @objc(getSignedSignData::) func signedSignData(input: JSValue, options: JSValue) -> JSValue
     @objc(getSignedTonProof::) func signedTonProof(input: JSValue, options: JSValue) -> JSValue
     
