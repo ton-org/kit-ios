@@ -122,7 +122,7 @@ private class TONWalletKitInjectionMessagesHandler: NSObject, WKScriptMessageHan
         let eventMessage = TONBridgeEventMessage(
             messageId: messageID,
             tabId: messageDictionary?["frameID"] as? String,
-            domain: domain,
+            domain: domain ?? "",
             walletId: walletId
         )
         

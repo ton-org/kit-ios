@@ -36,6 +36,21 @@ struct WalletKitInvestigationView: View {
             } label: {
                 Text("Tonconnect")
             }
+            NavigationLink {
+                WalletKitWebViewView()
+            } label: {
+                Text("dApp WebView")
+            }
+            NavigationLink {
+                WalletKitIframeSecurityView()
+            } label: {
+                Text("Iframe Security Matrix")
+            }
+            NavigationLink {
+                WalletKitRealBridgeIframeView()
+            } label: {
+                Text("Iframe Security — Real dApp Bridge")
+            }
         }
         .navigationTitle("Wallet Kit Investigation")
         .navigationBarTitleDisplayMode(.inline)

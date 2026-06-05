@@ -29,6 +29,6 @@ import Foundation
 struct TONBridgeEventMessage: Codable {
     let messageId: String
     let tabId: String?
-    let domain: String?
+    let domain: String
     let walletId: TONWalletID?
 }
