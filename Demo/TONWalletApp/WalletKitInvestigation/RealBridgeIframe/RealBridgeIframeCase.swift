@@ -32,6 +32,7 @@ enum RealBridgeIframeCase: String, CaseIterable, Identifiable {
     case crossOriginData
     case locationSpoof
     case srcdoc
+    case srcdocViaParent
     case sandboxed
 
     var id: String { rawValue }
@@ -48,6 +49,7 @@ enum RealBridgeIframeCase: String, CaseIterable, Identifiable {
         case .crossOriginData:     return "data:"
         case .locationSpoof:       return "Location spoof"
         case .srcdoc:              return "srcdoc"
+        case .srcdocViaParent:     return "srcdoc→parent"
         case .sandboxed:           return "sandboxed"
         }
     }
@@ -60,6 +62,7 @@ enum RealBridgeIframeCase: String, CaseIterable, Identifiable {
         case .crossOriginData:     return "Cross-origin data: iframe"
         case .locationSpoof:       return "Location/origin spoof attempt"
         case .srcdoc:              return "srcdoc iframe"
+        case .srcdocViaParent:     return "srcdoc + window.parent bypass — HIJACK"
         case .sandboxed:           return "Sandboxed iframe"
         }
     }
@@ -68,7 +71,7 @@ enum RealBridgeIframeCase: String, CaseIterable, Identifiable {
     /// resolves to the connected session by domain).
     var expectsSheet: Bool {
         switch self {
-        case .baselineMain, .sameOriginNavigated, .sameOriginNested:
+        case .baselineMain, .sameOriginNavigated, .sameOriginNested, .srcdocViaParent:
             return true
         case .crossOriginData, .locationSpoof, .srcdoc, .sandboxed:
             return false
@@ -79,6 +82,8 @@ enum RealBridgeIframeCase: String, CaseIterable, Identifiable {
         switch self {
         case .baselineMain, .sameOriginNavigated, .sameOriginNested:
             return "Expected: native sign-data sheet APPEARS (domain matches the connected session)."
+        case .srcdocViaParent:
+            return "Expected: sheet APPEARS — the call runs in the parent (window.top), so it is attributed to the main frame. The per-frame srcdoc rejection is bypassed."
         case .crossOriginData, .srcdoc, .sandboxed:
             return "Expected: REJECTED (frame domain ≠ connected domain) — no sheet."
         case .locationSpoof:
@@ -98,6 +103,8 @@ enum RealBridgeIframeCase: String, CaseIterable, Identifiable {
             return "Opaque-origin data: iframe sends a complete signData. Its native domain is data:, not the dApp's, so the session lookup fails and the SDK rejects it."
         case .srcdoc:
             return "srcdoc iframe shares the parent SECURITY-origin, but its request.url domain is about:srcdoc — which is what the bridge keys on — so it is rejected. Demonstrates the request.url-vs-securityOrigin gap."
+        case .srcdocViaParent:
+            return "A srcdoc iframe (same security-origin as the parent) does NOT call its own provider — it reaches window.top.ton.tonconnect. That call runs in the PARENT's context, so the bridge attributes it to the main frame and signs. Shows that rejecting srcdoc's own request.url is bypassable via the parent — same-origin frames can always reach the wallet through the top frame."
         case .sandboxed:
             return "sandbox=\"allow-scripts\" frame (opaque, no allow-same-origin). May lack the injected provider; if present, its domain still won't match — rejected."
         case .locationSpoof:
@@ -208,6 +215,20 @@ enum RealBridgeIframeCase: String, CaseIterable, Identifiable {
                 label: "SRCDOC-IFRAME",
                 bg: "#ffe5cf", border: "#ff9b5b",
                 note: "Shares security-origin, but request.url domain is about:srcdoc."
+            )
+            body = """
+            (function(){
+              var f=document.createElement('iframe');
+              \(Self.frameStyle("f"))
+              f.setAttribute('srcdoc', \(Self.jsLiteral(html)));
+              __ifsecAdd(f);
+            })();
+            """
+
+        case .srcdocViaParent:
+            let html = Self.parentBypassDoc(
+                label: "SRCDOC-VIA-PARENT",
+                note: "Same-origin as parent → reaches window.top.ton.tonconnect, bypassing the per-frame check."
             )
             body = """
             (function(){
@@ -355,6 +376,52 @@ enum RealBridgeIframeCase: String, CaseIterable, Identifiable {
         return """
         <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>\
         <body style="margin:0;background:\(bg);border:2px solid \(border);box-sizing:border-box">\
+        <script>\(script)</script></body></html>
+        """
+    }
+
+    /// A srcdoc document that does NOT use its own provider. Because srcdoc is same-origin
+    /// with the parent, it reaches `window.top.ton.tonconnect` — that send runs in the
+    /// parent's realm and is attributed to the main frame, bypassing the per-frame check.
+    private static func parentBypassDoc(label: String, note: String) -> String {
+        let script = """
+        (function(){
+          var LBL=\(jsLiteral(label)); var NOTE=\(jsLiteral(note));
+          function log(a,e){try{window.webkit.messageHandlers.iframeSecLog.postMessage({frameLabel:LBL,action:a,claimedOrigin:(location.origin||'null'),payload:e||'',ts:Date.now()});}catch(x){}}
+          var box=document.createElement('div');
+          box.style.cssText='position:fixed;inset:0;z-index:99999;background:#ffe0c0;color:#1d1d1f;font:13px -apple-system;padding:10px;box-sizing:border-box;border:2px solid #ff7b2b;overflow:auto';
+          box.innerHTML='<div style="font-weight:700;font-size:12px">'+LBL+'</div>'+
+            '<div style="font:11px ui-monospace;color:#444;margin:6px 0;word-break:break-all">origin: '+(location.origin||'null')+'<br>url: '+location.href+'</div>'+
+            '<button id="__ifsec_go" style="padding:7px 11px;border:0;border-radius:6px;background:#ff3b30;color:#fff;font-size:12px">Send via window.top.ton</button>'+
+            '<div style="font-size:11px;color:#7a3b00;margin-top:6px">'+NOTE+'</div>';
+          (document.body||document.documentElement).appendChild(box);
+          function realSend(){
+            var appReq={method:'signData',params:[JSON.stringify({type:'text',text:'srcdoc → window.top.ton bypass @ '+location.href})],id:String(Date.now())};
+            var pp=null;
+            try{ pp=(window.top&&window.top.ton&&window.top.ton.tonconnect)||(window.parent&&window.parent.ton&&window.parent.ton.tonconnect); }
+            catch(e){ log('parent/top provider NOT accessible (cross-origin)', String(e).slice(0,160)); }
+            if(pp){
+              log('reaching window.top.ton.tonconnect (same-origin bypass) →');
+              pp.send(appReq)
+               .then(function(r){log('RESOLVED ✓ signed via PARENT (bypass worked)',JSON.stringify(r).slice(0,160));})
+               .catch(function(e){log('REJECTED ✗',(e&&e.message?e.message:String(e)).slice(0,160));});
+              return;
+            }
+            var own=(window.ton&&window.ton.tonconnect);
+            if(own){
+              log('no parent access; trying OWN srcdoc provider (bridge should REJECT) →');
+              own.send(appReq).then(function(r){log('RESOLVED ✓ (own)',JSON.stringify(r).slice(0,160));}).catch(function(e){log('REJECTED ✗ (own)',(e&&e.message?e.message:String(e)).slice(0,160));});
+              return;
+            }
+            log('NO PARENT AND NO OWN PROVIDER');
+          }
+          var b=document.getElementById('__ifsec_go'); if(b) b.addEventListener('click',realSend);
+          setTimeout(realSend,500);
+        })();
+        """
+        return """
+        <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>\
+        <body style="margin:0;background:#ffe0c0;border:2px solid #ff7b2b;box-sizing:border-box">\
         <script>\(script)</script></body></html>
         """
     }

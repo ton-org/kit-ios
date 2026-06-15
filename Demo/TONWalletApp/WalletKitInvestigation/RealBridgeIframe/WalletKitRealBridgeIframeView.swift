@@ -17,7 +17,7 @@ struct WalletKitRealBridgeIframeView: View {
     @State private var selectedCase: RealBridgeIframeCase = .sameOriginNavigated
     @State private var showInfo = false
 
-    private static let dappURL = URL(string: "https://tonconnect-sdk-demo-dapp.vercel.app/")!
+    private static let dappURL = URL(string: "https://tonconnect-sdk-demo-dapp.vercel.app/?qa=1")!
 
     private var logger: IframeSecurityLogger { controller.logger }
 
