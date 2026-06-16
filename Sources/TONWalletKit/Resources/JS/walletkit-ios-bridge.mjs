@@ -50276,173 +50276,6 @@ var init_TonStakersStakingProvider = __esmMin((() => {
 //#region ../walletkit/dist/esm/defi/staking/tonstakers/index.js
 var init_tonstakers = __esmMin((() => {
 	init_TonStakersStakingProvider();
-}));
-//#endregion
-//#region src/SwiftStorageAdapter.ts
-var SwiftStorageAdapter;
-var init_SwiftStorageAdapter = __esmMin((() => {
-	SwiftStorageAdapter = class {
-		constructor(swiftStorage) {
-			this.swiftStorage = swiftStorage;
-		}
-		async get(key) {
-			return await this.swiftStorage.get(key);
-		}
-		async set(key, value) {
-			await this.swiftStorage.set(key, value);
-		}
-		async remove(key) {
-			await this.swiftStorage.remove(key);
-		}
-		async clear() {
-			await this.swiftStorage.clear();
-		}
-	};
-}));
-//#endregion
-//#region src/SwiftWalletAdapter.ts
-var SwiftWalletAdapter;
-var init_SwiftWalletAdapter = __esmMin((() => {
-	SwiftWalletAdapter = class {
-		constructor(swiftWalletAdapter, client) {
-			this.swiftWalletAdapter = swiftWalletAdapter;
-			this.client = client;
-		}
-		getPublicKey() {
-			return this.swiftWalletAdapter.getPublicKey();
-		}
-		getNetwork() {
-			return this.swiftWalletAdapter.getNetwork();
-		}
-		getClient() {
-			return this.client;
-		}
-		/** Get wallet's TON address */
-		getAddress(options) {
-			return this.swiftWalletAdapter.getAddress(options);
-		}
-		getWalletId() {
-			return this.swiftWalletAdapter.getWalletId();
-		}
-		/** Get state init for wallet deployment base64 encoded boc */
-		getStateInit() {
-			return this.swiftWalletAdapter.getStateInit();
-		}
-		getSignedSendTransaction(input, options) {
-			return this.swiftWalletAdapter.getSignedSendTransaction(input, options);
-		}
-		getSignedSignMessage(input, options) {
-			return this.swiftWalletAdapter.getSignedSignMessage(input, options);
-		}
-		getSignedSignData(input, options) {
-			return this.swiftWalletAdapter.getSignedSignData(input, options);
-		}
-		getSignedTonProof(input, options) {
-			return this.swiftWalletAdapter.getSignedTonProof(input, options);
-		}
-		getSupportedFeatures() {
-			return this.swiftWalletAdapter.getSupportedFeatures();
-		}
-	};
-}));
-//#endregion
-//#region src/SwiftAPIClientAdapter.ts
-var SwiftAPIClientAdapter;
-var init_SwiftAPIClientAdapter = __esmMin((() => {
-	SwiftAPIClientAdapter = class {
-		constructor(swiftApiClient) {
-			this.swiftApiClient = swiftApiClient;
-		}
-		getNetwork() {
-			return this.swiftApiClient.getNetwork();
-		}
-		async sendBoc(boc) {
-			return this.swiftApiClient.sendBoc(boc);
-		}
-		async runGetMethod(address, method, stack, seqno) {
-			return this.swiftApiClient.runGetMethod(address, method, stack, seqno);
-		}
-		async nftItemsByAddress(request) {
-			return this.swiftApiClient.nftItemsByAddress(request);
-		}
-		async nftItemsByOwner(request) {
-			return this.swiftApiClient.nftItemsByOwner(request);
-		}
-		async fetchEmulation(messageBoc, ignoreSignature) {
-			return this.swiftApiClient.fetchEmulation(messageBoc, ignoreSignature);
-		}
-		async getAccountState(address, seqno) {
-			return this.swiftApiClient.getAccountState(address, seqno);
-		}
-		async getAccountStates(addresses) {
-			return this.swiftApiClient.getAccountStates(addresses);
-		}
-		async getBalance(address, seqno) {
-			return this.swiftApiClient.getBalance(address, seqno);
-		}
-		async getAccountTransactions(_request) {
-			throw new Error("getAccountTransactions is not implemented yet");
-		}
-		async getTransactionsByHash(_request) {
-			throw new Error("getTransactionsByHash is not implemented yet");
-		}
-		async getPendingTransactions(_request) {
-			throw new Error("getPendingTransactions is not implemented yet");
-		}
-		async getTrace(_request) {
-			throw new Error("getTrace is not implemented yet");
-		}
-		async getPendingTrace(_request) {
-			throw new Error("getPendingTrace is not implemented yet");
-		}
-		async resolveDnsWallet(domain) {
-			return this.swiftApiClient.resolveDnsWallet(domain);
-		}
-		async backResolveDnsWallet(address) {
-			return this.swiftApiClient.backResolveDnsWallet(address);
-		}
-		async jettonsByAddress(_request) {
-			throw new Error("jettonsByAddress is not implemented yet");
-		}
-		async jettonsByOwnerAddress(_request) {
-			throw new Error("jettonsByOwnerAddress is not implemented yet");
-		}
-		async getEvents(_request) {
-			throw new Error("getEvents is not implemented yet");
-		}
-		async getMasterchainInfo() {
-			return this.swiftApiClient.getMasterchainInfo();
-		}
-	};
-}));
-//#endregion
-//#region src/SwiftTONConnectSessionsManager.ts
-var SwiftTONConnectSessionsManager;
-var init_SwiftTONConnectSessionsManager = __esmMin((() => {
-	SwiftTONConnectSessionsManager = class {
-		constructor(swiftSessionsManager) {
-			this.swiftSessionsManager = swiftSessionsManager;
-		}
-		async initialize() {}
-		async createSession(sessionId, dAppInfo, wallet, isJsBridge) {
-			return await this.swiftSessionsManager.createSession(sessionId, dAppInfo, wallet, isJsBridge);
-		}
-		async getSession(sessionId) {
-			return await this.swiftSessionsManager.getSession(sessionId);
-		}
-		async getSessions(parameters) {
-			return await this.swiftSessionsManager.getSessions(parameters);
-		}
-		async removeSession(sessionId) {
-			await this.swiftSessionsManager.removeSession(sessionId);
-		}
-		async removeSessions(parameters) {
-			await this.swiftSessionsManager.removeSessions(parameters);
-		}
-		async clearSessions() {
-			await this.swiftSessionsManager.clearSessions();
-		}
-	};
 })), DEFAULT_METADATA;
 var init_constants = __esmMin((() => {
 	DEFAULT_METADATA = {
@@ -50731,6 +50564,173 @@ var init_tonapi = __esmMin((() => {
 	init_TonApiGaslessProvider();
 }));
 //#endregion
+//#region src/SwiftStorageAdapter.ts
+var SwiftStorageAdapter;
+var init_SwiftStorageAdapter = __esmMin((() => {
+	SwiftStorageAdapter = class {
+		constructor(swiftStorage) {
+			this.swiftStorage = swiftStorage;
+		}
+		async get(key) {
+			return await this.swiftStorage.get(key);
+		}
+		async set(key, value) {
+			await this.swiftStorage.set(key, value);
+		}
+		async remove(key) {
+			await this.swiftStorage.remove(key);
+		}
+		async clear() {
+			await this.swiftStorage.clear();
+		}
+	};
+}));
+//#endregion
+//#region src/SwiftWalletAdapter.ts
+var SwiftWalletAdapter;
+var init_SwiftWalletAdapter = __esmMin((() => {
+	SwiftWalletAdapter = class {
+		constructor(swiftWalletAdapter, client) {
+			this.swiftWalletAdapter = swiftWalletAdapter;
+			this.client = client;
+		}
+		getPublicKey() {
+			return this.swiftWalletAdapter.getPublicKey();
+		}
+		getNetwork() {
+			return this.swiftWalletAdapter.getNetwork();
+		}
+		getClient() {
+			return this.client;
+		}
+		/** Get wallet's TON address */
+		getAddress(options) {
+			return this.swiftWalletAdapter.getAddress(options);
+		}
+		getWalletId() {
+			return this.swiftWalletAdapter.getWalletId();
+		}
+		/** Get state init for wallet deployment base64 encoded boc */
+		getStateInit() {
+			return this.swiftWalletAdapter.getStateInit();
+		}
+		getSignedSendTransaction(input, options) {
+			return this.swiftWalletAdapter.getSignedSendTransaction(input, options);
+		}
+		getSignedSignMessage(input, options) {
+			return this.swiftWalletAdapter.getSignedSignMessage(input, options);
+		}
+		getSignedSignData(input, options) {
+			return this.swiftWalletAdapter.getSignedSignData(input, options);
+		}
+		getSignedTonProof(input, options) {
+			return this.swiftWalletAdapter.getSignedTonProof(input, options);
+		}
+		getSupportedFeatures() {
+			return this.swiftWalletAdapter.getSupportedFeatures();
+		}
+	};
+}));
+//#endregion
+//#region src/SwiftAPIClientAdapter.ts
+var SwiftAPIClientAdapter;
+var init_SwiftAPIClientAdapter = __esmMin((() => {
+	SwiftAPIClientAdapter = class {
+		constructor(swiftApiClient) {
+			this.swiftApiClient = swiftApiClient;
+		}
+		getNetwork() {
+			return this.swiftApiClient.getNetwork();
+		}
+		async sendBoc(boc) {
+			return this.swiftApiClient.sendBoc(boc);
+		}
+		async runGetMethod(address, method, stack, seqno) {
+			return this.swiftApiClient.runGetMethod(address, method, stack, seqno);
+		}
+		async nftItemsByAddress(request) {
+			return this.swiftApiClient.nftItemsByAddress(request);
+		}
+		async nftItemsByOwner(request) {
+			return this.swiftApiClient.nftItemsByOwner(request);
+		}
+		async fetchEmulation(messageBoc, ignoreSignature) {
+			return this.swiftApiClient.fetchEmulation(messageBoc, ignoreSignature);
+		}
+		async getAccountState(address, seqno) {
+			return this.swiftApiClient.getAccountState(address, seqno);
+		}
+		async getAccountStates(addresses) {
+			return this.swiftApiClient.getAccountStates(addresses);
+		}
+		async getBalance(address, seqno) {
+			return this.swiftApiClient.getBalance(address, seqno);
+		}
+		async getAccountTransactions(_request) {
+			throw new Error("getAccountTransactions is not implemented yet");
+		}
+		async getTransactionsByHash(_request) {
+			throw new Error("getTransactionsByHash is not implemented yet");
+		}
+		async getPendingTransactions(_request) {
+			throw new Error("getPendingTransactions is not implemented yet");
+		}
+		async getTrace(_request) {
+			throw new Error("getTrace is not implemented yet");
+		}
+		async getPendingTrace(_request) {
+			throw new Error("getPendingTrace is not implemented yet");
+		}
+		async resolveDnsWallet(domain) {
+			return this.swiftApiClient.resolveDnsWallet(domain);
+		}
+		async backResolveDnsWallet(address) {
+			return this.swiftApiClient.backResolveDnsWallet(address);
+		}
+		async jettonsByAddress(_request) {
+			throw new Error("jettonsByAddress is not implemented yet");
+		}
+		async jettonsByOwnerAddress(_request) {
+			throw new Error("jettonsByOwnerAddress is not implemented yet");
+		}
+		async getEvents(_request) {
+			throw new Error("getEvents is not implemented yet");
+		}
+		async getMasterchainInfo() {
+			return this.swiftApiClient.getMasterchainInfo();
+		}
+	};
+}));
+//#endregion
+//#region src/SwiftTONConnectSessionsManager.ts
+var SwiftTONConnectSessionsManager;
+var init_SwiftTONConnectSessionsManager = __esmMin((() => {
+	SwiftTONConnectSessionsManager = class {
+		constructor(swiftSessionsManager) {
+			this.swiftSessionsManager = swiftSessionsManager;
+		}
+		async initialize() {}
+		async createSession(sessionId, dAppInfo, wallet, isJsBridge) {
+			return await this.swiftSessionsManager.createSession(sessionId, dAppInfo, wallet, isJsBridge);
+		}
+		async getSession(sessionId) {
+			return await this.swiftSessionsManager.getSession(sessionId);
+		}
+		async getSessions(parameters) {
+			return await this.swiftSessionsManager.getSessions(parameters);
+		}
+		async removeSession(sessionId) {
+			await this.swiftSessionsManager.removeSession(sessionId);
+		}
+		async removeSessions(parameters) {
+			await this.swiftSessionsManager.removeSessions(parameters);
+		}
+		async clearSessions() {
+			await this.swiftSessionsManager.clearSessions();
+		}
+	};
+}));
+//#endregion
 //#region src/main.ts
 var main_exports = /* @__PURE__ */ __exportAll({});
 function parseSwiftConstructorPattern(str) {
@@ -50751,11 +50751,11 @@ var init_main = __esmMin((() => {
 	init_omniston();
 	init_dedust();
 	init_tonstakers();
+	init_tonapi();
 	init_SwiftStorageAdapter();
 	init_SwiftWalletAdapter();
 	init_SwiftAPIClientAdapter();
 	init_SwiftTONConnectSessionsManager();
-	init_tonapi();
 	window.initWalletKit = async (configuration, storage, bridgeTransport, sessionManager, apiClients, fetchManifest) => {
 		console.log("🚀 WalletKit iOS Bridge starting...");
 		console.log("Creating WalletKit instance with configuration", configuration);
