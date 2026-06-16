@@ -33,6 +33,8 @@ final class SendableTONViewModel: SendableTokenViewModel {
     var symbol: String { "TON" }
     var decimals: Int { 9 }
     var requiredAmountInfo: String { "Minimum transaction: 0.0001 TON" }
+    var jettonAddress: TONUserFriendlyAddress? { nil }
+    var iconURL: URL? { nil }
 
     private(set) var balance: String
 

@@ -33,6 +33,8 @@ final class SendableJettonViewModel: SendableTokenViewModel {
     var symbol: String {  jetton.info.symbol ?? "UNKNOWN" }
     var decimals: Int { jetton.decimalsNumber ?? 9 }
     var requiredAmountInfo: String { "Enter amount in \(symbol) units" }
+    var jettonAddress: TONUserFriendlyAddress? { jetton.address }
+    var iconURL: URL? { jetton.info.image?.smallUrl ?? jetton.info.image?.url }
     var balance: String {
         if let streamed = streamedBalance { return streamed }
         return jettonBalance.flatMap { formatter.string(from: $0) } ?? "Unknown Balance"

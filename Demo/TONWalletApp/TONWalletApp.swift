@@ -115,7 +115,24 @@ extension TONWalletKit {
         } catch {
             debugPrint("ERROR - \(error)")
         }
-        
+
+        do {
+            let gaslessProvider = try await kit.tonApiGaslessProvider(
+                config: TONTonApiGaslessProviderConfig(
+                    chains: [
+                        TONNetwork.mainnet.chainId: TONTonApiGaslessChainConfig(
+                            endpoint: "https://tonapi.io",
+                            apiKey: Env.tonApiKey
+                        )
+                    ]
+                )
+            )
+
+            try await kit.gasless().register(provider: gaslessProvider)
+        } catch {
+            debugPrint("ERROR registering gasless provider - \(error)")
+        }
+
         _shared = kit
         return kit
     }
