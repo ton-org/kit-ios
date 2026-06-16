@@ -30,4 +30,5 @@ public enum TONProviderType: String {
     case swap
     case streaming
     case staking
+    case gasless
 }

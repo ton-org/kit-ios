@@ -43,17 +43,20 @@ public struct TONOmnistonSwapProviderConfig: Codable {
     public var defaultSlippageBps: Int?
     /** Timeout for quote requests in milliseconds */
     public var quoteTimeoutMs: Int?
+    /** Timeout for build-transaction requests in milliseconds. Guards against indefinite hangs when network connectivity is lost between getting a quote and signing — `buildTransfer` would otherwise wait without surfacing an error. */
+    public var buildTimeoutMs: Int?
     /** Identifier for the provider */
     public var providerId: String?
     public var metadata: TONSwapProviderMetadataOverride?
 
-    public init(referrerAddress: String? = nil, referrerFeeBps: Int? = nil, flexibleReferrerFee: Bool? = nil, apiUrl: URL? = nil, defaultSlippageBps: Int? = nil, quoteTimeoutMs: Int? = nil, providerId: String? = nil, metadata: TONSwapProviderMetadataOverride? = nil) {
+    public init(referrerAddress: String? = nil, referrerFeeBps: Int? = nil, flexibleReferrerFee: Bool? = nil, apiUrl: URL? = nil, defaultSlippageBps: Int? = nil, quoteTimeoutMs: Int? = nil, buildTimeoutMs: Int? = nil, providerId: String? = nil, metadata: TONSwapProviderMetadataOverride? = nil) {
         self.referrerAddress = referrerAddress
         self.referrerFeeBps = referrerFeeBps
         self.flexibleReferrerFee = flexibleReferrerFee
         self.apiUrl = apiUrl
         self.defaultSlippageBps = defaultSlippageBps
         self.quoteTimeoutMs = quoteTimeoutMs
+        self.buildTimeoutMs = buildTimeoutMs
         self.providerId = providerId
         self.metadata = metadata
     }
@@ -65,6 +68,7 @@ public struct TONOmnistonSwapProviderConfig: Codable {
         case apiUrl
         case defaultSlippageBps
         case quoteTimeoutMs
+        case buildTimeoutMs
         case providerId
         case metadata
     }
@@ -79,6 +83,7 @@ public struct TONOmnistonSwapProviderConfig: Codable {
         try container.encodeIfPresent(apiUrl, forKey: .apiUrl)
         try container.encodeIfPresent(defaultSlippageBps, forKey: .defaultSlippageBps)
         try container.encodeIfPresent(quoteTimeoutMs, forKey: .quoteTimeoutMs)
+        try container.encodeIfPresent(buildTimeoutMs, forKey: .buildTimeoutMs)
         try container.encodeIfPresent(providerId, forKey: .providerId)
         try container.encodeIfPresent(metadata, forKey: .metadata)
     }

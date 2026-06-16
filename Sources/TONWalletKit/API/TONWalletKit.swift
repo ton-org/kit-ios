@@ -103,6 +103,12 @@ public class TONWalletKit {
         try await jsWalletKit().createTonStakersStakingProvider(config)
     }
 
+    public func tonApiGaslessProvider(
+        config: TONTonApiGaslessProviderConfig?
+    ) async throws -> TONTonApiGaslessProvider {
+        try await jsWalletKit().createTonApiGaslessProvider(config)
+    }
+
     public func swap() async throws -> any TONSwapManagerProtocol {
         let manager: TONSwapManager = try await jsWalletKit().swap()
         return manager
@@ -117,7 +123,12 @@ public class TONWalletKit {
         let manager: TONStakingManager = try await jsWalletKit().staking()
         return manager
     }
-    
+
+	public func gasless() async throws -> any TONGaslessManagerProtocol {
+        let manager: TONGaslessManager = try await jsWalletKit().gasless()
+        return manager
+    }
+
     public func signer(mnemonic: TONMnemonic) async throws -> any TONWalletSignerProtocol {
         let signer = try await jsWalletKit().createSignerFromMnemonic(mnemonic.value)
 
