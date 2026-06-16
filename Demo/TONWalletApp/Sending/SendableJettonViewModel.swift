@@ -98,11 +98,13 @@ final class SendableJettonViewModel: SendableTokenViewModel {
                     .sink(
                         receiveCompletion: { _ in },
                         receiveValue: { [weak self] update in
+                            guard let self else { return }
                             guard update.status == .finalized else { return }
                             guard update.masterAddress.value == masterAddress else { return }
-                            guard let formatted = update.balance else { return }
-                            self?.streamedBalance = formatted
-                            self?.balanceSubject.send()
+                            // `update.balance` is the optional, pre-formatted string and is often
+                            // nil; `rawBalance` is always present, so format it ourselves.
+                            self.streamedBalance = update.balance ?? self.formatter.string(from: update.rawBalance)
+                            self.balanceSubject.send()
                         }
                     )
                     .store(in: &self.subscribers)

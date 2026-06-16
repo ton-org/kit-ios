@@ -61,7 +61,7 @@ class SendTokensViewModel: ObservableObject {
     /// USDT jetton master on mainnet — preferred default fee asset, mirroring the JS demo.
     private static let usdtMasterMainnet = "EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs"
 
-    /// Per-jetton display metadata, keyed by master address, built from the available tokens.
+    /// Per-jetton display metadata, keyed by master address, built from the wallet's held tokens.
     private lazy var jettonMetadata: [String: FeeAsset] = {
         var map: [String: FeeAsset] = [:]
         for token in tokens {
@@ -186,7 +186,7 @@ class SendTokensViewModel: ObservableObject {
             gasless: gasless,
             wallet: wallet,
             jettonAddress: jettonAddress,
-            feeAsset: feeAsset,
+            feeAssetAddress: feeAsset.address,
             transferAmount: transferAmount,
             recipient: recipient,
             relay: relay
@@ -300,7 +300,7 @@ class SendTokensViewModel: ObservableObject {
                     gasless: gasless,
                     wallet: wallet,
                     jettonAddress: jettonAddress,
-                    feeAsset: feeAsset,
+                    feeAssetAddress: feeAsset.address,
                     transferAmount: transferAmount,
                     recipient: recipient,
                     relay: relay
@@ -325,7 +325,7 @@ class SendTokensViewModel: ObservableObject {
         gasless: any TONGaslessManagerProtocol,
         wallet: any TONWalletProtocol,
         jettonAddress: TONUserFriendlyAddress,
-        feeAsset: FeeAsset,
+        feeAssetAddress: TONUserFriendlyAddress,
         transferAmount: TONTokenAmount,
         recipient: TONUserFriendlyAddress,
         relay: TONUserFriendlyAddress
@@ -342,7 +342,7 @@ class SendTokensViewModel: ObservableObject {
 
         let params = TONGaslessQuoteParams(
             network: network,
-            feeAsset: feeAsset.address,
+            feeAsset: feeAssetAddress,
             walletAddress: wallet.address,
             walletPublicKey: try wallet.publicKey(),
             messages: transaction.messages
