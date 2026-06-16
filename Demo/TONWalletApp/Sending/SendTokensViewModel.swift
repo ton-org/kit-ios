@@ -41,8 +41,8 @@ class SendTokensViewModel: ObservableObject {
     // MARK: - Gasless
 
     @Published var gaslessEnabled = false
-    @Published private(set) var feeAssets: [FeeAsset] = []
-    @Published var selectedFeeAsset: FeeAsset?
+    @Published private(set) var feeAssets: [FeeAssetViewModel] = []
+    @Published var selectedFeeAsset: FeeAssetViewModel?
     @Published private(set) var isQuoting = false
     @Published private(set) var gaslessFeeText: String?
     @Published private(set) var gaslessError: String?
@@ -60,21 +60,6 @@ class SendTokensViewModel: ObservableObject {
 
     /// USDT jetton master on mainnet — preferred default fee asset, mirroring the JS demo.
     private static let usdtMasterMainnet = "EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs"
-
-    /// Per-jetton display metadata, keyed by master address, built from the wallet's held tokens.
-    private lazy var jettonMetadata: [String: FeeAsset] = {
-        var map: [String: FeeAsset] = [:]
-        for token in tokens {
-            guard let address = token.jettonAddress else { continue }
-            map[address.value] = FeeAsset(
-                address: address,
-                symbol: token.symbol,
-                decimals: token.decimals,
-                iconURL: token.iconURL
-            )
-        }
-        return map
-    }()
 
     var availableTokens: [any SendableTokenViewModel] {
         return tokens
@@ -360,21 +345,11 @@ class SendTokensViewModel: ObservableObject {
 
     // MARK: - Fee asset resolution
 
-    private func resolveFeeAssets(from supported: [TONGaslessSupportedAsset]) -> [FeeAsset] {
-        supported.map { asset in
-            if let known = jettonMetadata[asset.address.value] {
-                return known
-            }
-            return FeeAsset(
-                address: asset.address,
-                symbol: shortAddress(asset.address.value),
-                decimals: 9,
-                iconURL: nil
-            )
-        }
+    private func resolveFeeAssets(from supported: [TONGaslessSupportedAsset]) -> [FeeAssetViewModel] {
+        supported.map { FeeAssetViewModel(address: $0.address, network: network) }
     }
 
-    private func pickDefaultFeeAsset(_ assets: [FeeAsset]) -> FeeAsset? {
+    private func pickDefaultFeeAsset(_ assets: [FeeAssetViewModel]) -> FeeAssetViewModel? {
         if let usdt = assets.first(where: { $0.address.value == Self.usdtMasterMainnet }) {
             return usdt
         }
@@ -389,15 +364,10 @@ class SendTokensViewModel: ObservableObject {
         return formatter
     }
 
-    private func format(fee: TONTokenAmount, asset: FeeAsset) -> String {
+    private func format(fee: TONTokenAmount, asset: FeeAssetViewModel) -> String {
         let formatter = makeFormatter(decimals: asset.decimals)
         let value = formatter.string(from: fee) ?? "0"
-        return "\(value) \(asset.symbol)"
-    }
-
-    private func shortAddress(_ address: String) -> String {
-        guard address.count > 8 else { return address }
-        return "\(address.prefix(4))…\(address.suffix(4))"
+        return "\(value) \(asset.title)"
     }
 }
 

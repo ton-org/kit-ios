@@ -129,6 +129,11 @@ public class TONWalletKit {
         return manager
     }
 
+	public func jettons() async throws -> any TONJettonsManagerProtocol {
+        let manager: TONJettonsManager = try await jsWalletKit().jettons()
+        return manager
+    }
+
     public func signer(mnemonic: TONMnemonic) async throws -> any TONWalletSignerProtocol {
         let signer = try await jsWalletKit().createSignerFromMnemonic(mnemonic.value)
 

@@ -39728,7 +39728,7 @@ var init_JettonsManager = __esmMin((() => {
 						decimals = 9;
 					}
 					const result = {
-						address: jetton.jetton,
+						address: jetton.address,
 						name: tokenInfo?.name ?? "",
 						symbol: tokenInfo?.symbol ?? "",
 						description: tokenInfo?.description ?? "",
@@ -50824,7 +50824,7 @@ var init_main = __esmMin((() => {
 			isReady() {
 				return initialized && !!walletKit;
 			},
-			jettonsManager() {
+			jettons() {
 				return walletKit.jettons;
 			},
 			setEventsListeners(callback) {

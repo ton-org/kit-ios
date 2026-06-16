@@ -59,33 +59,42 @@ struct SendTokenPickerBottomSheet: View {
 // MARK: - Fee asset picker
 
 struct FeeAssetPickerBottomSheet: View {
-    let assets: [FeeAsset]
-    let selected: FeeAsset?
-    let onSelect: (FeeAsset) -> Void
+    let assets: [FeeAssetViewModel]
+    let selected: FeeAssetViewModel?
+    let onSelect: (FeeAssetViewModel) -> Void
     let onClose: () -> Void
 
     var body: some View {
         SendAssetPickerContainer(title: "Fee asset", onClose: onClose) {
             ForEach(assets) { asset in
-                SendAssetRow(
-                    iconURL: asset.iconURL,
-                    isNativeTON: false,
-                    symbolForPlaceholder: asset.symbol,
-                    title: asset.symbol,
-                    subtitle: shortAddress(asset.address.value),
-                    trailing: nil,
-                    isSelected: asset == selected
-                ) {
+                FeeAssetRow(viewModel: asset, isSelected: asset === selected) {
                     onSelect(asset)
                     onClose()
                 }
             }
         }
     }
+}
 
-    private func shortAddress(_ address: String) -> String {
-        guard address.count > 8 else { return address }
-        return "\(address.prefix(4))…\(address.suffix(4))"
+/// Observes a single fee-asset view model so the row reflects its resolved ticker/icon as it loads.
+/// Triggers the metadata load when it appears.
+private struct FeeAssetRow: View {
+    @ObservedObject var viewModel: FeeAssetViewModel
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        SendAssetRow(
+            iconURL: viewModel.iconURL,
+            isNativeTON: false,
+            symbolForPlaceholder: viewModel.title,
+            title: viewModel.title,
+            subtitle: viewModel.subtitle,
+            trailing: nil,
+            isSelected: isSelected,
+            onTap: onTap
+        )
+        .task { await viewModel.load() }
     }
 }
 

@@ -248,13 +248,13 @@ struct SendTokensView: View {
                             .textStyle(.body)
                             .foregroundStyle(Color.tonTextSecondary)
                         Spacer()
-                        Text(viewModel.selectedFeeAsset?.symbol ?? "Select")
-                            .textStyle(.bodySemibold)
-                            .foregroundStyle(
-                                viewModel.selectedFeeAsset == nil
-                                    ? Color.tonTextSecondary
-                                    : Color.tonTextPrimary
-                            )
+                        if let asset = viewModel.selectedFeeAsset {
+                            SelectedFeeAssetLabel(viewModel: asset)
+                        } else {
+                            Text("Select")
+                                .textStyle(.bodySemibold)
+                                .foregroundStyle(Color.tonTextSecondary)
+                        }
                         TONIcon.chevronDown.image
                             .resizable()
                             .scaledToFit()
@@ -337,6 +337,20 @@ struct SendTokensView: View {
     private func shortAddress(_ address: String) -> String {
         guard address.count > 12 else { return address }
         return "\(address.prefix(6))…\(address.suffix(6))"
+    }
+}
+
+// MARK: - Selected fee asset label
+
+/// Observes the selected fee-asset view model so the inline label reflects its resolved ticker.
+private struct SelectedFeeAssetLabel: View {
+    @ObservedObject var viewModel: FeeAssetViewModel
+
+    var body: some View {
+        Text(viewModel.title)
+            .textStyle(.bodySemibold)
+            .foregroundStyle(Color.tonTextPrimary)
+            .task { await viewModel.load() }
     }
 }
 
