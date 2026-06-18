@@ -26,6 +26,7 @@
 
 import Foundation
 import Combine
+import TONWalletKit
 
 protocol SendableTokenViewModel: AnyObject {
     var name: String { get }
@@ -35,8 +36,21 @@ protocol SendableTokenViewModel: AnyObject {
     var requiredAmountInfo: String { get }
     var balanceChanges: AnyPublisher<Void, Never> { get }
 
+    /// The wallet that owns this asset — used to build/sign transactions.
+    var wallet: any TONWalletProtocol { get }
+    /// Jetton master address, or `nil` for native TON. Used to gate gasless.
+    var jettonAddress: TONUserFriendlyAddress? { get }
+    /// Remote icon for the asset, when available.
+    var iconURL: URL? { get }
+
     func send(amount: String, address: String) async throws
     func updateBalance() async throws
+}
+
+extension SendableTokenViewModel {
+
+    /// Gasless is only available for jettons (native TON already pays its own gas).
+    var isNativeTON: Bool { jettonAddress == nil }
 }
 
 extension SendableTokenViewModel {

@@ -33,6 +33,8 @@ final class SendableJettonViewModel: SendableTokenViewModel {
     var symbol: String {  jetton.info.symbol ?? "UNKNOWN" }
     var decimals: Int { jetton.decimalsNumber ?? 9 }
     var requiredAmountInfo: String { "Enter amount in \(symbol) units" }
+    var jettonAddress: TONUserFriendlyAddress? { jetton.address }
+    var iconURL: URL? { jetton.info.image?.smallUrl ?? jetton.info.image?.url }
     var balance: String {
         if let streamed = streamedBalance { return streamed }
         return jettonBalance.flatMap { formatter.string(from: $0) } ?? "Unknown Balance"
@@ -96,11 +98,13 @@ final class SendableJettonViewModel: SendableTokenViewModel {
                     .sink(
                         receiveCompletion: { _ in },
                         receiveValue: { [weak self] update in
+                            guard let self else { return }
                             guard update.status == .finalized else { return }
                             guard update.masterAddress.value == masterAddress else { return }
-                            guard let formatted = update.balance else { return }
-                            self?.streamedBalance = formatted
-                            self?.balanceSubject.send()
+                            // `update.balance` is the optional, pre-formatted string and is often
+                            // nil; `rawBalance` is always present, so format it ourselves.
+                            self.streamedBalance = update.balance ?? self.formatter.string(from: update.rawBalance)
+                            self.balanceSubject.send()
                         }
                     )
                     .store(in: &self.subscribers)
