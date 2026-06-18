@@ -7,10 +7,11 @@ struct DebugMenuView: View {
     var body: some View {
         NavigationStack {
             List {
-                NavigationLink("Typography") { TypographyDebugView() }
-                NavigationLink("Colors")     { ColorsDebugView() }
-                NavigationLink("Icons")      { IconsDebugView() }
-                NavigationLink("Controls")   { ControlsDebugView() }
+                NavigationLink("Typography")   { TypographyDebugView() }
+                NavigationLink("Colors")       { ColorsDebugView() }
+                NavigationLink("Icons")        { IconsDebugView() }
+                NavigationLink("Controls")     { ControlsDebugView() }
+                NavigationLink("Numeric Text") { NumericTextDebugView() }
             }
             .navigationTitle("Design System")
             .navigationBarTitleDisplayMode(.inline)

@@ -18,7 +18,7 @@ struct SwapProviderOption: Identifiable, Hashable, Equatable {
 
 @MainActor
 class SwapViewModel: ObservableObject {
-    @Published var fromToken = TONSwapToken(address: "ton", decimals: 9, name: "TON", symbol: "TON")
+    @Published var fromToken = TONSwapToken(address: "ton", decimals: 9, name: "GRAM", symbol: "GRAM")
     @Published var toToken = TONSwapToken(address: "EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs", decimals: 6, name: "USDT", symbol: "USDT")
     @Published var fromAmount = ""
     @Published var toAmount = ""

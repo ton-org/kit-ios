@@ -30,9 +30,9 @@ import TONWalletKit
 
 final class SendableTONViewModel: SendableTokenViewModel {
     var name: String { "The Open Network" }
-    var symbol: String { "TON" }
+    var symbol: String { "GRAM" }
     var decimals: Int { 9 }
-    var requiredAmountInfo: String { "Minimum transaction: 0.0001 TON" }
+    var requiredAmountInfo: String { "Minimum transaction: 0.0001 GRAM" }
     var jettonAddress: TONUserFriendlyAddress? { nil }
     var iconURL: URL? { nil }
 

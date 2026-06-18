@@ -27,15 +27,15 @@
 import SwiftUI
 
 struct WalletHomeActionsRow: View {
-    let onDeposit: () -> Void
     let onSend: () -> Void
-    let onReceive: () -> Void
+    let onSwap: () -> Void
+    let onStake: () -> Void
 
     var body: some View {
         HStack(spacing: 8) {
-            TONActionButton(icon: .circlePlus, title: "Deposit", style: .secondary, action: onDeposit)
-            TONActionButton(icon: .send, title: "Send", style: .secondary, action: onSend)
-            TONActionButton(icon: .arrowDownCircle, title: "Receive", style: .secondary, action: onReceive)
+            TONActionButton(icon: .send, title: "Send", style: .tertiary, action: onSend)
+            TONActionButton(icon: .iconSort, title: "Swap", style: .tertiary, action: onSwap)
+            TONActionButton(icon: .iconCurrency, title: "Stake", style: .tertiary, action: onStake)
         }
     }
 }

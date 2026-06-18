@@ -35,6 +35,7 @@ struct WalletHomeView: View {
     @State private var addWalletPath = NavigationPath()
     @State private var isWalletsSheetPresented = false
     @State private var isAddWalletPresented = false
+    @State private var isScannerPresented = false
     @State private var nftDetailsViewModel: WalletNFTDetailsViewModel?
 
     init(walletsList: WalletsListViewModel, activeWallet: WalletViewModel) {
@@ -47,14 +48,16 @@ struct WalletHomeView: View {
     var body: some View {
         NavigationStack(path: $navigationPath) {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: 8) {
                     balanceBlock
 
                     WalletHomeActionsRow(
-                        onDeposit: openStaking,
                         onSend: openSend,
-                        onReceive: openSwap
+                        onSwap: openSwap,
+                        onStake: openStaking
                     )
+                    // Sections sit 8 apart; keep a larger gap above the action row.
+                    .padding(.top, 16)
 
                     assetsSection
 
@@ -67,20 +70,30 @@ struct WalletHomeView: View {
             .background(Color.tonBgPrimary)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        isScannerPresented = true
+                    } label: {
+                        TONIcon.iconScan.image
+                            .renderingMode(.template)
+                            .resizable()
+                            .scaledToFit()
+                            .size(24)
+                            .foregroundStyle(Color.tonTextPrimary)
+                    }
+                }
                 ToolbarItem(placement: .principal) {
                     WalletHomeHeaderView(
                         title: viewModel.title,
-                        networkLabel: "MainNet",
-                        truncatedAddress: viewModel.truncatedAddress,
                         onTap: { isWalletsSheetPresented = true }
                     )
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         navigationPath.append(HomePath.investigation(viewModel.wallet))
                     } label: {
-                        TONIcon.settings24.image
+                        TONIcon.iconSettings.image
+                            .renderingMode(.template)
                             .resizable()
                             .scaledToFit()
                             .size(24)
@@ -163,6 +176,15 @@ struct WalletHomeView: View {
             WalletNFTDetailsView(viewModel: details)
                 .presentationDragIndicator(.visible)
         }
+        .fullScreenCover(isPresented: $isScannerPresented) {
+            QRScannerView(
+                onScanned: { payload in
+                    isScannerPresented = false
+                    handleScanned(payload)
+                },
+                onClose: { isScannerPresented = false }
+            )
+        }
         .onReceive(walletsList.event) { event in
             handleWalletsEvent(event)
         }
@@ -170,33 +192,45 @@ struct WalletHomeView: View {
 
     private var balanceBlock: some View {
         VStack(spacing: 4) {
-            Text("Balance")
-                .textStyle(.title3RoundedRegular)
-                .foregroundStyle(Color.tonTextPrimary.opacity(0.6))
             HStack(alignment: .lastTextBaseline, spacing: 0) {
                 Text(viewModel.totalBalanceInteger)
-                    .textStyle(.price64)
+                    .textStyle(.price50)
                     .foregroundStyle(Color.tonTextPrimary)
+                    .contentTransition(.numericText())
+                    .animation(.snappy, value: viewModel.totalBalanceInteger)
                 if !viewModel.totalBalanceFraction.isEmpty {
-                    Text(viewModel.totalBalanceFraction)
+                    Text(".")
                         .textStyle(.price40)
-                        .foregroundStyle(Color.tonTextPrimary)
+                        .foregroundStyle(Color.tonTextSecondary)
+                    Text(balanceFractionDigits)
+                        .textStyle(.price30)
+                        .foregroundStyle(Color.tonTextSecondary)
+                        .contentTransition(.numericText())
+                        .animation(.snappy, value: balanceFractionDigits)
                 }
-                Text(" TON")
-                    .textStyle(.price40)
-                    .foregroundStyle(Color.tonTextPrimary)
+                Text(" GRAM")
+                    .textStyle(.price30)
+                    .foregroundStyle(Color.tonTextSecondary)
             }
             .lineLimit(1)
             .minimumScaleFactor(0.5)
+
+            WalletAddressPill(address: viewModel.wallet.address)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
     }
 
+    /// Fractional digits without the leading dot — `totalBalanceFraction` is like ".47" and the
+    /// dot is rendered separately at its own size.
+    private var balanceFractionDigits: String {
+        String(viewModel.totalBalanceFraction.dropFirst())
+    }
+
     private var assetsSection: some View {
         VStack(spacing: 16) {
             sectionHeader(
-                title: "My assets",
+                title: "Assets",
                 showAll: viewModel.hasMoreAssets,
                 onShowAll: {
                     navigationPath.append(HomePath.allAssets(viewModel.wallet))
@@ -209,6 +243,7 @@ struct WalletHomeView: View {
                 }
             }
         }
+        .sectionCard()
     }
 
     private var nftsSection: some View {
@@ -229,26 +264,36 @@ struct WalletHomeView: View {
                         onRemove: {}
                     )
                 }
+                // Cancel the section card's 16 padding so the scroll view spans the full card
+                // width; the 16 left/right inset now lives inside the scroll content.
                 .padding(.horizontal, -16)
-                .padding(.leading, 16)
             }
         }
+        .sectionCard()
     }
 
     private func sectionHeader(title: String, showAll: Bool, onShowAll: @escaping () -> Void) -> some View {
         HStack {
-            Text(title)
-                .textStyle(.title3Bold)
-                .foregroundStyle(Color.tonTextPrimary)
-            Spacer()
-            if showAll {
-                Button(action: onShowAll) {
-                    Text("Show All")
-                        .textStyle(.body)
-                        .foregroundStyle(Color.tonTextBrand)
+            Button(action: onShowAll) {
+                HStack(spacing: 4) {
+                    Text(title)
+                        .textStyle(.calloutMedium)
+                        .foregroundStyle(Color.tonTextPrimary)
+                    if showAll {
+                        TONIcon.chevronForwardSmall.image
+                            .renderingMode(.template)
+                            .resizable()
+                            .scaledToFit()
+                            .size(20)
+                            .foregroundStyle(Color.tonTextTertiary)
+                    }
                 }
-                .buttonStyle(.plain)
+                .contentShape(.rect)
             }
+            .buttonStyle(.plain)
+            .disabled(!showAll)
+
+            Spacer()
         }
     }
 
@@ -283,6 +328,31 @@ struct WalletHomeView: View {
 
     private func openStaking() {
         navigationPath.append(HomePath.staking(viewModel.wallet.stakingViewModel()))
+    }
+
+    // MARK: - QR scanning
+
+    /// Forwards a scanned payload to the kit's TON Connect handler, but only when it actually
+    /// looks like a URL (a scheme, or a recognizable TON Connect deep link). Anything else is ignored.
+    private func handleScanned(_ payload: String) {
+        let trimmed = payload.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard Self.isConnectURL(trimmed) else { return }
+
+        Task {
+            do {
+                try await TONWalletKit.shared().connect(url: trimmed)
+            } catch {
+                debugPrint("Failed to handle scanned connect URL: \(error)")
+            }
+        }
+    }
+
+    private static func isConnectURL(_ string: String) -> Bool {
+        guard !string.isEmpty, let components = URLComponents(string: string) else { return false }
+        if components.scheme != nil { return true }
+        // Bare TON Connect payloads have no scheme; `connect(url:)` prepends `tc` for them.
+        let lowered = string.lowercased()
+        return lowered.contains("tonconnect") || lowered.hasPrefix("tc?") || lowered.hasPrefix("tc/")
     }
 
     private func handleWalletsEvent(_ event: WalletsListViewModel.Event) {
@@ -354,6 +424,64 @@ struct WalletHomeView: View {
         }
 
         presenter.present(controller, animated: true)
+    }
+}
+
+// MARK: - Address pill
+
+/// Truncated wallet address shown under the balance. Tapping copies the full address to the
+/// clipboard and briefly confirms with a "Copied" label.
+private struct WalletAddressPill: View {
+    let address: String
+
+    @State private var didCopy = false
+
+    var body: some View {
+        Button(action: copy) {
+            HStack(spacing: 6) {
+                TONIcon.ton.image
+                    .resizable()
+                    .renderingMode(.original)
+                    .scaledToFit()
+                    .size(16)
+
+                Text(didCopy ? "Copied" : Self.short(address))
+                    .textStyle(.subheadline2)
+                    .foregroundStyle(Color.tonTextSecondary)
+            }
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func copy() {
+        UIPasteboard.general.string = address
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        withAnimation { didCopy = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+            withAnimation { didCopy = false }
+        }
+    }
+
+    private static func short(_ address: String) -> String {
+        guard address.count > 12 else { return address }
+        return "\(address.prefix(6))…\(address.suffix(6))"
+    }
+}
+
+// MARK: - Section card
+
+private extension View {
+    /// Wraps a home section (Assets / NFTs) in a "background level 2" card:
+    /// 16 padding, 24pt continuous corners.
+    func sectionCard() -> some View {
+        self
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(Color.tonBgSecondary)
+            )
     }
 }
 

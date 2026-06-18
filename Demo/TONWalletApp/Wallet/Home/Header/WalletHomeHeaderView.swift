@@ -26,42 +26,31 @@
 
 import SwiftUI
 
+/// Compact wallet switcher shown in the navigation bar: "Wallet 1 ⌄" inside a capsule.
+/// Tapping opens the wallets bottom sheet.
 struct WalletHomeHeaderView: View {
     let title: String
-    let networkLabel: String
-    let truncatedAddress: String
     let onTap: () -> Void
-
-    private let iconSize: CGFloat = 36
 
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: 10) {
-                ZStack {
-                    Circle().fill(Color.tonBgFillTertiary)
-                    TONIcon.wallet.image
-                        .resizable()
-                        .scaledToFit()
-                        .size(20)
-                        .foregroundStyle(Color.tonTextSecondary)
-                }
-                .frame(width: iconSize, height: iconSize)
-
-                VStack(alignment: .leading, spacing: 0) {
-                    HStack(spacing: 6) {
-                        Text(title)
-                            .textStyle(.bodySemibold)
-                            .foregroundStyle(Color.tonTextPrimary)
-                        TONBadge(networkLabel, style: .gray)
-                    }
-                    Text(truncatedAddress)
-                        .textStyle(.subheadline2)
-                        .foregroundStyle(Color.tonTextSecondary)
-                }
-
-                Spacer(minLength: 0)
+            HStack(spacing: 4) {
+                Text(title)
+                    .textStyle(.subheadline2Semibold)
+                    .foregroundStyle(Color.tonTextPrimary)
+                    .lineLimit(1)
+                TONIcon.chevronDownSmall.image
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .size(16)
+                    .foregroundStyle(Color.tonTextSecondary)
             }
-            .contentShape(.rect)
+            .padding(.leading, 16)
+            .padding(.trailing, 12)
+            .padding(.vertical, 8)
+            .background(Capsule().fill(Color.tonBgSecondary))
+            .contentShape(Capsule())
         }
         .buttonStyle(.plain)
     }

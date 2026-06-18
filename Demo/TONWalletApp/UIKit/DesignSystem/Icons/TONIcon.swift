@@ -52,6 +52,12 @@ enum TONIcon: String, CaseIterable, Hashable {
     case wallet = "Wallet"
     case wallet4 = "Wallet4"
 
+    // MARK: - 24 Home / nav (top-level imagesets)
+    case iconScan = "icon_scan"
+    case iconSettings = "icon_settings"
+    case iconSort = "icon_sort"
+    case iconCurrency = "icon_currency"
+
     // MARK: - 20 Action
     case changeValue = "ChangeValue"
     case chevronBackSmall = "ChevronBackSmall"
@@ -147,7 +153,8 @@ enum TONIcon: String, CaseIterable, Hashable {
              .calendarDays, .chat, .chevronDown, .chevronRight, .chevronUp, .circleMinus, .circlePlus, .coin,
              .filter, .gas, .globus, .headerArrowShare, .headerStar, .headerStarOutline, .holders, .more,
              .plusLarge, .sellIcon, .send, .settings24, .star24, .switchVertical24, .ton, .toncoin, .tonFill,
-             .trend, .volume, .volume2, .volume3, .wallet, .wallet4:
+             .trend, .volume, .volume2, .volume3, .wallet, .wallet4,
+             .iconScan, .iconSettings, .iconSort, .iconCurrency:
             return .icons24
         case .changeValue, .chevronBackSmall, .chevronDownSmall, .chevronForwardSmall, .chevronTopSmall,
              .clear, .close, .copy, .fingerprint, .doc, .done, .failed, .github, .globe, .inProgress,

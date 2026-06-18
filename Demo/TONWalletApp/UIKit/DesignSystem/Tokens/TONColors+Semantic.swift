@@ -22,4 +22,5 @@ extension Color {
     static var tonBgFillQuaternary: Color { Color(light: .tonBgQuaternaryFill,  dark: .tonBgQuaternaryFill) }
     static var tonBgSuccessSubtle:  Color { Color(light: .tonBgLightGreen,      dark: .tonBgLightGreen) }
     static var tonBgScrim:          Color { Color(light: .tonBgScrimDark,      dark: .tonBgScrimDark) }
+    static var tonBgInverse:        Color { Color(light: .tonBgBlack,         dark: .tonBgBlack) }
 }

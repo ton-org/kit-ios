@@ -119,10 +119,10 @@ final class WalletHomeViewModel: ObservableObject {
 
         let tonAmount = Self.trim(wallet.info.formattedBalance ?? "0", maxFractionDigits: Self.maxFractionDigits)
         let tonItem = WalletHomeAssetItem(
-            id: "ton",
-            name: "Toncoin",
-            symbol: "TON",
-            formattedAmount: "\(tonAmount) TON",
+            id: "gram",
+            name: "Gram",
+            symbol: "GRAM",
+            formattedAmount: "\(tonAmount) GRAM",
             icon: .ton
         )
         items.append(tonItem)

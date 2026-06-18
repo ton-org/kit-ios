@@ -238,7 +238,7 @@ private struct WalletRowView: View {
                     .truncationMode(.middle)
                 
                 if let balance = walletInfoViewModel.formattedBalance {
-                    Text("\(balance) TON")
+                    Text("\(balance) GRAM")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
