@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 import TONWalletKit
 
 struct SwapProviderOption: Identifiable, Hashable, Equatable {
@@ -34,12 +35,23 @@ class SwapViewModel: ObservableObject {
     @Published var showSettings = false
     @Published var useCustomDestination = false
 
+    /// Formatted balances of the currently selected from/to tokens, kept live via streaming.
+    @Published private(set) var fromBalance: String?
+    @Published private(set) var toBalance: String?
+
     let wallet: any TONWalletProtocol
 
     private var swapManager: TONSwapManagerProtocol?
 
+    /// Streamed TON balance (already human-readable) and raw jetton balances keyed by the
+    /// canonical raw master address (`workchain:hash`), formatted per-token on demand.
+    private var tonBalance: String?
+    private var jettonRawBalances: [String: TONTokenAmount] = [:]
+    private var balanceSubscribers = Set<AnyCancellable>()
+
     init(wallet: any TONWalletProtocol) {
         self.wallet = wallet
+        subscribeToBalances()
     }
 
     var fromTokenSymbol: String { fromToken.symbol ?? "???" }
@@ -105,6 +117,7 @@ class SwapViewModel: ObservableObject {
         fromAmount = ""
         toAmount = ""
         clearQuote()
+        refreshDisplayedBalances()
     }
 
     func getQuote() {
@@ -187,6 +200,7 @@ class SwapViewModel: ObservableObject {
         } catch {
             debugPrint(error.localizedDescription)
         }
+        await loadInitialBalances()
     }
 
     private func clearQuote() {
@@ -213,8 +227,95 @@ class SwapViewModel: ObservableObject {
         ]
         
         selectedProvider = providers.first
-        
+
         swapManager = manager
         return manager
+    }
+
+    // MARK: - Balances (initial fetch + streaming)
+
+    /// Seeds the from/to balances once. Streaming only pushes on change, so without this the
+    /// balances stay empty until the wallet's balance actually moves.
+    private func loadInitialBalances() async {
+        if let ton = try? await wallet.balance() {
+            let formatter = TONBalanceFormatter()
+            formatter.nanoUnitDecimalsNumber = 9
+            tonBalance = formatter.string(from: ton)
+        }
+
+        for token in [fromToken, toToken] where !Self.isNativeTON(token.address) {
+            guard let address = try? TONUserFriendlyAddress(value: token.address) else { continue }
+            if let balance = try? await wallet.jettonBalance(jettonAddress: address) {
+                jettonRawBalances[address.raw.string] = balance
+            }
+        }
+
+        refreshDisplayedBalances()
+    }
+
+    private func subscribeToBalances() {
+        let address = wallet.address.value
+        Task { [weak self] in
+            do {
+                let streaming = try await TONWalletKit.shared().streaming()
+                guard let self else { return }
+
+                streaming.balance(network: .mainnet, address: address)
+                    .receive(on: DispatchQueue.main)
+                    .sink(
+                        receiveCompletion: { _ in },
+                        receiveValue: { [weak self] update in
+                            guard let self, update.status == .finalized else { return }
+                            self.tonBalance = update.balance
+                            self.refreshDisplayedBalances()
+                        }
+                    )
+                    .store(in: &self.balanceSubscribers)
+
+                streaming.jettons(network: .mainnet, address: address)
+                    .receive(on: DispatchQueue.main)
+                    .sink(
+                        receiveCompletion: { _ in },
+                        receiveValue: { [weak self] update in
+                            guard let self, update.status == .finalized else { return }
+                            self.jettonRawBalances[update.masterAddress.raw.string] = update.rawBalance
+                            self.refreshDisplayedBalances()
+                        }
+                    )
+                    .store(in: &self.balanceSubscribers)
+            } catch {
+                debugPrint("Failed to subscribe to swap balance streams: \(error)")
+            }
+        }
+    }
+
+    private func refreshDisplayedBalances() {
+        fromBalance = formattedBalance(for: fromToken)
+        toBalance = formattedBalance(for: toToken)
+    }
+
+    private func formattedBalance(for token: TONSwapToken) -> String? {
+        if Self.isNativeTON(token.address) {
+            return tonBalance
+        }
+        guard
+            let key = Self.rawKey(for: token.address),
+            let raw = jettonRawBalances[key]
+        else {
+            return nil
+        }
+        let formatter = TONBalanceFormatter()
+        formatter.nanoUnitDecimalsNumber = Int(token.decimals)
+        return formatter.string(from: raw)
+    }
+
+    private static func isNativeTON(_ address: String) -> Bool {
+        address.lowercased() == "ton"
+    }
+
+    /// Canonical `workchain:hash` key for a jetton master address, so streamed addresses match
+    /// regardless of bounceable / URL-safe formatting.
+    private static func rawKey(for address: String) -> String? {
+        (try? TONUserFriendlyAddress(value: address))?.raw.string
     }
 }
