@@ -30,7 +30,8 @@ struct WalletHomeNFTsCarousel: View {
     let nfts: [WalletNFTsListItem]
     let onTap: (WalletNFTsListItem) -> Void
 
-    private let cardSize: CGFloat = 168
+    private let imageWidth: CGFloat = 164
+    private let imageHeight: CGFloat = 140
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -44,6 +45,7 @@ struct WalletHomeNFTsCarousel: View {
                     .buttonStyle(.plain)
                 }
             }
+            .padding(.horizontal, 16)
         }
     }
 
@@ -60,26 +62,36 @@ struct WalletHomeNFTsCarousel: View {
                     placeholder
                 }
             }
-            .frame(width: cardSize, height: cardSize)
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .frame(width: imageWidth, height: imageHeight)
+            .clipped()
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(nft.name)
-                    .textStyle(.bodySemibold)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(displayString(nft.name))
+                    .textStyle(.calloutSemibold)
                     .foregroundStyle(Color.tonTextPrimary)
                     .lineLimit(1)
-                Text(shortAddress(nft.address))
-                    .textStyle(.subheadline2)
+                Text(displayString(shortAddress(nft.address)))
+                    .textStyle(.caption1)
                     .foregroundStyle(Color.tonTextSecondary)
                     .lineLimit(1)
             }
-            .frame(width: cardSize, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
         }
+        .frame(width: imageWidth)
+        .background(Color.tonBgFillTertiary)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    /// Keeps the line height when a title/subtitle is missing by substituting a space.
+    private func displayString(_ value: String) -> String {
+        value.isEmpty ? " " : value
     }
 
     private var placeholder: some View {
         ZStack {
-            Color.tonBgFillTertiary
+            Color.clear
             TONIcon.doc.image
                 .resizable()
                 .scaledToFit()

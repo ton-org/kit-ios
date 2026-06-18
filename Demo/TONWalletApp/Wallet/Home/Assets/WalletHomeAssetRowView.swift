@@ -38,14 +38,14 @@ struct WalletHomeAssetRowView: View {
                 .clipShape(Circle())
 
             Text(item.name)
-                .textStyle(.bodySemibold)
+                .textStyle(.calloutSemibold)
                 .foregroundStyle(Color.tonTextPrimary)
                 .lineLimit(1)
 
             Spacer(minLength: 8)
 
             Text(item.formattedAmount)
-                .textStyle(.bodySemibold)
+                .textStyle(.calloutSemibold)
                 .foregroundStyle(Color.tonTextPrimary)
                 .lineLimit(1)
         }

@@ -214,7 +214,7 @@ struct StakingView: View {
                 infoRow(label: "APY", value: apy, valueColor: Color.TON.green600)
             }
             if let available = viewModel.formattedInstantUnstakeAvailable {
-                infoRow(label: "Instant Unstake Available", value: "\(available) TON")
+                infoRow(label: "Instant Unstake Available", value: "\(available) GRAM")
             }
         }
         .widget()

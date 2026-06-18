@@ -428,7 +428,7 @@ struct WalletSignMessageRequestView: View {
 
     private func assetName(for transfer: TONTransactionTraceMoneyFlowItem) -> String {
         switch transfer.assetType {
-        case .ton: return "TON"
+        case .ton: return "GRAM"
         case .jetton: return transfer.tokenAddress.map { shortAddress($0.value) } ?? "Jetton"
         case .nft: return transfer.tokenAddress.map { shortAddress($0.value) } ?? "NFT"
         }
@@ -436,7 +436,7 @@ struct WalletSignMessageRequestView: View {
 
     private func unitLabel(for transfer: TONTransactionTraceMoneyFlowItem) -> String {
         switch transfer.assetType {
-        case .ton: return "TON"
+        case .ton: return "GRAM"
         case .jetton: return ""
         case .nft: return "NFT"
         }
