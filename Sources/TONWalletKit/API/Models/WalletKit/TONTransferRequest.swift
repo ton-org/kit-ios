@@ -27,7 +27,7 @@
 import Foundation
 import _BigInt
 
-/** Request parameters for transferring TON to another address. */
+/** Request parameters for transferring GRAM to another address. */
 
 public struct TONTransferRequest: Codable {
 

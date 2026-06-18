@@ -36,7 +36,7 @@ public struct TONStakingProviderInfo: Codable {
     public var rawInstantUnstakeAvailable: TONTokenAmount?
     /** Amount available for instant unstake */
     public var instantUnstakeAvailable: String?
-    /** Exchange rate between stakeToken and receiveToken (e.g. 1 TON = 0.95 tsTON). Undefined when there is no receiveToken (direct/custodial staking). */
+    /** Exchange rate between stakeToken and receiveToken (e.g. 1 GRAM = 0.95 tsTON). Undefined when there is no receiveToken (direct/custodial staking). */
     public var exchangeRate: String?
 
     public init(apy: Double, rawInstantUnstakeAvailable: TONTokenAmount? = nil, instantUnstakeAvailable: String? = nil, exchangeRate: String? = nil) {

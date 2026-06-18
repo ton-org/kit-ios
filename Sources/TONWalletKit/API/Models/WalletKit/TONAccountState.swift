@@ -34,7 +34,7 @@ public struct TONAccountState: Codable {
     public var address: TONUserFriendlyAddress
     public var status: TONAccountStatus
     public var rawBalance: TONTokenAmount
-    /** Balance formatted in TON (10^9 nanotons = 1 TON). */
+    /** Balance formatted in GRAM (10^9 nano units = 1 GRAM). */
     public var balance: String
     /** Map of extra currency IDs to their amounts. Extra currencies are additional tokens that can be attached to TON messages. */
     public var extraCurrencies: [String: String]

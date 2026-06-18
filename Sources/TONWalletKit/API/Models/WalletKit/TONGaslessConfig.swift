@@ -27,7 +27,7 @@
 import Foundation
 import _BigInt
 
-/** Provider-level configuration for a gasless relayer on a given network.  Bundles every piece of provider state a consumer needs to drive a gasless transfer end-to-end:  - &#x60;relayAddress&#x60; — where the relayer wants residual TON (e.g. jetton-transfer    &#x60;responseDestination&#x60;) returned to.  - &#x60;supportedAssets&#x60; — what the relayer accepts as fee payment. */
+/** Provider-level configuration for a gasless relayer on a given network.  Bundles every piece of provider state a consumer needs to drive a gasless transfer end-to-end:  - &#x60;relayAddress&#x60; — where the relayer wants residual GRAM (e.g. jetton-transfer    &#x60;responseDestination&#x60;) returned to.  - &#x60;supportedAssets&#x60; — what the relayer accepts as fee payment. */
 
 public struct TONGaslessConfig: Codable {
 

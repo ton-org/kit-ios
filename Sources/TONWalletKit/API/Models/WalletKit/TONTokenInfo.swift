@@ -27,7 +27,7 @@
 import Foundation
 import _BigInt
 
-/** Display information for a token (TON, Jetton, or NFT). */
+/** Display information for a token (GRAM, Jetton, or NFT). */
 
 public struct TONTokenInfo: Codable {
 
@@ -37,7 +37,7 @@ public struct TONTokenInfo: Codable {
     public var description: String?
     public var image: TONTokenImage?
     public var animation: TONTokenAnimation?
-    /** Ticker symbol of the token (e.g., \"TON\", \"USDT\") */
+    /** Ticker symbol of the token (e.g., \"GRAM\", \"USDT\") */
     public var symbol: String?
 
     public init(name: String? = nil, description: String? = nil, image: TONTokenImage? = nil, animation: TONTokenAnimation? = nil, symbol: String? = nil) {

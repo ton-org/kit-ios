@@ -27,11 +27,12 @@
 import Foundation
 import _BigInt
 
-/** Discriminator for DeFi-style providers (swap quotes, staking, gasless relayers). */
+/** Discriminator for DeFi-style providers (swap quotes, staking, gasless relayers, crypto onramp). */
 public enum TONDefiProviderType: String, Codable, CaseIterable {
     case swap = "swap"
     case staking = "staking"
     case gasless = "gasless"
+    case cryptoOnramp = "crypto-onramp"
 }
 
 
