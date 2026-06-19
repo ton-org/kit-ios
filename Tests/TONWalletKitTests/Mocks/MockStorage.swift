@@ -34,25 +34,25 @@ class MockStorage: TONWalletKitStorage {
     var removeCalls: [String] = []
     var clearCallCount = 0
 
-    func set(key: String, value: String) throws {
+    func set(key: String, value: String) async throws {
         if shouldThrow { throw "Mock storage error" }
         setCalls.append((key, value))
         store[key] = value
     }
 
-    func get(key: String) throws -> String? {
+    func get(key: String) async throws -> String? {
         if shouldThrow { throw "Mock storage error" }
         getCalls.append(key)
         return store[key]
     }
 
-    func remove(key: String) throws {
+    func remove(key: String) async throws {
         if shouldThrow { throw "Mock storage error" }
         removeCalls.append(key)
         store.removeValue(forKey: key)
     }
 
-    func clear() throws {
+    func clear() async throws {
         if shouldThrow { throw "Mock storage error" }
         clearCallCount += 1
         store.removeAll()
