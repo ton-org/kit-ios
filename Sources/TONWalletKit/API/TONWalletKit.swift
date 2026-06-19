@@ -93,7 +93,7 @@ public class TONWalletKit {
     public func streamingProvider(
         config: TONTonApiStreamingProviderConfig
     ) async throws -> any TONStreamingProviderProtocol {
-        let provider: TONStreamingProvider = try await jsWalletKit().createTonCenterStreamingProvider(config)
+        let provider: TONStreamingProvider = try await jsWalletKit().createTonApiStreamingProvider(config)
         return provider
     }
 

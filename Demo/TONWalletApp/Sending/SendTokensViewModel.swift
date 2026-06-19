@@ -183,7 +183,10 @@ class SendTokensViewModel: ObservableObject {
             validUntil: quote.validUntil,
             fromAddress: wallet.address.value
         )
-        let internalBoc = try await wallet.signedSignMessage(input: signInput, fakeSignature: false)
+        let internalBoc = try await wallet.signedSignMessage(
+            input: signInput,
+            options: TONSignedSendTransactionOptions(fakeSignature: false)
+        )
 
         let sendParams = TONGaslessSendParams(
             network: network,

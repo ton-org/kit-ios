@@ -69,12 +69,12 @@ class MockWalletAdapter: TONWalletAdapterProtocol {
         return TONBase64(string: "stateInit")
     }
 
-    func signedSendTransaction(input: TONTransactionRequest, fakeSignature: Bool?) async throws -> TONBase64 {
+    func signedSendTransaction(input: TONTransactionRequest, options: TONSignedSendTransactionOptions?) async throws -> TONBase64 {
         if shouldThrow { throw "Mock error" }
         return TONBase64(string: "signed")
     }
 
-    func signedSignMessage(input: TONTransactionRequest, fakeSignature: Bool?) async throws -> TONBase64 {
+    func signedSignMessage(input: TONTransactionRequest, options: TONSignedSendTransactionOptions?) async throws -> TONBase64 {
         if shouldThrow { throw "Mock error" }
         return TONBase64(string: "signedMessage")
     }
