@@ -268,12 +268,17 @@ struct TONStreamingProviderTests {
         #expect(network.chainId == "-239")
     }
 
-    @Test("network throws when jsObject has no network")
+    @Test("network throws .streamingNetworkUnavailable when jsObject has no network")
     func networkThrowsWhenMissing() {
         let (sut, _) = makeSUT()
 
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: TONWalletKitError.self) {
             try sut.network
+        }
+
+        guard case .streamingNetworkUnavailable? = error else {
+            Issue.record("Expected .streamingNetworkUnavailable, got \(String(describing: error))")
+            return
         }
     }
 
