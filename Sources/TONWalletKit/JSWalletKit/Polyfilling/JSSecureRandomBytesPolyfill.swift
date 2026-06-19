@@ -56,14 +56,14 @@ public class JSSecureRandomBytesPolyfill: JSPolyfill {
     @objc
     private func generateSecureRandomBytes(count: Int) throws -> [UInt8] {
         guard count > 0 else {
-            throw "Random bytes count must be positive"
+            throw JSCryptoPolyfillError.nonPositiveByteCount
         }
         
         var randomBytes = [UInt8](repeating: 0, count: count)
         let result = SecRandomCopyBytes(kSecRandomDefault, count, &randomBytes)
         
         guard result == errSecSuccess else {
-            throw "Failed to generate secure random bytes: \(result)"
+            throw JSCryptoPolyfillError.randomGenerationFailed(status: result)
         }
         
         return randomBytes

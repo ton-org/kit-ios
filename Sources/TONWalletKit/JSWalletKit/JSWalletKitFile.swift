@@ -34,9 +34,10 @@ struct JSWalletKitScript: JSScript {
 
     func load() async throws -> String {
         let jsFile = "walletkit-ios-bridge"
+        let type = "mjs"
         
-        guard let path = Bundle.module.path(forResource: jsFile, ofType: "mjs") else {
-            throw "Unable to find walletkit-ios-bridge.mjs file"
+        guard let path = Bundle.module.path(forResource: jsFile, ofType: type) else {
+            throw JSWalletKitResourceError.resourceNotFound(name: "\(jsFile).\(type)")
         }
         
         var code = try String(contentsOfFile: path, encoding: .utf8)

@@ -279,7 +279,7 @@ public class TONWalletKit {
     
     func injectableBridge() throws -> TONWalletKitInjectableBridge {
         guard let context else {
-            throw "Unable to resolve bridge for injection. WalletKit is not initialized"
+            throw TONWalletKitError.bridgeUnavailable
         }
         
         return TONWalletKitInjectableBridge(
@@ -298,7 +298,7 @@ public class TONWalletKit {
         if let context {
             return context.walletKit
         } else {
-            throw "Unable to resolve initialized Wallet Kit instance"
+            throw TONWalletKitError.notInitialized
         }
     }
 }

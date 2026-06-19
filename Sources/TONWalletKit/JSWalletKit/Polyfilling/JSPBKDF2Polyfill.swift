@@ -69,11 +69,11 @@ public class JSPBKDF2Polyfill: JSPolyfill {
     ) throws -> String {
         guard let passwordData = Data(base64Encoded: password),
               let saltData = Data(base64Encoded: salt) else {
-            throw "Failed to convert password or salt to data"
+            throw JSCryptoPolyfillError.invalidPBKDF2Input
         }
-        
+
         guard let algorithm = HashAlgorithm(algorithm: hash)?.pbkdf2PseudoRandomAlgorithm else {
-            throw "Unsupported hash algorithm: \(hash)"
+            throw JSCryptoPolyfillError.unsupportedHashAlgorithm(hash)
         }
         
         var derivedKey = Data(count: keySize)
@@ -94,7 +94,7 @@ public class JSPBKDF2Polyfill: JSPolyfill {
         }
         
         guard result == kCCSuccess else {
-            throw "PBKDF2 derivation failed with error: \(result)"
+            throw JSCryptoPolyfillError.pbkdf2DerivationFailed(status: result)
         }
         return derivedKey.map { String(format: "%02x", $0) }.joined()
     }

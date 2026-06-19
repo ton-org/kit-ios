@@ -55,7 +55,7 @@ final class TONStreamingProvider: TONStreamingProviderProtocol {
             let network: TONNetwork? = jsObject.network
             
             guard let network else {
-                throw "Unable to get network from streaming provider"
+                throw TONWalletKitError.streamingNetworkUnavailable
             }
             return network
         }
