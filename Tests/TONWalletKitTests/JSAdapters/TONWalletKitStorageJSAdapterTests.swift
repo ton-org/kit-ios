@@ -40,19 +40,11 @@ struct TONWalletKitStorageJSAdapterTests {
         return (sut, storage)
     }
 
-    private func resolvePromise(_ promise: JSValue) -> JSValue? {
-        context.setObject(promise, forKeyedSubscript: "__promise" as NSString)
-        context.evaluateScript("var __resolved = '__SENTINEL__'; __promise.then(function(v) { __resolved = v; })")
-        let result = context.objectForKeyedSubscript("__resolved")
-        if result?.toString() == "__SENTINEL__" { return nil }
-        return result
-    }
-
     @Test("Set delegates to storage with correct key and value")
-    func saveDelegates() {
+    func saveDelegates() async throws {
         let (sut, storage) = makeSUT()
 
-        _ = sut.set(key: "testKey", value: "testValue")
+        _ = try await sut.set(key: "testKey", value: "testValue").then()
 
         #expect(storage.setCalls.count == 1)
         #expect(storage.setCalls.first?.key == "testKey")
@@ -60,13 +52,12 @@ struct TONWalletKitStorageJSAdapterTests {
     }
 
     @Test("Set resolves with undefined")
-    func saveResolvesWithUndefined() {
+    func saveResolvesWithUndefined() async throws {
         let (sut, _) = makeSUT()
 
-        let result = sut.set(key: "key", value: "value")
-        let resolved = resolvePromise(result)
+        let resolved = try await sut.set(key: "key", value: "value").then()
 
-        #expect(resolved?.isUndefined == true)
+        #expect(resolved.isUndefined == true)
     }
 
     @Test("Set rejects when storage throws")
@@ -83,36 +74,34 @@ struct TONWalletKitStorageJSAdapterTests {
     }
 
     @Test("Get delegates to storage with correct key")
-    func getDelegates() {
+    func getDelegates() async throws {
         let storage = MockStorage()
         storage.store["myKey"] = "myValue"
         let (sut, _) = makeSUT(storage: storage)
 
-        _ = sut.get(key: "myKey")
+        _ = try await sut.get(key: "myKey").then()
 
         #expect(storage.getCalls == ["myKey"])
     }
 
     @Test("Get resolves with stored value")
-    func getResolvesWithStoredValue() {
+    func getResolvesWithStoredValue() async throws {
         let storage = MockStorage()
         storage.store["myKey"] = "myValue"
         let (sut, _) = makeSUT(storage: storage)
 
-        let result = sut.get(key: "myKey")
-        let resolved = resolvePromise(result)
+        let resolved = try await sut.get(key: "myKey").then()
 
-        #expect(resolved?.toString() == "myValue")
+        #expect(resolved.toString() == "myValue")
     }
 
     @Test("Get resolves with null for missing key")
-    func getResolvesWithNullForMissingKey() {
+    func getResolvesWithNullForMissingKey() async throws {
         let (sut, _) = makeSUT()
 
-        let result = sut.get(key: "nonExistent")
-        let resolved = resolvePromise(result)
+        let resolved = try await sut.get(key: "nonExistent").then()
 
-        #expect(resolved?.isNull == true)
+        #expect(resolved.isNull == true)
     }
 
     @Test("Get rejects when storage throws")
@@ -129,22 +118,21 @@ struct TONWalletKitStorageJSAdapterTests {
     }
 
     @Test("Remove delegates to storage with correct key")
-    func removeDelegates() {
+    func removeDelegates() async throws {
         let (sut, storage) = makeSUT()
 
-        _ = sut.remove(key: "removeMe")
+        _ = try await sut.remove(key: "removeMe").then()
 
         #expect(storage.removeCalls == ["removeMe"])
     }
 
     @Test("Remove resolves with undefined")
-    func removeResolvesWithUndefined() {
+    func removeResolvesWithUndefined() async throws {
         let (sut, _) = makeSUT()
 
-        let result = sut.remove(key: "key")
-        let resolved = resolvePromise(result)
+        let resolved = try await sut.remove(key: "key").then()
 
-        #expect(resolved?.isUndefined == true)
+        #expect(resolved.isUndefined == true)
     }
 
     @Test("Remove rejects when storage throws")
@@ -161,22 +149,21 @@ struct TONWalletKitStorageJSAdapterTests {
     }
 
     @Test("Clear delegates to storage")
-    func clearDelegates() {
+    func clearDelegates() async throws {
         let (sut, storage) = makeSUT()
 
-        _ = sut.clear()
+        _ = try await sut.clear().then()
 
         #expect(storage.clearCallCount == 1)
     }
 
     @Test("Clear resolves with undefined")
-    func clearResolvesWithUndefined() {
+    func clearResolvesWithUndefined() async throws {
         let (sut, _) = makeSUT()
 
-        let result = sut.clear()
-        let resolved = resolvePromise(result)
+        let resolved = try await sut.clear().then()
 
-        #expect(resolved?.isUndefined == true)
+        #expect(resolved.isUndefined == true)
     }
 
     @Test("set rejects when context is deallocated")

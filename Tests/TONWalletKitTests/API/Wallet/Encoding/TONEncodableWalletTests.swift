@@ -19,8 +19,8 @@ private class NonEncodableWallet: TONWalletProtocol {
     func network() throws -> TONNetwork { .mainnet }
     func address(testnet: Bool) throws -> TONUserFriendlyAddress { address }
     func stateInit() async throws -> TONBase64 { TONBase64(string: "test") }
-    func signedSendTransaction(input: TONTransactionRequest, fakeSignature: Bool?) async throws -> TONBase64 { TONBase64(string: "test") }
-    func signedSignMessage(input: TONTransactionRequest, fakeSignature: Bool?) async throws -> TONBase64 { TONBase64(string: "test") }
+    func signedSendTransaction(input: TONTransactionRequest, options: TONSignedSendTransactionOptions?) async throws -> TONBase64 { TONBase64(string: "test") }
+    func signedSignMessage(input: TONTransactionRequest, options: TONSignedSendTransactionOptions?) async throws -> TONBase64 { TONBase64(string: "test") }
     func signedSignData(input: TONPreparedSignData, fakeSignature: Bool?) async throws -> TONHex { TONHex(data: Data([0x00])) }
     func signedTonProof(input: TONProofMessage, fakeSignature: Bool?) async throws -> TONHex { TONHex(data: Data([0x00])) }
     func supportedFeatures() -> [any TONFeature]? { nil }
