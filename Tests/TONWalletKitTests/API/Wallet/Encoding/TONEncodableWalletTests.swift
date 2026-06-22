@@ -66,14 +66,20 @@ struct TONEncodableWalletTests {
         #expect(result is MockJSDynamicObject)
     }
 
-    @Test("encode with non-JSValueEncodable wallet throws")
+    @Test("encode with non-JSValueEncodable wallet throws .unableToEncode with wallet type")
     func encodeWithNonJSValueEncodableWallet() {
         let nonEncodable = NonEncodableWallet(address: testAddress)
         let sut = TONEncodableWallet(wallet: nonEncodable)
 
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: JSValueConversionError.self) {
             try sut.encode(in: context)
         }
+
+        guard case .unableToEncode(let type)? = error else {
+            Issue.record("Expected .unableToEncode, got \(String(describing: error))")
+            return
+        }
+        #expect(type == NonEncodableWallet.self)
     }
 
     @Test("stores wallet reference")

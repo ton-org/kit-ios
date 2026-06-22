@@ -140,7 +140,7 @@ extension JSValue {
             do {
                 try then(
                     { continuation.resume(returning: $0) },
-                    { continuation.resume(throwing: $0.toJSError() ?? $0.toString()) }
+                    { continuation.resume(throwing: $0.toJSError() ?? JSError(message: $0.toString())) }
                 )
             } catch {
                 continuation.resume(throwing: error)

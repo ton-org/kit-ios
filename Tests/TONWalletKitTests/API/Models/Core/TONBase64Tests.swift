@@ -12,11 +12,17 @@ struct TONBase64Tests {
         #expect(sut.value == "dGVzdA==")
     }
 
-    @Test("init(base64Encoded:) with invalid string throws")
+    @Test("init(base64Encoded:) with invalid string throws .invalidBase64String")
     func initBase64EncodedInvalid() {
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: TONBase64ValidationError.self) {
             try TONBase64(base64Encoded: "!!!")
         }
+
+        guard case .invalidBase64String(let invalid)? = error else {
+            Issue.record("Expected .invalidBase64String, got \(String(describing: error))")
+            return
+        }
+        #expect(invalid == "!!!")
     }
 
     @Test("init(data:) encodes data to base64")

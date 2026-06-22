@@ -32,9 +32,9 @@ public struct TONBase64: Codable {
     
     public init(base64Encoded: String) throws {
         if Data(base64Encoded: base64Encoded) == nil {
-            throw "\(base64Encoded) is not a valid base64 encoded string."
+            throw TONBase64ValidationError.invalidBase64String(base64Encoded)
         }
-        
+
         self.value = base64Encoded
     }
     
@@ -55,4 +55,8 @@ public struct TONBase64: Codable {
         var container = encoder.singleValueContainer()
         try container.encode(value)
     }
+}
+
+public enum TONBase64ValidationError: Error {
+    case invalidBase64String(String)
 }

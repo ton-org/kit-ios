@@ -1,10 +1,10 @@
 //
-//  String.swift
+//  TONBridgeEventError.swift
 //  TONWalletKit
 //
-//  Created by Nikita Rodionov on 11.09.2025.
+//  Created by Nikita Rodionov on 19.06.2026.
 //
-//  Copyright (c) 2025 TON Connect
+//  Copyright (c) 2026 TON Connect
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -12,10 +12,10 @@
 //  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 //  copies of the Software, and to permit persons to whom the Software is
 //  furnished to do so, subject to the following conditions:
-//  
+//
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-//  
+//
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,7 +26,23 @@
 
 import Foundation
 
-extension String: @retroactive LocalizedError {
-    
-    public var errorDescription: String? { self }
+/// Errors raised while dispatching bridge events from JS to Swift handlers.
+enum TONBridgeEventError: LocalizedError {
+    /// No handler/context was available to handle an event of the given type.
+    case unhandledEvent(type: String)
+    /// The incoming event type string didn't map to a known bridge event type.
+    case unknownEventType(String)
+    /// No handlers were registered for the given event type.
+    case noHandlerRegistered(eventType: String)
+
+    var errorDescription: String? {
+        switch self {
+        case .unhandledEvent(let type):
+            return "Unable to handle event: \(type)"
+        case .unknownEventType(let rawType):
+            return "Unknown event type: \(rawType)"
+        case .noHandlerRegistered(let eventType):
+            return "No handlers were added to handle \(eventType)"
+        }
+    }
 }

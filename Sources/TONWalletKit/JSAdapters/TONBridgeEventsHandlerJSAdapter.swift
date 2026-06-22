@@ -44,7 +44,7 @@ class TONBridgeEventsHandlerJSAdapter: JSBridgeEventsHandler {
     
     func handle(event: JSWalletKitSwiftBridgeEvent) throws {
         guard let handler, let context else {
-            throw "Unable to handle event: \(event.type)"
+            throw TONBridgeEventError.unhandledEvent(type: "\(event.type)")
         }
         
         let event = try TONWalletKitEvent(bridgeEvent: event, context: context)
