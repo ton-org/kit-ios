@@ -85,9 +85,15 @@ struct TONBridgeEventsHandlerJSAdapterTests {
             value: JSValue(undefinedIn: context.jsContext)
         )
 
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: TONBridgeEventError.self) {
             try sut.handle(event: event)
         }
+
+        guard case .unhandledEvent(let type)? = error else {
+            Issue.record("Expected .unhandledEvent, got \(String(describing: error))")
+            return
+        }
+        #expect(type == "disconnect")
     }
 
     @Test("Handle throws when context is nil")
@@ -103,9 +109,15 @@ struct TONBridgeEventsHandlerJSAdapterTests {
             value: JSValue(undefinedIn: jsContext)
         )
 
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: TONBridgeEventError.self) {
             try sut.handle(event: event)
         }
+
+        guard case .unhandledEvent(let type)? = error else {
+            Issue.record("Expected .unhandledEvent, got \(String(describing: error))")
+            return
+        }
+        #expect(type == "disconnect")
     }
 
     @Test("Adapter equals its handler")

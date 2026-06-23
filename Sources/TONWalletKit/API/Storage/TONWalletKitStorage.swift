@@ -27,8 +27,8 @@
 import Foundation
 
 public protocol TONWalletKitStorage: AnyObject {
-    func set(key: String, value: String) throws
-    func get(key: String) throws -> String?
-    func remove(key: String) throws
-    func clear() throws
+    func set(key: String, value: String) async throws
+    func get(key: String) async throws -> String?
+    func remove(key: String) async throws
+    func clear() async throws
 }

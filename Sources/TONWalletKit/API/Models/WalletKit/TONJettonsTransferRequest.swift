@@ -34,13 +34,15 @@ public struct TONJettonsTransferRequest: Codable {
     public var jettonAddress: TONUserFriendlyAddress
     public var transferAmount: TONTokenAmount
     public var recipientAddress: TONUserFriendlyAddress
+    public var responseDestination: TONUserFriendlyAddress?
     /** Human-readable comment attached to the transfer */
     public var comment: String?
 
-    public init(jettonAddress: TONUserFriendlyAddress, transferAmount: TONTokenAmount, recipientAddress: TONUserFriendlyAddress, comment: String? = nil) {
+    public init(jettonAddress: TONUserFriendlyAddress, transferAmount: TONTokenAmount, recipientAddress: TONUserFriendlyAddress, responseDestination: TONUserFriendlyAddress? = nil, comment: String? = nil) {
         self.jettonAddress = jettonAddress
         self.transferAmount = transferAmount
         self.recipientAddress = recipientAddress
+        self.responseDestination = responseDestination
         self.comment = comment
     }
 
@@ -48,6 +50,7 @@ public struct TONJettonsTransferRequest: Codable {
         case jettonAddress
         case transferAmount
         case recipientAddress
+        case responseDestination
         case comment
     }
 
@@ -58,6 +61,7 @@ public struct TONJettonsTransferRequest: Codable {
         try container.encode(jettonAddress, forKey: .jettonAddress)
         try container.encode(transferAmount, forKey: .transferAmount)
         try container.encode(recipientAddress, forKey: .recipientAddress)
+        try container.encodeIfPresent(responseDestination, forKey: .responseDestination)
         try container.encodeIfPresent(comment, forKey: .comment)
     }
 }

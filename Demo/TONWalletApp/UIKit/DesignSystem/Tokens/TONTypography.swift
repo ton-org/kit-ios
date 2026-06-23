@@ -3,7 +3,7 @@ import UIKit
 
 // All 23 SF Pro styles enumerated from the Figma "Typography" section via MCP.
 // Names mirror Apple HIG (Title 1/2/3, Body, Callout, Subheadline 1/2, Footnote, Caption 1/2)
-// plus the three SF Pro Rounded Bold "Price" sizes (40 / 44 / 64) used for amounts.
+// plus the three SF Pro Bold "Price" sizes (40 / 44 / 64) used for amounts (non-rounded).
 enum TONTypography {
     struct TextStyle: Hashable {
         let name: String
@@ -17,20 +17,32 @@ enum TONTypography {
 
         // MARK: - Price (SF Pro Rounded Bold)
         static let price64 = TextStyle(
-            name: "Price 64 — SF Pro Rounded Bold",
-            font: .system(size: 64, weight: .bold, design: .rounded),
+            name: "Price 64 — SF Pro Bold",
+            font: .system(size: 64, weight: .bold),
             uiFont: .systemFont(ofSize: 64, weight: .bold),
             lineHeight: 82, letterSpacing: -0.64, textCase: nil
         )
+        static let price50 = TextStyle(
+            name: "Price 50 — SF Pro Bold",
+            font: .system(size: 50, weight: .bold),
+            uiFont: .systemFont(ofSize: 50, weight: .bold),
+            lineHeight: 60, letterSpacing: -0.5, textCase: nil
+        )
         static let price44 = TextStyle(
-            name: "Price 44 — SF Pro Rounded Bold",
-            font: .system(size: 44, weight: .bold, design: .rounded),
+            name: "Price 44 — SF Pro Bold",
+            font: .system(size: 44, weight: .bold),
             uiFont: .systemFont(ofSize: 44, weight: .bold),
             lineHeight: 46, letterSpacing: -1.32, textCase: nil
         )
+        static let price30 = TextStyle(
+            name: "Price 30 — SF Pro Bold",
+            font: .system(size: 30, weight: .bold),
+            uiFont: .systemFont(ofSize: 30, weight: .bold),
+            lineHeight: 36, letterSpacing: -0.4, textCase: nil
+        )
         static let price40 = TextStyle(
-            name: "Price 40 — SF Pro Rounded Bold",
-            font: .system(size: 40, weight: .bold, design: .rounded),
+            name: "Price 40 — SF Pro Bold",
+            font: .system(size: 40, weight: .bold),
             uiFont: .systemFont(ofSize: 40, weight: .bold),
             lineHeight: 46, letterSpacing: -0.5, textCase: nil
         )
@@ -106,6 +118,12 @@ enum TONTypography {
             name: "Callout Medium — SF Pro Medium 16",
             font: .system(size: 16, weight: .medium),
             uiFont: .systemFont(ofSize: 16, weight: .medium),
+            lineHeight: 22, letterSpacing: -0.31, textCase: nil
+        )
+        static let calloutSemibold = TextStyle(
+            name: "Callout Semibold — SF Pro Semibold 16",
+            font: .system(size: 16, weight: .semibold),
+            uiFont: .systemFont(ofSize: 16, weight: .semibold),
             lineHeight: 22, letterSpacing: -0.31, textCase: nil
         )
 
@@ -186,10 +204,10 @@ enum TONTypography {
         )
 
         static let allStyles: [TextStyle] = [
-            .price64, .price44, .price40,
+            .price64, .price50, .price44, .price40, .price30,
             .title1, .title2, .title3Bold, .title3Semibold, .title3RoundedRegular,
             .body, .bodyMedium, .bodySemibold, .bodyRoundedSemibold,
-            .callout, .calloutMedium,
+            .callout, .calloutMedium, .calloutSemibold,
             .subheadline1,
             .subheadline2, .subheadline2Medium, .subheadline2Semibold,
             .footnote, .footnoteSemibold, .footnoteCaps,

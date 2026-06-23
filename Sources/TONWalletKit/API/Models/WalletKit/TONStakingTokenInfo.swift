@@ -32,7 +32,7 @@ public struct TONStakingTokenInfo: Codable {
 
     public var ticker: String
     public var decimals: Int
-    /** 'ton' for native TON, otherwise contract address in friendly format */
+    /** 'ton' for native GRAM, otherwise contract address in friendly format */
     public var address: String
 
     public init(ticker: String, decimals: Int, address: String) {

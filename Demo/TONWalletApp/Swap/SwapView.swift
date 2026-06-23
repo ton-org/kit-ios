@@ -63,7 +63,7 @@ struct SwapView: View {
                     .textSM()
                     .foregroundColor(Color.TON.gray500)
                 Spacer()
-                Text("Balance: \(viewModel.wallet.formattedTONBalance ?? "—")")
+                Text("Balance: \(viewModel.fromBalance ?? "—")")
                     .textSM()
                     .foregroundColor(Color.TON.gray500)
             }
@@ -83,7 +83,7 @@ struct SwapView: View {
             HStack {
                 Spacer()
                 Button("Max") {
-                    viewModel.setFromAmount(viewModel.wallet.formattedTONBalance ?? "0")
+                    viewModel.setFromAmount(viewModel.fromBalance ?? "0")
                 }
                 .textSM(weight: .medium)
                 .foregroundColor(Color.TON.blue600)
@@ -116,7 +116,7 @@ struct SwapView: View {
                     .textSM()
                     .foregroundColor(Color.TON.gray500)
                 Spacer()
-                Text("Balance: 0.000000")
+                Text("Balance: \(viewModel.toBalance ?? "—")")
                     .textSM()
                     .foregroundColor(Color.TON.gray500)
             }
@@ -314,10 +314,3 @@ struct CheckboxToggleStyle: ToggleStyle {
     }
 }
 
-// MARK: - Wallet balance helper
-
-private extension TONWalletProtocol {
-    var formattedTONBalance: String? {
-        nil
-    }
-}

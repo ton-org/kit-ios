@@ -61,17 +61,27 @@ struct JSSecureRandomBytesPolyfillTests {
         #expect(result1 != result2)
     }
 
-    @Test("generateSecureRandomBytes throws for zero count")
+    @Test("generateSecureRandomBytes throws .nonPositiveByteCount for zero count")
     func generateThrowsForZeroCount() {
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: JSCryptoPolyfillError.self) {
             try sut.generateSecureRandomBytes(count: 0)
+        }
+
+        guard case .nonPositiveByteCount? = error else {
+            Issue.record("Expected .nonPositiveByteCount, got \(String(describing: error))")
+            return
         }
     }
 
-    @Test("generateSecureRandomBytes throws for negative count")
+    @Test("generateSecureRandomBytes throws .nonPositiveByteCount for negative count")
     func generateThrowsForNegativeCount() {
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: JSCryptoPolyfillError.self) {
             try sut.generateSecureRandomBytes(count: -1)
+        }
+
+        guard case .nonPositiveByteCount? = error else {
+            Issue.record("Expected .nonPositiveByteCount, got \(String(describing: error))")
+            return
         }
     }
 

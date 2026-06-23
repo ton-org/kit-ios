@@ -34,7 +34,7 @@ public struct TONStakingQuoteParams<TProviderOptions: Codable>: Codable {
     public var userAddress: TONUserFriendlyAddress?
     public var network: TONNetwork?
     public var unstakeMode: TONUnstakeMode?
-    /** If true, for unstake requests the amount is specified in the staking coin (e.g. TON) instead of the Liquid Staking Token (e.g. tsTON). */
+    /** If true, for unstake requests the amount is specified in the staking coin (e.g. GRAM) instead of the Liquid Staking Token (e.g. tsTON). */
     public var isReversed: Bool?
     /** Provider-specific options */
     public var providerOptions: TProviderOptions?

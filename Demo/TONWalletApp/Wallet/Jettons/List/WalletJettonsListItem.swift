@@ -68,9 +68,16 @@ struct WalletJettonsListItem: Identifiable {
         guard update.masterAddress.value == self.address && update.status == .finalized else {
             return self
         }
-        
+
         var copy = self
-        copy.balance = update.balance ?? copy.balance
+        if let formatted = update.balance {
+            copy.balance = formatted
+        } else {
+            // `update.balance` is often nil; `rawBalance` is always present, so format it ourselves.
+            let formatter = TONTokenAmountFormatter()
+            formatter.nanoUnitDecimalsNumber = min(jetton.decimalsNumber ?? 0, 9)
+            copy.balance = formatter.string(from: update.rawBalance) ?? copy.balance
+        }
         return copy
     }
 }

@@ -206,12 +206,17 @@ struct TONWalletKitTests {
         #expect(paths.contains("walletKit.removeWallet"))
     }
 
-    @Test("injectableBridge() before init throws")
+    @Test("injectableBridge() before init throws .bridgeUnavailable")
     func injectableBridgeBeforeInitThrows() {
         let (sut, _, _) = makeSUT()
 
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: TONWalletKitError.self) {
             try sut.injectableBridge()
+        }
+
+        guard case .bridgeUnavailable? = error else {
+            Issue.record("Expected .bridgeUnavailable, got \(String(describing: error))")
+            return
         }
     }
 
@@ -321,5 +326,27 @@ struct TONWalletKitTests {
 
         let paths = mockContext.callRecords.map(\.path)
         #expect(paths.contains("walletKit.streaming"))
+    }
+
+    @Test("tonApiGaslessProvider(config:) calls createTonApiGaslessProvider")
+    func tonApiGaslessProviderCalls() async throws {
+        let (sut, _, mockContext) = makeSUT()
+        try await sut.initialize()
+
+        _ = try? await sut.tonApiGaslessProvider(config: nil)
+
+        let paths = mockContext.callRecords.map(\.path)
+        #expect(paths.contains("walletKit.createTonApiGaslessProvider"))
+    }
+
+    @Test("gasless() calls gasless")
+    func gaslessCallsGasless() async throws {
+        let (sut, _, mockContext) = makeSUT()
+        try await sut.initialize()
+
+        _ = try? await sut.gasless()
+
+        let paths = mockContext.callRecords.map(\.path)
+        #expect(paths.contains("walletKit.gasless"))
     }
 }

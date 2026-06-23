@@ -30,7 +30,7 @@ import Security
 public class TONWalletKitKeychainStorage: TONWalletKitStorage {
     private let service = "com.tonwalletkit.keychain"
 
-    public func set(key: String, value: String) throws {
+    public func set(key: String, value: String) async throws {
         let data = value.data(using: .utf8)
         
         let query: [String: Any] = [
@@ -49,7 +49,7 @@ public class TONWalletKitKeychainStorage: TONWalletKitStorage {
         }
     }
     
-    public func get(key: String) throws -> String? {
+    public func get(key: String) async throws -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -77,7 +77,7 @@ public class TONWalletKitKeychainStorage: TONWalletKitStorage {
         return string
     }
     
-    public func remove(key: String) throws {
+    public func remove(key: String) async throws {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -91,7 +91,7 @@ public class TONWalletKitKeychainStorage: TONWalletKitStorage {
         }
     }
     
-    public func clear() throws {
+    public func clear() async throws {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service

@@ -32,7 +32,7 @@ public struct TONHex: Codable {
     
     public init(hexString: String) throws {
         if Data(hex: hexString) == nil {
-            throw "\(hexString) is not a valid hex string."
+            throw TONHexValidationError.invalidHexString(hexString)
         }
         self.value = hexString
     }
@@ -54,4 +54,8 @@ public struct TONHex: Codable {
         var container = encoder.singleValueContainer()
         try container.encode(value)
     }
+}
+
+public enum TONHexValidationError: Error {
+    case invalidHexString(String)
 }

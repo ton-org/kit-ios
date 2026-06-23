@@ -32,7 +32,7 @@ struct JSWalletKitInjectionScript: JSScript {
         let jsFile = "inject"
         
         guard let path = Bundle.module.path(forResource: jsFile, ofType: "mjs") else {
-            throw "Unable to find \(jsFile).mjs file"
+            throw JSWalletKitResourceError.resourceNotFound(name: "\(jsFile).mjs")
         }
         
         var code = try String(contentsOfFile: path, encoding: .utf8)

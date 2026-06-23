@@ -120,25 +120,37 @@ struct JSBridgeRawEventsHandlerTests {
 
     // MARK: - handle(eventType:eventData:)
 
-    @Test("Handle throws for unknown event type")
+    @Test("Handle throws .unknownEventType for unknown event type")
     func handleUnknownEventType() {
         let handler = MockJSBridgeEventsHandler()
         let sut = JSBridgeRawEventsHandler(handlers: [handler])
 
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: TONBridgeEventError.self) {
             try sut.handle(eventType: "unknownEvent", eventData: makeJSValue())
         }
+
+        guard case .unknownEventType(let type)? = error else {
+            Issue.record("Expected .unknownEventType, got \(String(describing: error))")
+            return
+        }
+        #expect(type == "unknownEvent")
     }
 
-    @Test("Handle throws when no handlers remain after clean")
+    @Test("Handle throws .noHandlerRegistered when no handlers remain after clean")
     func handleNoHandlersAfterClean() {
         let invalid = MockJSBridgeEventsHandler()
         invalid.isValid = false
         let sut = JSBridgeRawEventsHandler(handlers: [invalid])
 
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: TONBridgeEventError.self) {
             try sut.handle(eventType: "connectRequest", eventData: makeJSValue())
         }
+
+        guard case .noHandlerRegistered(let eventType)? = error else {
+            Issue.record("Expected .noHandlerRegistered, got \(String(describing: error))")
+            return
+        }
+        #expect(eventType == "connectRequest")
     }
 
     @Test("Handle dispatches event to handler",
@@ -221,8 +233,13 @@ struct JSBridgeRawEventsHandlerTests {
         invalid.isValid = false
         let sut = JSBridgeRawEventsHandler(handlers: [invalid])
 
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: TONBridgeEventError.self) {
             try sut.handle(eventType: "connectRequest", eventData: makeJSValue())
+        }
+
+        guard case .noHandlerRegistered? = error else {
+            Issue.record("Expected .noHandlerRegistered, got \(String(describing: error))")
+            return
         }
         #expect(sut.handlers.isEmpty)
     }

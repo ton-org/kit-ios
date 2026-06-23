@@ -93,7 +93,7 @@ public class TONWalletKit {
     public func streamingProvider(
         config: TONTonApiStreamingProviderConfig
     ) async throws -> any TONStreamingProviderProtocol {
-        let provider: TONStreamingProvider = try await jsWalletKit().createTonCenterStreamingProvider(config)
+        let provider: TONStreamingProvider = try await jsWalletKit().createTonApiStreamingProvider(config)
         return provider
     }
 
@@ -101,6 +101,12 @@ public class TONWalletKit {
         config: TONTonStakersProviderConfig
     ) async throws -> TONTonStakersStakingProvider {
         try await jsWalletKit().createTonStakersStakingProvider(config)
+    }
+
+    public func tonApiGaslessProvider(
+        config: TONTonApiGaslessProviderConfig?
+    ) async throws -> TONTonApiGaslessProvider {
+        try await jsWalletKit().createTonApiGaslessProvider(config)
     }
 
     public func swap() async throws -> any TONSwapManagerProtocol {
@@ -117,7 +123,17 @@ public class TONWalletKit {
         let manager: TONStakingManager = try await jsWalletKit().staking()
         return manager
     }
-    
+
+	public func gasless() async throws -> any TONGaslessManagerProtocol {
+        let manager: TONGaslessManager = try await jsWalletKit().gasless()
+        return manager
+    }
+
+	public func jettons() async throws -> any TONJettonsManagerProtocol {
+        let manager: TONJettonsManager = try await jsWalletKit().jettons()
+        return manager
+    }
+
     public func signer(mnemonic: TONMnemonic) async throws -> any TONWalletSignerProtocol {
         let signer = try await jsWalletKit().createSignerFromMnemonic(mnemonic.value)
 
@@ -263,7 +279,7 @@ public class TONWalletKit {
     
     func injectableBridge() throws -> TONWalletKitInjectableBridge {
         guard let context else {
-            throw "Unable to resolve bridge for injection. WalletKit is not initialized"
+            throw TONWalletKitError.bridgeUnavailable
         }
         
         return TONWalletKitInjectableBridge(
@@ -282,7 +298,7 @@ public class TONWalletKit {
         if let context {
             return context.walletKit
         } else {
-            throw "Unable to resolve initialized Wallet Kit instance"
+            throw TONWalletKitError.notInitialized
         }
     }
 }

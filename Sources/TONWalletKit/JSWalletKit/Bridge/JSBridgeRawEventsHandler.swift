@@ -40,13 +40,13 @@ class JSBridgeRawEventsHandler {
         clean()
         
         guard let eventType = JSWalletKitSwiftBridgeEventType(rawValue: eventType) else {
-            throw "Unknown event type: \(eventType)"
+            throw TONBridgeEventError.unknownEventType(eventType)
         }
         
         let event = JSWalletKitSwiftBridgeEvent(type: eventType, value: eventData)
         
         if handlers.isEmpty {
-            throw "No handlers was added to handle \(eventType)"
+            throw TONBridgeEventError.noHandlerRegistered(eventType: "\(eventType)")
         }
         
         let errors: [Error] = handlers.compactMap {

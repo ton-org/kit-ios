@@ -38,6 +38,6 @@ class TONEncodableWallet: JSValueEncodable {
             return try value.encode(in: context)
         }
         // TODO: Create TONWalletJSAdapter
-        throw "Unable to encode \(wallet.self) to JSValue"
+        throw JSValueConversionError.unableToEncode(type: type(of: wallet))
     }
 }

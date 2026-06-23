@@ -25,11 +25,11 @@ class StakingViewModel: ObservableObject {
     }
 
     var inputTokenSymbol: String {
-        direction == .stake ? "TON" : "tsTON"
+        direction == .stake ? "GRAM" : "tsTON"
     }
 
     var receiveTokenSymbol: String {
-        direction == .stake ? "tsTON" : "TON"
+        direction == .stake ? "tsTON" : "GRAM"
     }
 
     var receiveAmount: String? {

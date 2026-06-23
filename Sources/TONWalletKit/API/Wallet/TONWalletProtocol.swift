@@ -33,8 +33,8 @@ public protocol TONWalletAdapterProtocol: AnyObject {
     func network() throws -> TONNetwork
     func address(testnet: Bool) throws -> TONUserFriendlyAddress
     func stateInit() async throws -> TONBase64
-    func signedSendTransaction(input: TONTransactionRequest, fakeSignature: Bool?) async throws -> TONBase64
-    func signedSignMessage(input: TONTransactionRequest, fakeSignature: Bool?) async throws -> TONBase64
+    func signedSendTransaction(input: TONTransactionRequest, options: TONSignedSendTransactionOptions?) async throws -> TONBase64
+    func signedSignMessage(input: TONTransactionRequest, options: TONSignedSendTransactionOptions?) async throws -> TONBase64
     func signedSignData(input: TONPreparedSignData, fakeSignature: Bool?) async throws -> TONHex
     func signedTonProof(input: TONProofMessage, fakeSignature: Bool?) async throws -> TONHex
     func supportedFeatures() -> [any TONFeature]?
