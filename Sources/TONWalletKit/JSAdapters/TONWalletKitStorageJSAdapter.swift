@@ -45,15 +45,21 @@ class TONWalletKitStorageJSAdapter: NSObject, JSWalletKitStorage {
                 in: JSContext()
             )
         }
-        
-        do {
-            try storage.set(key: key, value: value)
-            return JSValue(newPromiseResolvedWithResult: JSValue(undefinedIn: context), in: context)
-        } catch {
-            return JSValue(newPromiseRejectedWithReason: error.localizedDescription, in: context)
+
+        return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
+            Task {
+                guard let self else { return }
+
+                do {
+                    try await self.storage.set(key: key, value: value)
+                    resolve?.call(withArguments: [JSValue(undefinedIn: context)])
+                } catch {
+                    reject?.call(withArguments: [error.localizedDescription])
+                }
+            }
         }
     }
-    
+
     @objc(get:) func get(key: String) -> JSValue {
         guard let context else {
             return JSValue(
@@ -61,18 +67,24 @@ class TONWalletKitStorageJSAdapter: NSObject, JSWalletKitStorage {
                 in: JSContext()
             )
         }
-        
-        do {
-            if let value = try storage.get(key: key) {
-                return JSValue(newPromiseResolvedWithResult: value, in: context)
-            } else {
-                return JSValue(newPromiseResolvedWithResult: JSValue(nullIn: context), in: context)
+
+        return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
+            Task {
+                guard let self else { return }
+
+                do {
+                    if let value = try await self.storage.get(key: key) {
+                        resolve?.call(withArguments: [value])
+                    } else {
+                        resolve?.call(withArguments: [JSValue(nullIn: context)])
+                    }
+                } catch {
+                    reject?.call(withArguments: [error.localizedDescription])
+                }
             }
-        } catch {
-            return JSValue(newPromiseRejectedWithReason: error.localizedDescription, in: context)
         }
     }
-    
+
     @objc(remove:) func remove(key: String) -> JSValue {
         guard let context else {
             return JSValue(
@@ -80,15 +92,21 @@ class TONWalletKitStorageJSAdapter: NSObject, JSWalletKitStorage {
                 in: JSContext()
             )
         }
-        
-        do {
-            try storage.remove(key: key)
-            return JSValue(newPromiseResolvedWithResult: JSValue(undefinedIn: context), in: context)
-        } catch {
-            return JSValue(newPromiseRejectedWithReason: error.localizedDescription, in: context)
+
+        return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
+            Task {
+                guard let self else { return }
+
+                do {
+                    try await self.storage.remove(key: key)
+                    resolve?.call(withArguments: [JSValue(undefinedIn: context)])
+                } catch {
+                    reject?.call(withArguments: [error.localizedDescription])
+                }
+            }
         }
     }
-    
+
     @objc func clear() -> JSValue {
         guard let context else {
             return JSValue(
@@ -96,12 +114,18 @@ class TONWalletKitStorageJSAdapter: NSObject, JSWalletKitStorage {
                 in: JSContext()
             )
         }
-        
-        do {
-            try storage.clear()
-            return JSValue(newPromiseResolvedWithResult: JSValue(undefinedIn: context), in: context)
-        } catch {
-            return JSValue(newPromiseRejectedWithReason: error.localizedDescription, in: context)
+
+        return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
+            Task {
+                guard let self else { return }
+
+                do {
+                    try await self.storage.clear()
+                    resolve?.call(withArguments: [JSValue(undefinedIn: context)])
+                } catch {
+                    reject?.call(withArguments: [error.localizedDescription])
+                }
+            }
         }
     }
 }

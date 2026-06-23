@@ -29,9 +29,18 @@ import Foundation
 public struct TONV4R2WalletParameters: Codable {
     public let network: TONNetwork
     public let domain: TONSignatureDomain?
-    
-    public init(network: TONNetwork, domain: TONSignatureDomain?) {
+    public let walletId: Int?
+    public let workchain: Int?
+
+    public init(
+        network: TONNetwork,
+        domain: TONSignatureDomain?,
+        walletId: Int? = nil,
+        workchain: Int? = nil
+    ) {
         self.network = network
         self.domain = domain
+        self.walletId = walletId
+        self.workchain = workchain
     }
 }

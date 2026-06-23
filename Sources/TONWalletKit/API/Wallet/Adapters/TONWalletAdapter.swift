@@ -54,21 +54,15 @@ class TONWalletAdapter: TONWalletAdapterProtocol {
         try TONBase64(base64Encoded: try await jsWalletAdapter.getStateInit())
     }
     
-    func signedSendTransaction(input: TONTransactionRequest, fakeSignature: Bool?) async throws -> TONBase64 {
+    func signedSendTransaction(input: TONTransactionRequest, options: TONSignedSendTransactionOptions?) async throws -> TONBase64 {
         try TONBase64(
-            base64Encoded: try await jsWalletAdapter.getSignedSendTransaction(
-                input,
-                TONSignedSendTransactionAllOptions(fakeSignature: fakeSignature)
-            )
+            base64Encoded: try await jsWalletAdapter.getSignedSendTransaction(input, options)
         )
     }
 
-    func signedSignMessage(input: TONTransactionRequest, fakeSignature: Bool?) async throws -> TONBase64 {
+    func signedSignMessage(input: TONTransactionRequest, options: TONSignedSendTransactionOptions?) async throws -> TONBase64 {
         try TONBase64(
-            base64Encoded: try await jsWalletAdapter.getSignedSignMessage(
-                input,
-                TONSignedSendTransactionAllOptions(fakeSignature: fakeSignature)
-            )
+            base64Encoded: try await jsWalletAdapter.getSignedSignMessage(input, options)
         )
     }
 

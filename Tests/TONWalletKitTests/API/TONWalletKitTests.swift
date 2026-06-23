@@ -206,12 +206,17 @@ struct TONWalletKitTests {
         #expect(paths.contains("walletKit.removeWallet"))
     }
 
-    @Test("injectableBridge() before init throws")
+    @Test("injectableBridge() before init throws .bridgeUnavailable")
     func injectableBridgeBeforeInitThrows() {
         let (sut, _, _) = makeSUT()
 
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: TONWalletKitError.self) {
             try sut.injectableBridge()
+        }
+
+        guard case .bridgeUnavailable? = error else {
+            Issue.record("Expected .bridgeUnavailable, got \(String(describing: error))")
+            return
         }
     }
 

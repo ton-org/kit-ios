@@ -35,7 +35,7 @@ public struct TONStakingProviderMetadata: Codable {
     public var name: String
     /** Supported unstake modes for this provider */
     public var supportedUnstakeModes: [TONUnstakeMode]
-    /** Whether provider supports reversed quote format (e.g., passing TON instead of tsTON for unstake) */
+    /** Whether provider supports reversed quote format (e.g., passing GRAM instead of tsTON for unstake) */
     public var supportsReversedQuote: Bool
     public var stakeToken: TONStakingTokenInfo
     public var receiveToken: TONStakingTokenInfo?

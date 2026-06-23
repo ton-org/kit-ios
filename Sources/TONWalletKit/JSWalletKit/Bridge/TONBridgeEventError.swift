@@ -1,10 +1,10 @@
 //
-//  TONEncodableWallet.swift
+//  TONBridgeEventError.swift
 //  TONWalletKit
 //
-//  Created by Nikita Rodionov on 12.11.2025.
-//  
-//  Copyright (c) 2025 TON Connect
+//  Created by Nikita Rodionov on 19.06.2026.
+//
+//  Copyright (c) 2026 TON Connect
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -12,10 +12,10 @@
 //  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 //  copies of the Software, and to permit persons to whom the Software is
 //  furnished to do so, subject to the following conditions:
-//  
+//
 //  The above copyright notice and this permission notice shall be included in all
 //  copies or substantial portions of the Software.
-//  
+//
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,18 +26,23 @@
 
 import Foundation
 
-class TONEncodableWallet: JSValueEncodable {
-    let wallet: any TONWalletProtocol
-    
-    init(wallet: any TONWalletProtocol) {
-        self.wallet = wallet
-    }
-    
-    func encode(in context: JSContext) throws -> Any {
-        if let value = wallet as? JSValueEncodable {
-            return try value.encode(in: context)
+/// Errors raised while dispatching bridge events from JS to Swift handlers.
+enum TONBridgeEventError: LocalizedError {
+    /// No handler/context was available to handle an event of the given type.
+    case unhandledEvent(type: String)
+    /// The incoming event type string didn't map to a known bridge event type.
+    case unknownEventType(String)
+    /// No handlers were registered for the given event type.
+    case noHandlerRegistered(eventType: String)
+
+    var errorDescription: String? {
+        switch self {
+        case .unhandledEvent(let type):
+            return "Unable to handle event: \(type)"
+        case .unknownEventType(let rawType):
+            return "Unknown event type: \(rawType)"
+        case .noHandlerRegistered(let eventType):
+            return "No handlers were added to handle \(eventType)"
         }
-        // TODO: Create TONWalletJSAdapter
-        throw JSValueConversionError.unableToEncode(type: type(of: wallet))
     }
 }

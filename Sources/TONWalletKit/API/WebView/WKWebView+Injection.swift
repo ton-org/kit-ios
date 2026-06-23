@@ -132,7 +132,7 @@ private class TONWalletKitInjectionMessagesHandler: NSObject, WKScriptMessageHan
             .filter { $0.messageID == messageID }
             .prefix(1)
             .timeout(.milliseconds(timeout ?? defaultTimeout), scheduler: DispatchQueue.main) {
-                "Timeout waiting for response for message with ID \(messageID)"
+                TONWalletKitError.bridgeRequestTimeout(messageID: messageID)
             }
             .sink(receiveCompletion: { [weak self] completion in
                 if case .failure(let error) = completion {

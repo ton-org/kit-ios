@@ -93,7 +93,7 @@ public class TONWalletKit {
     public func streamingProvider(
         config: TONTonApiStreamingProviderConfig
     ) async throws -> any TONStreamingProviderProtocol {
-        let provider: TONStreamingProvider = try await jsWalletKit().createTonCenterStreamingProvider(config)
+        let provider: TONStreamingProvider = try await jsWalletKit().createTonApiStreamingProvider(config)
         return provider
     }
 
@@ -279,7 +279,7 @@ public class TONWalletKit {
     
     func injectableBridge() throws -> TONWalletKitInjectableBridge {
         guard let context else {
-            throw "Unable to resolve bridge for injection. WalletKit is not initialized"
+            throw TONWalletKitError.bridgeUnavailable
         }
         
         return TONWalletKitInjectableBridge(
@@ -298,7 +298,7 @@ public class TONWalletKit {
         if let context {
             return context.walletKit
         } else {
-            throw "Unable to resolve initialized Wallet Kit instance"
+            throw TONWalletKitError.notInitialized
         }
     }
 }

@@ -101,9 +101,9 @@ struct JSPBKDF2PolyfillTests {
         #expect(result.count == 128)
     }
 
-    @Test("derivePBKDF2 throws for invalid base64 password")
+    @Test("derivePBKDF2 throws .invalidPBKDF2Input for invalid base64 password")
     func deriveInvalidPassword() {
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: JSCryptoPolyfillError.self) {
             try sut.derivePBKDF2(
                 password: "%%%invalid%%%",
                 salt: saltB64,
@@ -112,11 +112,16 @@ struct JSPBKDF2PolyfillTests {
                 hash: "SHA-1"
             )
         }
+
+        guard case .invalidPBKDF2Input? = error else {
+            Issue.record("Expected .invalidPBKDF2Input, got \(String(describing: error))")
+            return
+        }
     }
 
-    @Test("derivePBKDF2 throws for invalid base64 salt")
+    @Test("derivePBKDF2 throws .invalidPBKDF2Input for invalid base64 salt")
     func deriveInvalidSalt() {
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: JSCryptoPolyfillError.self) {
             try sut.derivePBKDF2(
                 password: passwordB64,
                 salt: "%%%invalid%%%",
@@ -125,11 +130,16 @@ struct JSPBKDF2PolyfillTests {
                 hash: "SHA-1"
             )
         }
+
+        guard case .invalidPBKDF2Input? = error else {
+            Issue.record("Expected .invalidPBKDF2Input, got \(String(describing: error))")
+            return
+        }
     }
 
-    @Test("derivePBKDF2 throws for unsupported hash algorithm")
+    @Test("derivePBKDF2 throws .unsupportedHashAlgorithm for unsupported hash algorithm")
     func deriveUnsupportedAlgorithm() {
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: JSCryptoPolyfillError.self) {
             try sut.derivePBKDF2(
                 password: passwordB64,
                 salt: saltB64,
@@ -138,11 +148,17 @@ struct JSPBKDF2PolyfillTests {
                 hash: "MD5"
             )
         }
+
+        guard case .unsupportedHashAlgorithm(let hash)? = error else {
+            Issue.record("Expected .unsupportedHashAlgorithm, got \(String(describing: error))")
+            return
+        }
+        #expect(hash == "MD5")
     }
 
-    @Test("derivePBKDF2 throws for unknown hash algorithm")
+    @Test("derivePBKDF2 throws .unsupportedHashAlgorithm for unknown hash algorithm")
     func deriveUnknownAlgorithm() {
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: JSCryptoPolyfillError.self) {
             try sut.derivePBKDF2(
                 password: passwordB64,
                 salt: saltB64,
@@ -151,6 +167,12 @@ struct JSPBKDF2PolyfillTests {
                 hash: "INVALID"
             )
         }
+
+        guard case .unsupportedHashAlgorithm(let hash)? = error else {
+            Issue.record("Expected .unsupportedHashAlgorithm, got \(String(describing: error))")
+            return
+        }
+        #expect(hash == "INVALID")
     }
 
     // MARK: - JS Integration

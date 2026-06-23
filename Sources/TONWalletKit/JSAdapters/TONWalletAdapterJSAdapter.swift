@@ -122,7 +122,7 @@ class TONWalletAdapterJSAdapter: NSObject, JSWalletAdapter {
         }
 
         do {
-            let options: TONSignedSendTransactionAllOptions? = try options.decode()
+            let options: TONSignedSendTransactionOptions? = try options.decode()
             let input: TONTransactionRequest = try input.decode()
 
             return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
@@ -132,7 +132,7 @@ class TONWalletAdapterJSAdapter: NSObject, JSWalletAdapter {
                     do {
                         let value = try await self.walletAdapter.signedSendTransaction(
                             input: input,
-                            fakeSignature: options?.fakeSignature
+                            options: options
                         ).value
 
                         resolve?.call(withArguments: [value])
@@ -155,7 +155,7 @@ class TONWalletAdapterJSAdapter: NSObject, JSWalletAdapter {
         }
 
         do {
-            let options: TONSignedSendTransactionAllOptions? = try options.decode()
+            let options: TONSignedSendTransactionOptions? = try options.decode()
             let input: TONTransactionRequest = try input.decode()
 
             return JSValue(newPromiseIn: context) { [weak self] resolve, reject in
@@ -165,7 +165,7 @@ class TONWalletAdapterJSAdapter: NSObject, JSWalletAdapter {
                     do {
                         let value = try await self.walletAdapter.signedSignMessage(
                             input: input,
-                            fakeSignature: options?.fakeSignature
+                            options: options
                         ).value
 
                         resolve?.call(withArguments: [value])

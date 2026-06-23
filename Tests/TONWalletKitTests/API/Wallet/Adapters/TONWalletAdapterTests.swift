@@ -127,7 +127,7 @@ struct TONWalletAdapterTests {
         mock.stubbedAsyncResults["getSignedSendTransaction"] = "dGVzdA==" as String
         let input = TONTransactionRequest(messages: [])
 
-        let result = try await sut.signedSendTransaction(input: input, fakeSignature: nil)
+        let result = try await sut.signedSendTransaction(input: input, options: nil)
 
         #expect(mock.callRecords.first?.path == "getSignedSendTransaction")
         #expect(result.value == "dGVzdA==")
@@ -140,7 +140,7 @@ struct TONWalletAdapterTests {
         let input = TONTransactionRequest(messages: [])
 
         await #expect(throws: (any Error).self) {
-            try await sut.signedSendTransaction(input: input, fakeSignature: nil)
+            try await sut.signedSendTransaction(input: input, options: nil)
         }
     }
 
@@ -150,7 +150,7 @@ struct TONWalletAdapterTests {
         mock.stubbedAsyncResults["getSignedSignMessage"] = "dGVzdA==" as String
         let input = TONTransactionRequest(messages: [])
 
-        let result = try await sut.signedSignMessage(input: input, fakeSignature: nil)
+        let result = try await sut.signedSignMessage(input: input, options: nil)
 
         #expect(mock.callRecords.first?.path == "getSignedSignMessage")
         #expect(result.value == "dGVzdA==")
@@ -163,7 +163,7 @@ struct TONWalletAdapterTests {
         let input = TONTransactionRequest(messages: [])
 
         await #expect(throws: (any Error).self) {
-            try await sut.signedSignMessage(input: input, fakeSignature: nil)
+            try await sut.signedSignMessage(input: input, options: nil)
         }
     }
 

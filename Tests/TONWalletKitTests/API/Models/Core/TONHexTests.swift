@@ -19,18 +19,30 @@ struct TONHexTests {
         #expect(sut.value == "abcd")
     }
 
-    @Test("init(hexString:) invalid characters throws")
+    @Test("init(hexString:) invalid characters throws .invalidHexString")
     func initHexStringInvalid() {
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: TONHexValidationError.self) {
             try TONHex(hexString: "xyz")
         }
+
+        guard case .invalidHexString(let invalid)? = error else {
+            Issue.record("Expected .invalidHexString, got \(String(describing: error))")
+            return
+        }
+        #expect(invalid == "xyz")
     }
 
-    @Test("init(hexString:) odd length throws")
+    @Test("init(hexString:) odd length throws .invalidHexString")
     func initHexStringOddLength() {
-        #expect(throws: (any Error).self) {
+        let error = #expect(throws: TONHexValidationError.self) {
             try TONHex(hexString: "abc")
         }
+
+        guard case .invalidHexString(let invalid)? = error else {
+            Issue.record("Expected .invalidHexString, got \(String(describing: error))")
+            return
+        }
+        #expect(invalid == "abc")
     }
 
     @Test("init(data:) creates hex with 0x prefix")
